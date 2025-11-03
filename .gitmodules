@@ -1,0 +1,36 @@
+[submodule "scripts"]
+	path = scripts
+	url = git@github.com:dwilson2547/scripts.git
+[submodule "chrome_extensions"]
+	path = chrome_extensions
+	url = git@github.com:dwilson2547/chrome_extensions.git
+[submodule "potree"]
+	path = potree
+	url = git@github.com:dwilson2547/potree.git
+[submodule "photo_dump"]
+	path = photo_dump
+	url = git@github.com:dwilson2547/photo_dump.git
+[submodule "dockers"]
+	path = dockers
+	url = git@github.com:dwilson2547/dockers.git
+[submodule "parts_interchange"]
+	path = parts_interchange
+	url = git@github.com:dwilson2547/parts_interchange.git
+[submodule "legacy"]
+	path = legacy
+	url = git@github.com:dwilson2547/legacy.git
+[submodule "wiki_demo"]
+	path = wiki_demo
+	url = git@github.com:dwilson2547/wiki_demo.git
+[submodule "ai_projects"]
+	path = ai_projects
+	url = git@github.com:dwilson2547/ai_projects.git
+[submodule "arduino_pi_projects"]
+	path = arduino_pi_projects
+	url = git@github.com:dwilson2547/arduino_pi_projects.git
+[submodule "pocs"]
+	path = pocs
+	url = git@github.com:dwilson2547/pocs.git
+[submodule "web_scrapers"]
+	path = web_scrapers
+	url = git@github.com:dwilson2547/web_scrapers.git
