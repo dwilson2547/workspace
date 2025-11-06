@@ -34,3 +34,6 @@
 [submodule "web_scrapers"]
 	path = web_scrapers
 	url = git@github.com:dwilson2547/web_scrapers.git
+[submodule "auto_dbms_from_sql"]
+	path = auto_dbms_from_sql
+	url = git@github.com:dwilson2547/auto_dbms_from_sql.git

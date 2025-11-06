@@ -1,0 +1,84 @@
+.cronjob-list {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.list-header h2 {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.namespace-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.namespace-selector label {
+  font-weight: 500;
+  color: #666;
+}
+
+.namespace-selector input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.cronjob-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.cronjob-table th {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.cronjob-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.cronjob-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.cronjob-table a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.cronjob-table a:hover {
+  text-decoration: underline;
+}
+
+.cronjob-table .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cronjob-table code {
+  background-color: #e9ecef;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}

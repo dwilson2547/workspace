@@ -1,0 +1,255 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cronjob-manager
+
+---
+# ServiceAccount for the operator
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronjob-manager-operator
+  namespace: cronjob-manager
+
+---
+# ClusterRole for operator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cronjob-manager-operator
+rules:
+- apiGroups: ["batch"]
+  resources: ["cronjobs"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs/status"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
+
+---
+# ClusterRoleBinding for operator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cronjob-manager-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cronjob-manager-operator
+subjects:
+- kind: ServiceAccount
+  name: cronjob-manager-operator
+  namespace: cronjob-manager
+
+---
+# ServiceAccount for backend
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronjob-manager-backend
+  namespace: cronjob-manager
+
+---
+# ClusterRole for backend
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cronjob-manager-backend
+rules:
+- apiGroups: ["batch"]
+  resources: ["cronjobs"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs/status"]
+  verbs: ["get"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
+
+---
+# ClusterRoleBinding for backend
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cronjob-manager-backend
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cronjob-manager-backend
+subjects:
+- kind: ServiceAccount
+  name: cronjob-manager-backend
+  namespace: cronjob-manager
+
+---
+# Operator Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronjob-manager-operator
+  namespace: cronjob-manager
+  labels:
+    app: cronjob-manager-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cronjob-manager-operator
+  template:
+    metadata:
+      labels:
+        app: cronjob-manager-operator
+    spec:
+      serviceAccountName: cronjob-manager-operator
+      containers:
+      - name: manager
+        image: cronjob-manager-operator:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /manager
+        args:
+        - --leader-elect
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronjob-manager-backend
+  namespace: cronjob-manager
+  labels:
+    app: cronjob-manager-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cronjob-manager-backend
+  template:
+    metadata:
+      labels:
+        app: cronjob-manager-backend
+    spec:
+      serviceAccountName: cronjob-manager-backend
+      containers:
+      - name: backend
+        image: cronjob-manager-backend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronjob-manager-backend
+  namespace: cronjob-manager
+spec:
+  selector:
+    app: cronjob-manager-backend
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  type: ClusterIP
+
+---
+# Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronjob-manager-frontend
+  namespace: cronjob-manager
+  labels:
+    app: cronjob-manager-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cronjob-manager-frontend
+  template:
+    metadata:
+      labels:
+        app: cronjob-manager-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: cronjob-manager-frontend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: REACT_APP_API_URL
+          value: "http://cronjob-manager-backend.cronjob-manager.svc.cluster.local:8000"
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronjob-manager-frontend
+  namespace: cronjob-manager
+spec:
+  selector:
+    app: cronjob-manager-frontend
+  ports:
+  - port: 80
+    targetPort: 3000
+    name: http
+  type: LoadBalancer

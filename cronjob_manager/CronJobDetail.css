@@ -1,0 +1,212 @@
+.cronjob-detail {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.detail-header h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.namespace-badge {
+  display: inline-block;
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tabs button {
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #6c757d;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tabs button:hover {
+  color: #495057;
+}
+
+.tabs button.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  font-weight: 500;
+}
+
+.tab-content {
+  min-height: 300px;
+}
+
+.info-section {
+  margin-bottom: 2rem;
+}
+
+.info-section h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #495057;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-item label {
+  font-weight: 500;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.info-item span,
+.info-item code {
+  font-size: 1rem;
+  color: #212529;
+}
+
+.history-section,
+.logs-section {
+  margin-top: 1rem;
+}
+
+.history-section h3,
+.logs-section h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #495057;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.history-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.history-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.history-table code {
+  font-size: 0.85rem;
+}
+
+.job-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.job-status.status-succeeded {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.job-status.status-failed {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.job-status.status-running {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.logs-meta {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.logs-content {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1.5rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.logs-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.logs-content::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.logs-content::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.logs-content::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
