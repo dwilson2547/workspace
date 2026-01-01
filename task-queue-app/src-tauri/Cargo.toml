@@ -1,0 +1,38 @@
+[package]
+name = "task-queue-app"
+version = "0.1.0"
+description = "A desktop task queue manager"
+authors = ["you"]
+license = "MIT"
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.6", features = [ "fs-read-dir", "shell-open", "dialog-open", "dialog-save"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.36", features = ["full"] }
+sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite"] }
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+async-trait = "0.1"
+futures = "0.3"
+walkdir = "2.4"
+zip = "0.6"
+tar = "0.4"
+flate2 = "1.0"
+fs_extra = "1.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+parking_lot = "0.12"
+uuid = { version = "1.7", features = ["v4", "serde"] }
+regex = "1.10"
+rayon = "1.10"
+crossbeam-channel = "0.5"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
