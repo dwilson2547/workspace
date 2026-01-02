@@ -15,6 +15,16 @@ Tasks to include:
 
 > Users should have an override ability to kill tasks that they can click at any time to interrupt the process and remove the task from the queue. the task should not be removed from the queue until it is verified that the process is killed. 
 
+> Users should have the ability to edit tasks in the queue
+
+> Add indexes on db tables to make lookups faster
+
+> Add more robust task history and workflow history sections
+
+> Add section for workflow triggers if possible
+
+> Add workflow/task import and export via json
+
 * Copy
     * Single file or directory to output file or directory
 * Tar

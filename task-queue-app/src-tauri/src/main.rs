@@ -25,6 +25,34 @@ fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    // Set up panic hook to log crashes
+    std::panic::set_hook(Box::new(|panic_info| {
+        let payload = panic_info.payload();
+        let message = if let Some(s) = payload.downcast_ref::<&str>() {
+            s.to_string()
+        } else if let Some(s) = payload.downcast_ref::<String>() {
+            s.clone()
+        } else {
+            "Unknown panic payload".to_string()
+        };
+        
+        let location = if let Some(loc) = panic_info.location() {
+            format!("{}:{}:{}", loc.file(), loc.line(), loc.column())
+        } else {
+            "Unknown location".to_string()
+        };
+        
+        error!("PANIC: {} at {}", message, location);
+        error!("This may be related to C++ library issues (e.g., FFmpeg vtable corruption)");
+        error!("Check if FFmpeg processes are still running after this crash");
+        
+        // Print to stderr as well since logging might be broken
+        eprintln!("=== PANIC OCCURRED ===");
+        eprintln!("Message: {}", message);
+        eprintln!("Location: {}", location);
+        eprintln!("======================");
+    }));
+
     info!("Starting Task Queue Manager");
 
     tauri::Builder::default()

@@ -133,8 +133,11 @@ impl QueueManager {
             status,
         };
 
+        debug!("Emitting queue-status-changed event for queue {} with status {:?}", queue_id, status);
         if let Err(e) = self.app_handle.emit_all("queue-status-changed", &event) {
-            error!("Failed to emit queue status event: {}", e);
+            error!("Failed to emit queue status event for queue {}: {}", queue_id, e);
+        } else {
+            debug!("Successfully emitted queue-status-changed event for queue {}", queue_id);
         }
     }
 }
@@ -284,17 +287,34 @@ async fn process_queue(
         let app_handle_clone = app_handle.clone();
         let task_id_for_progress = task.id.clone();
         let progress_forwarder = tokio::spawn(async move {
+            let mut event_count = 0u32;
             while let Some(progress) = progress_rx.recv().await {
+                event_count += 1;
                 // Serialize event emission to prevent concurrent access
+                // CRITICAL: We must AWAIT each spawn_blocking to ensure truly serial emissions
                 let handle = app_handle_clone.clone();
                 let task_id = task_id_for_progress.clone();
-                tokio::task::spawn_blocking(move || {
-                    if let Err(e) = handle.emit_all("task-progress", &progress) {
-                        debug!("Failed to emit progress for task {}: {}", task_id, e);
+                let count = event_count;
+                
+                let emit_result = tokio::task::spawn_blocking(move || {
+                    if count % 10 == 1 {
+                        debug!("Emitting progress event #{} for task {}", count, task_id);
                     }
-                });
+                    if let Err(e) = handle.emit_all("task-progress", &progress) {
+                        error!("Failed to emit progress for task {} (event #{}): {}", task_id, count, e);
+                        return Err(e);
+                    }
+                    Ok(())
+                }).await;
+                
+                if let Err(e) = emit_result {
+                    error!("spawn_blocking task panicked for progress event #{}: {:?}", count, e);
+                }
+                
+                // Small delay between emissions to prevent overwhelming the event system
+                tokio::time::sleep(tokio::time::Duration::from_millis(5)).await;
             }
-            debug!("Progress forwarder finished for task {}", task_id_for_progress);
+            info!("Progress forwarder finished for task {} after {} events", task_id_for_progress, event_count);
         });
 
         // Execute the task
@@ -341,8 +361,14 @@ async fn process_queue(
                     duration_ms,
                 };
                 let handle = app_handle.clone();
+                let task_id = task.id.clone();
                 tokio::task::spawn_blocking(move || {
-                    let _ = handle.emit_all("task-completed", &event);
+                    debug!("Emitting task-completed event for task {}", task_id);
+                    if let Err(e) = handle.emit_all("task-completed", &event) {
+                        error!("Failed to emit task-completed event for task {}: {}", task_id, e);
+                    } else {
+                        debug!("Successfully emitted task-completed event for task {}", task_id);
+                    }
                 });
             }
             Err(e) => {
@@ -372,8 +398,14 @@ async fn process_queue(
                     duration_ms,
                 };
                 let handle = app_handle.clone();
+                let task_id = task.id.clone();
                 tokio::task::spawn_blocking(move || {
-                    let _ = handle.emit_all("task-completed", &event);
+                    debug!("Emitting task-completed (failed) event for task {}", task_id);
+                    if let Err(e) = handle.emit_all("task-completed", &event) {
+                        error!("Failed to emit task-completed (failed) event for task {}: {}", task_id, e);
+                    } else {
+                        debug!("Successfully emitted task-completed (failed) event for task {}", task_id);
+                    }
                 });
             }
         }

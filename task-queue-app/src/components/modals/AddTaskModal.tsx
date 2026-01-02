@@ -305,6 +305,7 @@ function TranscodeForm({ onSubmit, onClose, isSubmitting }: FormProps) {
           audio_codec: audioCodec,
         });
       } catch (err) {
+        console.error('Failed to add transcode task:', err);
         setError(err instanceof Error ? err.message : 'Failed to add task');
       }
     } else {
@@ -315,35 +316,81 @@ function TranscodeForm({ onSubmit, onClose, isSubmitting }: FormProps) {
       try {
         // Use Tauri's fs to read directory
         const { readDir } = await import('@tauri-apps/api/fs');
-        const entries = await readDir(inputDir);
         
-        // Filter video files
-        const videoExtensions = ['mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'wmv', 'mpg', 'mpeg', 'm4v'];
-        const videoFiles = entries.filter(entry => {
-          if (!entry.name) return false;
-          const ext = entry.name.split('.').pop()?.toLowerCase();
-          return ext && videoExtensions.includes(ext);
-        });
+        // Recursive function to scan directories
+        const scanDirectory = async (dirPath: string): Promise<Array<{path: string, name: string}>> => {
+          const videoExtensions = ['mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'wmv', 'mpg', 'mpeg', 'm4v'];
+          const videoFiles: Array<{path: string, name: string}> = [];
+          const subdirs: string[] = [];
+          
+          try {
+            const entries = await readDir(dirPath);
+            
+            for (const entry of entries) {
+              if (!entry.name) continue;
+              
+              // Check if it's a directory
+              if (entry.children !== undefined) {
+                // It's a directory, add to subdirs for scanning
+                const fullPath = `${dirPath}/${entry.name}`;
+                subdirs.push(fullPath);
+              } else {
+                // It's a file, check if it's a video
+                const ext = entry.name.split('.').pop()?.toLowerCase();
+                if (ext && videoExtensions.includes(ext)) {
+                  videoFiles.push({
+                    path: `${dirPath}/${entry.name}`,
+                    name: entry.name
+                  });
+                }
+              }
+            }
+            
+            // If we found subdirectories but no videos in root, scan subdirectories
+            if (videoFiles.length === 0 && subdirs.length > 0) {
+              console.log(`No videos in ${dirPath}, scanning ${subdirs.length} subdirectories`);
+              for (const subdir of subdirs) {
+                try {
+                  const subVideos = await scanDirectory(subdir);
+                  videoFiles.push(...subVideos);
+                } catch (err) {
+                  console.warn(`Failed to scan subdirectory ${subdir}:`, err);
+                }
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to read directory ${dirPath}:`, err);
+            throw new Error(`Cannot read directory: ${dirPath}`);
+          }
+          
+          return videoFiles;
+        };
+        
+        console.log(`Scanning directory: ${inputDir}`);
+        const videoFiles = await scanDirectory(inputDir);
         
         if (videoFiles.length === 0) {
-          return setError('No video files found in directory');
+          return setError('No video files found in directory or its subdirectories. Supported formats: mp4, mkv, avi, mov, webm, flv, wmv, mpg, mpeg, m4v');
         }
+        
+        console.log(`Found ${videoFiles.length} video file(s)`);
         
         // Create tasks for each file
         const outputExt = codec === 'copy' ? 'mp4' : 'mp4'; // Default to mp4
         let successCount = 0;
+        let failCount = 0;
         
         for (const file of videoFiles) {
-          const inputPath = `${inputDir}/${file.name}`;
-          const fileNameWithoutExt = file.name!.replace(/\.[^/.]+$/, '');
+          const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
           const outputFileName = filenamePattern
             .replace('{filename}', fileNameWithoutExt)
             .replace('{ext}', outputExt);
           const outputPath = `${outputDir}/${outputFileName}.${outputExt}`;
           
           try {
+            console.log(`Adding task for: ${file.name}`);
             await onSubmit('transcode', {
-              input: inputPath,
+              input: file.path,
               output: outputPath,
               codec,
               preset,
@@ -357,16 +404,24 @@ function TranscodeForm({ onSubmit, onClose, isSubmitting }: FormProps) {
             await new Promise(resolve => setTimeout(resolve, 50));
           } catch (err) {
             console.error(`Failed to add task for ${file.name}:`, err);
+            failCount++;
           }
         }
         
         if (successCount === 0) {
-          throw new Error('Failed to add any tasks');
+          throw new Error(`Failed to add any tasks. ${failCount} file(s) failed.`);
+        }
+        
+        if (failCount > 0) {
+          console.warn(`Added ${successCount} task(s), but ${failCount} file(s) failed`);
+        } else {
+          console.log(`Successfully added ${successCount} task(s)`);
         }
         
         // Close modal after adding all tasks
         onClose();
       } catch (err) {
+        console.error('Batch transcode failed:', err);
         setError(err instanceof Error ? err.message : 'Failed to add tasks');
       }
     }

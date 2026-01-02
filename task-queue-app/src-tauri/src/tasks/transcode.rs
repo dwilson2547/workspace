@@ -21,11 +21,19 @@ impl TaskExecutor for TranscodeExecutor {
         config: &Value,
         progress_tx: ProgressSender,
     ) -> Result<TaskResult, TaskError> {
+        info!("[Task {}] Starting transcode execution", task_id);
+        
         let config: TranscodeConfig = serde_json::from_value(config.clone())
-            .map_err(|e| TaskError::InvalidConfig(e.to_string()))?;
+            .map_err(|e| {
+                error!("[Task {}] Invalid config: {}", task_id, e);
+                TaskError::InvalidConfig(e.to_string())
+            })?;
+
+        info!("[Task {}] Input: {}, Output: {}", task_id, config.input, config.output);
 
         let input_path = Path::new(&config.input);
         if !input_path.exists() {
+            error!("[Task {}] Source file not found: {}", task_id, config.input);
             return Err(TaskError::SourceNotFound(config.input.clone()));
         }
 
