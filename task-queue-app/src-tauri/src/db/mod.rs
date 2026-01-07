@@ -22,6 +22,9 @@ pub async fn init_database(db_path: &Path) -> Result<Pool<Sqlite>, sqlx::Error> 
     // Run migrations
     run_migrations(&pool).await?;
 
+    // Reset any tasks that were stuck in "running" state after a crash
+    reset_stuck_tasks(&pool).await?;
+
     Ok(pool)
 }
 
@@ -104,6 +107,56 @@ async fn run_migrations(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         .await?;
 
     info!("Database migrations completed successfully");
+    Ok(())
+}
+
+/// Mark any tasks that were stuck in "running" state after a crash as failed
+/// This should be called during database initialization
+async fn reset_stuck_tasks(pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    // Find all tasks that were running when the app crashed
+    let stuck_tasks: Vec<Task> = sqlx::query_as::<_, Task>(
+        "SELECT * FROM tasks WHERE status = 'running'"
+    )
+    .fetch_all(pool)
+    .await?;
+
+    if stuck_tasks.is_empty() {
+        return Ok(());
+    }
+
+    info!("Found {} stuck task(s) in 'running' state, marking as failed", stuck_tasks.len());
+
+    for task in stuck_tasks {
+        // Calculate duration if we have a start time
+        let duration_ms = if let Some(started_at) = &task.started_at {
+            if let Ok(started) = chrono::DateTime::parse_from_str(
+                &format!("{} +00:00", started_at),
+                "%Y-%m-%d %H:%M:%S %z"
+            ) {
+                let now = chrono::Utc::now();
+                (now.timestamp_millis() - started.timestamp_millis()).max(0)
+            } else {
+                0
+            }
+        } else {
+            0
+        };
+
+        // Mark the task as failed and move to history
+        if let Err(e) = complete_task(
+            pool,
+            &task.id,
+            TaskStatus::Failed,
+            Some("Task interrupted by application crash"),
+            0,
+            duration_ms,
+        ).await {
+            // Log but don't fail the entire initialization
+            tracing::error!("Failed to mark crashed task {} as failed: {}", task.id, e);
+        }
+    }
+
+    info!("Successfully marked all crashed tasks as failed");
     Ok(())
 }
 

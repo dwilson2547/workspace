@@ -84,3 +84,34 @@ terminate called without an active exception
 - Caused by adding a transcoding batch job where there were no files in the selected folder
 - Structure was folderA -> folderB -> video.mkv, I selected folder A. 
 - Add better logging into the application so we can actually tell what's throwing the errors
+
+
+-- fixed 
+
+ui bug where task stuck in running was not removed
+
+-- updated so that on startup any task marked as running is moved to failed 
+
+app crashed when i removed a usb device it was not currently using
+
+When new task starts, its status is not shown until the user manually hits refresh, would be nice if it updated automatically
+
+
+
+2026-01-02T06:38:01.191450Z  INFO task_queue_app::tasks::transcode: Started FFmpeg process with PID: Some(359697)
+2026-01-02T06:38:11.703317Z DEBUG task_queue_app::queue: Emitting progress event #11 for task dcfd77e9-6b46-4b6f-a190-c68e1bbfb95f
+2026-01-02T06:38:22.234993Z DEBUG task_queue_app::queue: Emitting progress event #21 for task dcfd77e9-6b46-4b6f-a190-c68e1bbfb95f
+2026-01-02T06:38:33.783594Z DEBUG task_queue_app::queue: Emitting progress event #31 for task dcfd77e9-6b46-4b6f-a190-c68e1bbfb95f
+pure virtual method called
+terminate called without an active exception
+2026-01-02T06:38:42.863275Z  INFO task_queue_app: Window regained focus
+2026-01-02T06:38:44.816972Z DEBUG task_queue_app::queue: Emitting progress event #41 for task dcfd77e9-6b46-4b6f-a190-c68e1bbfb95f
+2026-01-02T06:38:55.849978Z DEBUG task_queue_app::queue: Emitting progress event #51 for task dcfd77e9-6b46-4b6f-a190-c68e1bbfb95f
+2026-01-02T06:38:58.189133Z  INFO task_queue_app: Window regained focus
+2026-01-02T06:39:04.013196Z  INFO task_queue_app: Window regained focus
+
+
+2026-01-06T00:16:27.679108Z  INFO task_queue_app::commands: Deleting task: 29a2c17d-86fe-406e-93a5-3c160e23140b
+pure virtual method called
+terminate called without an active exception
+2026-01-06T00:16:33.162426Z  INFO task_queue_app: Window regained focus
