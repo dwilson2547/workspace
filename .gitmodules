@@ -37,3 +37,6 @@
 [submodule "web_scrapers"]
 	path = web_scrapers
 	url = git@github.com:dwilson2547/web_scrapers.git
+[submodule "helm"]
+	path = helm
+	url = git@github.com:dwilson2547/helm.git
