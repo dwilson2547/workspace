@@ -1,4 +1,4 @@
-import type { FilePickerOptions } from '@shared/types';
+import type { ElectronAPI, FilePickerOptions } from '@shared/types';
 
 interface FilePickerProps {
   label: string;
@@ -10,9 +10,7 @@ interface FilePickerProps {
 
 declare global {
   interface Window {
-    api: {
-      pickPath: (options: FilePickerOptions) => Promise<string[]>;
-    };
+    api: ElectronAPI;
   }
 }
 

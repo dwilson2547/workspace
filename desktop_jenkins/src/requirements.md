@@ -564,8 +564,8 @@ window.api.on('task-progress', (data) => {
 - [x] Setup Electron project structure
 - [x] Implement SQLite database layer
 - [x] Create basic UI layout with React
-- [ ] Implement Queue functionality
-- [ ] Add basic task types (copy, move, delete)
+- [x] Implement Queue functionality
+- [x] Add basic task types (copy, move, delete)
 
 ### Phase 2: Workflow System
 - [ ] Implement Workflow data model

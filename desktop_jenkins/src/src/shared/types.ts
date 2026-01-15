@@ -42,3 +42,13 @@ export interface Queue {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ElectronAPI {
+  listQueues: () => Promise<Queue[]>;
+  createQueue: (name: string) => Promise<Queue>;
+  addTask: (queueId: string, task: Omit<Task, 'id' | 'status' | 'createdAt'>) => Promise<Task>;
+  removeTask: (queueId: string, taskId: string) => Promise<boolean>;
+  runQueue: (queueId: string) => Promise<void>;
+  pauseQueue: (queueId: string) => Promise<void>;
+  pickPath: (options: FilePickerOptions) => Promise<string[]>;
+}
