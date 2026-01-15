@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Queue, Task, TaskConfig, TaskType } from '../src/shared/types';
+import type { Queue, Task, TaskConfig, TaskHistoryEntry, TaskType } from '../src/shared/types';
 import { getDatabase } from './db';
 
 const serializeTask = (task: Task) => ({
@@ -20,13 +20,34 @@ const deserializeTask = (row: any): Task => ({
   completedAt: row.completed_at ?? undefined
 });
 
+const deserializeHistory = (row: any): TaskHistoryEntry => ({
+  id: row.id,
+  queueId: row.queue_id,
+  durationMs: row.duration_ms ?? undefined,
+  task: {
+    id: row.id,
+    type: row.type as TaskType,
+    name: row.name,
+    config: JSON.parse(row.config) as TaskConfig,
+    status: row.status,
+    progress: row.progress ?? undefined,
+    error: row.error ?? undefined,
+    createdAt: row.created_at,
+    startedAt: row.started_at ?? undefined,
+    completedAt: row.completed_at ?? undefined
+  }
+});
+
 export const listQueues = (): Queue[] => {
   const db = getDatabase();
   const queueRows = db.prepare('SELECT * FROM queues ORDER BY created_at ASC').all();
 
   return queueRows.map((queueRow: any) => {
     const taskRows = db
-      .prepare('SELECT * FROM tasks WHERE queue_id = ? ORDER BY task_order ASC')
+      .prepare('SELECT * FROM tasks WHERE queue_id = ? AND status IN (?, ?) ORDER BY task_order ASC')
+      .all(queueRow.id, 'pending', 'running');
+    const historyRows = db
+      .prepare('SELECT * FROM task_history WHERE queue_id = ? ORDER BY completed_at DESC')
       .all(queueRow.id);
 
     return {
@@ -37,7 +58,8 @@ export const listQueues = (): Queue[] => {
       currentTaskIndex: queueRow.current_task_index ?? 0,
       createdAt: queueRow.created_at,
       updatedAt: queueRow.updated_at,
-      tasks: taskRows.map(deserializeTask)
+      tasks: taskRows.map(deserializeTask),
+      history: historyRows.map(deserializeHistory)
     } as Queue;
   });
 };
@@ -53,7 +75,8 @@ export const createQueue = (name: string): Queue => {
     currentTaskIndex: 0,
     createdAt: now,
     updatedAt: now,
-    tasks: []
+    tasks: [],
+    history: []
   };
 
   db.prepare(
@@ -106,6 +129,17 @@ export const addTaskToQueue = (
   return task;
 };
 
+export const removeTaskFromQueue = (queueId: string, taskId: string) => {
+  const db = getDatabase();
+  const result = db
+    .prepare('DELETE FROM tasks WHERE id = ? AND queue_id = ? AND status = ?')
+    .run(taskId, queueId, 'pending');
+  if (result.changes > 0) {
+    db.prepare('UPDATE queues SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), queueId);
+  }
+  return result.changes > 0;
+};
+
 export const updateQueueStatus = (queueId: string, status: Queue['status']) => {
   const db = getDatabase();
   const now = new Date().toISOString();
@@ -126,4 +160,29 @@ export const updateTaskStatus = (
 export const updateQueueCurrentIndex = (queueId: string, index: number) => {
   const db = getDatabase();
   db.prepare('UPDATE queues SET current_task_index = ? WHERE id = ?').run(index, queueId);
+};
+
+export const archiveTask = (queueId: string, task: Task, durationMs?: number) => {
+  const db = getDatabase();
+  const serialized = serializeTask(task);
+  db.prepare(
+    `INSERT INTO task_history (id, queue_id, type, name, config, status, progress, error, created_at, started_at, completed_at, duration_ms)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    serialized.id,
+    queueId,
+    serialized.type,
+    serialized.name,
+    serialized.config,
+    serialized.status,
+    serialized.progress ?? null,
+    serialized.error ?? null,
+    serialized.createdAt,
+    serialized.startedAt ?? null,
+    serialized.completedAt ?? null,
+    durationMs ?? null
+  );
+
+  db.prepare('DELETE FROM tasks WHERE id = ?').run(task.id);
+  db.prepare('UPDATE queues SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), queueId);
 };

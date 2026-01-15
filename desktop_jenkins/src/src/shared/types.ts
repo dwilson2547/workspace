@@ -24,11 +24,19 @@ export interface Task {
   completedAt?: string;
 }
 
+export interface TaskHistoryEntry {
+  id: string;
+  queueId: string;
+  task: Task;
+  durationMs?: number;
+}
+
 export interface Queue {
   id: string;
   name: string;
   description?: string;
   tasks: Task[];
+  history: TaskHistoryEntry[];
   status: 'paused' | 'running' | 'completed';
   currentTaskIndex: number;
   createdAt: string;

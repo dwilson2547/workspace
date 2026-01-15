@@ -29,6 +29,21 @@ const schemaStatements = [
     started_at TEXT,
     completed_at TEXT,
     FOREIGN KEY (queue_id) REFERENCES queues(id) ON DELETE CASCADE
+  )`,
+  `CREATE TABLE IF NOT EXISTS task_history (
+    id TEXT PRIMARY KEY,
+    queue_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    name TEXT NOT NULL,
+    config TEXT NOT NULL,
+    status TEXT NOT NULL,
+    progress INTEGER,
+    error TEXT,
+    created_at TEXT NOT NULL,
+    started_at TEXT,
+    completed_at TEXT,
+    duration_ms INTEGER,
+    FOREIGN KEY (queue_id) REFERENCES queues(id) ON DELETE CASCADE
   )`
 ];
 

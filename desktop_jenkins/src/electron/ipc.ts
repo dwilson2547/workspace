@@ -2,8 +2,10 @@ import { BrowserWindow, dialog, ipcMain } from 'electron';
 import type { FilePickerOptions, Queue, Task } from '../src/shared/types';
 import {
   addTaskToQueue,
+  archiveTask,
   createQueue,
   listQueues,
+  removeTaskFromQueue,
   updateQueueStatus,
   updateTaskStatus,
   updateQueueCurrentIndex
@@ -18,6 +20,7 @@ const runQueue = async (queueId: string) => {
   }
   runningQueues.add(queueId);
   updateQueueStatus(queueId, 'running');
+  updateQueueCurrentIndex(queueId, 0);
 
   const queues = listQueues();
   const queue = queues.find((item: Queue) => item.id === queueId);
@@ -38,18 +41,25 @@ const runQueue = async (queueId: string) => {
 
     try {
       await runTask(task as Task);
-      updateTaskStatus(task.id, 'completed', { completedAt: new Date().toISOString() });
+      const completedAt = new Date().toISOString();
+      const durationMs = Date.parse(completedAt) - Date.parse(startedAt);
+      updateTaskStatus(task.id, 'completed', { completedAt });
+      archiveTask(queueId, { ...task, status: 'completed', startedAt, completedAt }, durationMs);
     } catch (error) {
-      updateTaskStatus(task.id, 'failed', { error: (error as Error).message, completedAt: new Date().toISOString() });
+      const completedAt = new Date().toISOString();
+      const errorMessage = (error as Error).message;
+      const durationMs = Date.parse(completedAt) - Date.parse(startedAt);
+      updateTaskStatus(task.id, 'failed', { error: errorMessage, completedAt });
+      archiveTask(queueId, { ...task, status: 'failed', error: errorMessage, startedAt, completedAt }, durationMs);
       updateQueueStatus(queueId, 'paused');
       runningQueues.delete(queueId);
-      updateQueueCurrentIndex(queueId, index);
+      updateQueueCurrentIndex(queueId, 0);
       return;
     }
   }
 
   updateQueueStatus(queueId, 'completed');
-  updateQueueCurrentIndex(queueId, queue.tasks.length);
+  updateQueueCurrentIndex(queueId, 0);
   runningQueues.delete(queueId);
 };
 
@@ -60,6 +70,9 @@ export const registerIpcHandlers = () => {
     'queues:add-task',
     (_event, queueId: string, task: Omit<Task, 'id' | 'status' | 'createdAt'>) =>
       addTaskToQueue(queueId, { name: task.name, type: task.type, config: task.config })
+  );
+  ipcMain.handle('queues:remove-task', (_event, queueId: string, taskId: string) =>
+    removeTaskFromQueue(queueId, taskId)
   );
   ipcMain.handle('queues:run', (_event, queueId: string) => runQueue(queueId));
   ipcMain.handle('queues:pause', (_event, queueId: string) => {
@@ -79,11 +92,14 @@ export const registerIpcHandlers = () => {
       properties.push('multiSelections');
     }
 
-    const browserWindow = BrowserWindow.getFocusedWindow() ?? undefined;
-    const result = await dialog.showOpenDialog(browserWindow, {
+    const browserWindow = BrowserWindow.getFocusedWindow();
+    const dialogOptions = {
       title: options.title,
       properties
-    });
+    };
+    const result = browserWindow
+      ? await dialog.showOpenDialog(browserWindow, dialogOptions)
+      : await dialog.showOpenDialog(dialogOptions);
     if (result.canceled) {
       return [];
     }

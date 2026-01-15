@@ -11,6 +11,7 @@ const runQueue = async (queueId) => {
     }
     runningQueues.add(queueId);
     (0, queues_1.updateQueueStatus)(queueId, 'running');
+    (0, queues_1.updateQueueCurrentIndex)(queueId, 0);
     const queues = (0, queues_1.listQueues)();
     const queue = queues.find((item) => item.id === queueId);
     if (!queue) {
@@ -28,24 +29,32 @@ const runQueue = async (queueId) => {
         (0, queues_1.updateTaskStatus)(task.id, 'running', { startedAt });
         try {
             await (0, taskRunner_1.runTask)(task);
-            (0, queues_1.updateTaskStatus)(task.id, 'completed', { completedAt: new Date().toISOString() });
+            const completedAt = new Date().toISOString();
+            const durationMs = Date.parse(completedAt) - Date.parse(startedAt);
+            (0, queues_1.updateTaskStatus)(task.id, 'completed', { completedAt });
+            (0, queues_1.archiveTask)(queueId, { ...task, status: 'completed', startedAt, completedAt }, durationMs);
         }
         catch (error) {
-            (0, queues_1.updateTaskStatus)(task.id, 'failed', { error: error.message, completedAt: new Date().toISOString() });
+            const completedAt = new Date().toISOString();
+            const errorMessage = error.message;
+            const durationMs = Date.parse(completedAt) - Date.parse(startedAt);
+            (0, queues_1.updateTaskStatus)(task.id, 'failed', { error: errorMessage, completedAt });
+            (0, queues_1.archiveTask)(queueId, { ...task, status: 'failed', error: errorMessage, startedAt, completedAt }, durationMs);
             (0, queues_1.updateQueueStatus)(queueId, 'paused');
             runningQueues.delete(queueId);
-            (0, queues_1.updateQueueCurrentIndex)(queueId, index);
+            (0, queues_1.updateQueueCurrentIndex)(queueId, 0);
             return;
         }
     }
     (0, queues_1.updateQueueStatus)(queueId, 'completed');
-    (0, queues_1.updateQueueCurrentIndex)(queueId, queue.tasks.length);
+    (0, queues_1.updateQueueCurrentIndex)(queueId, 0);
     runningQueues.delete(queueId);
 };
 const registerIpcHandlers = () => {
     electron_1.ipcMain.handle('queues:list', () => (0, queues_1.listQueues)());
     electron_1.ipcMain.handle('queues:create', (_event, name) => (0, queues_1.createQueue)(name));
     electron_1.ipcMain.handle('queues:add-task', (_event, queueId, task) => (0, queues_1.addTaskToQueue)(queueId, { name: task.name, type: task.type, config: task.config }));
+    electron_1.ipcMain.handle('queues:remove-task', (_event, queueId, taskId) => (0, queues_1.removeTaskFromQueue)(queueId, taskId));
     electron_1.ipcMain.handle('queues:run', (_event, queueId) => runQueue(queueId));
     electron_1.ipcMain.handle('queues:pause', (_event, queueId) => {
         runningQueues.delete(queueId);
@@ -65,11 +74,14 @@ const registerIpcHandlers = () => {
         if (options.allowMultiple) {
             properties.push('multiSelections');
         }
-        const browserWindow = electron_1.BrowserWindow.getFocusedWindow() ?? undefined;
-        const result = await electron_1.dialog.showOpenDialog(browserWindow, {
+        const browserWindow = electron_1.BrowserWindow.getFocusedWindow();
+        const dialogOptions = {
             title: options.title,
             properties
-        });
+        };
+        const result = browserWindow
+            ? await electron_1.dialog.showOpenDialog(browserWindow, dialogOptions)
+            : await electron_1.dialog.showOpenDialog(dialogOptions);
         if (result.canceled) {
             return [];
         }

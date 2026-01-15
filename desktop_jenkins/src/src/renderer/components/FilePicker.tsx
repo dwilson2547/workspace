@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { FilePickerOptions } from '@shared/types';
 
 interface FilePickerProps {
@@ -18,13 +17,9 @@ declare global {
 }
 
 export default function FilePicker({ label, value, placeholder, mode, onChange }: FilePickerProps) {
-  const [selectionMode, setSelectionMode] = useState<FilePickerOptions['mode']>(
-    mode === 'fileOrDirectory' ? 'file' : mode
-  );
-
-  const handleBrowse = async () => {
+  const handleBrowse = async (overrideMode?: FilePickerOptions['mode']) => {
     const selection = await window.api.pickPath({
-      mode: mode === 'fileOrDirectory' ? selectionMode : mode,
+      mode: overrideMode ?? mode,
       allowMultiple: false
     });
     if (selection.length > 0) {
@@ -42,18 +37,20 @@ export default function FilePicker({ label, value, placeholder, mode, onChange }
           placeholder={placeholder}
         />
         <div className="file-picker-controls">
-          {mode === 'fileOrDirectory' && (
-            <select
-              value={selectionMode}
-              onChange={(event) => setSelectionMode(event.target.value as FilePickerOptions['mode'])}
-            >
-              <option value="file">File</option>
-              <option value="directory">Directory</option>
-            </select>
+          {mode === 'fileOrDirectory' ? (
+            <>
+              <button type="button" className="secondary" onClick={() => handleBrowse('file')}>
+                Pick File
+              </button>
+              <button type="button" className="secondary" onClick={() => handleBrowse('directory')}>
+                Pick Folder
+              </button>
+            </>
+          ) : (
+            <button type="button" className="secondary" onClick={() => handleBrowse()}>
+              Browse
+            </button>
           )}
-          <button type="button" className="secondary" onClick={handleBrowse}>
-            Browse
-          </button>
         </div>
       </div>
     </label>
