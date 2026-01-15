@@ -577,9 +577,9 @@ window.api.on('task-progress', (data) => {
 
 ### Phase 3: Directory Watching
 - [x] Integrate chokidar for file watching
-- [ ] Implement file stability detection
+- [x] Implement file stability detection
 - [x] Add filter configuration UI
-- [ ] Implement processed file tracking
+- [x] Implement processed file tracking
 
 ### Phase 4: Advanced Tasks
 - [ ] Add rsync support

@@ -19,3 +19,13 @@
 - Work through each checklist item systematically.
 - Keep communication concise and focused.
 - Follow development best practices.
+
+UI Instructions:
+- [x] UI Should be split into components where applicable
+- [x] Ensure proper state management
+- [x] Follow accessibility best practices
+- [x] Consider the user workflow when using the application
+- [x] Ensure code is modular and reusable
+- [x] Follow language-specific style guides
+- [x] Write meaningful comments and documentation
+- [x] Implement error handling and logging
