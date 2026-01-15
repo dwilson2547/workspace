@@ -3,7 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerIpcHandlers = void 0;
 const electron_1 = require("electron");
 const queues_1 = require("./queues");
+const workflows_1 = require("./workflows");
+const watchers_1 = require("./watchers");
 const taskRunner_1 = require("./taskRunner");
+const workflowRunner_1 = require("./workflowRunner");
 const runningQueues = new Set();
 const runQueue = async (queueId) => {
     if (runningQueues.has(queueId)) {
@@ -59,6 +62,24 @@ const registerIpcHandlers = () => {
     electron_1.ipcMain.handle('queues:pause', (_event, queueId) => {
         runningQueues.delete(queueId);
         (0, queues_1.updateQueueStatus)(queueId, 'paused');
+    });
+    electron_1.ipcMain.handle('workflows:list', () => (0, workflows_1.listWorkflows)());
+    electron_1.ipcMain.handle('workflows:create', (_event, name) => (0, workflows_1.createWorkflow)(name));
+    electron_1.ipcMain.handle('workflows:add-task', (_event, workflowId, task) => (0, workflows_1.addWorkflowTask)(workflowId, { name: task.name, type: task.type, config: task.config }));
+    electron_1.ipcMain.handle('workflows:remove-task', (_event, workflowId, taskId) => (0, workflows_1.removeWorkflowTask)(workflowId, taskId));
+    electron_1.ipcMain.handle('workflows:add-files', (_event, workflowId, filePaths) => (0, workflows_1.addWorkflowFiles)(workflowId, filePaths));
+    electron_1.ipcMain.handle('workflows:add-folder', async (_event, workflowId, folderPath) => (0, workflows_1.addWorkflowFolder)(workflowId, folderPath));
+    electron_1.ipcMain.handle('workflows:update-settings', (_event, workflowId, settings) => (0, workflows_1.updateWorkflowSettings)(workflowId, settings));
+    electron_1.ipcMain.handle('workflows:update-watcher-config', (_event, workflowId, config) => (0, workflows_1.updateWorkflowWatcherConfig)(workflowId, config));
+    electron_1.ipcMain.handle('workflows:watcher-start', async (_event, workflowId) => {
+        await (0, watchers_1.startWorkflowWatcher)(workflowId);
+    });
+    electron_1.ipcMain.handle('workflows:watcher-stop', async (_event, workflowId) => {
+        await (0, watchers_1.stopWorkflowWatcher)(workflowId);
+    });
+    electron_1.ipcMain.handle('workflows:run', (_event, workflowId) => (0, workflowRunner_1.runWorkflow)(workflowId));
+    electron_1.ipcMain.handle('workflows:pause', (_event, workflowId) => {
+        (0, workflowRunner_1.pauseWorkflow)(workflowId);
     });
     electron_1.ipcMain.handle('picker:open', async (_event, options) => {
         const properties = [];

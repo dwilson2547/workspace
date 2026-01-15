@@ -59,6 +59,13 @@ button:hover {
   color: #94a3b8;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
 .sidebar-section ul {
   list-style: none;
   padding: 0;
@@ -89,9 +96,22 @@ button:hover {
   gap: 0.75rem;
 }
 
+.workflow-settings {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+}
+
 .panel label {
   display: grid;
   gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.panel .toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.85rem;
   color: #475569;
 }
@@ -137,6 +157,11 @@ button:hover {
 .panel .actions {
   display: flex;
   gap: 0.75rem;
+}
+
+.watcher-panel {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: end;
 }
 
 .sidebar .panel label {

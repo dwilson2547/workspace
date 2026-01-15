@@ -5,6 +5,7 @@ interface FilePickerProps {
   value: string;
   placeholder?: string;
   mode: FilePickerOptions['mode'];
+  allowMultiple?: boolean;
   onChange: (value: string) => void;
 }
 
@@ -14,11 +15,18 @@ declare global {
   }
 }
 
-export default function FilePicker({ label, value, placeholder, mode, onChange }: FilePickerProps) {
+export default function FilePicker({
+  label,
+  value,
+  placeholder,
+  mode,
+  allowMultiple = false,
+  onChange
+}: FilePickerProps) {
   const handleBrowse = async (overrideMode?: FilePickerOptions['mode']) => {
     const selection = await window.api.pickPath({
       mode: overrideMode ?? mode,
-      allowMultiple: false
+      allowMultiple
     });
     if (selection.length > 0) {
       onChange(selection[0]);

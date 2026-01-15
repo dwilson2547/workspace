@@ -566,18 +566,19 @@ window.api.on('task-progress', (data) => {
 - [x] Create basic UI layout with React
 - [x] Implement Queue functionality
 - [x] Add basic task types (copy, move, delete)
+- [x] Add file and folder picker
 
 ### Phase 2: Workflow System
-- [ ] Implement Workflow data model
-- [ ] Add manual file selection
-- [ ] Create workflow task pipeline editor
-- [ ] Implement sequential execution
-- [ ] Add parallel execution mode
+- [x] Implement Workflow data model
+- [x] Add manual file selection
+- [x] Create workflow task pipeline editor
+- [x] Implement sequential execution
+- [x] Add parallel execution mode
 
 ### Phase 3: Directory Watching
-- [ ] Integrate chokidar for file watching
+- [x] Integrate chokidar for file watching
 - [ ] Implement file stability detection
-- [ ] Add filter configuration UI
+- [x] Add filter configuration UI
 - [ ] Implement processed file tracking
 
 ### Phase 4: Advanced Tasks
