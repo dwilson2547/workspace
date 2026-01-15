@@ -6,6 +6,7 @@ import type {
   TaskHistoryEntry,
   TaskType,
   Workflow,
+  WorkflowFileHistory,
   WorkflowFile,
   WorkflowTask
 } from '@shared/types';
@@ -126,12 +127,20 @@ export default function App() {
   useEffect(() => {
     refreshQueues();
     refreshWorkflows();
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      refreshQueues();
-      refreshWorkflows();
+      if (selectedWorkflowId) {
+        refreshWorkflows();
+        return;
+      }
+      if (selectedQueueId) {
+        refreshQueues();
+      }
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedQueueId, selectedWorkflowId]);
 
   useEffect(() => {
     if (selectedWorkflow?.watcherConfig) {
@@ -240,6 +249,14 @@ export default function App() {
     refreshQueues();
   };
 
+  const handleRemoveQueueHistoryItem = async (historyId: string) => {
+    if (!api || !selectedQueue) {
+      return;
+    }
+    await api.removeQueueHistoryItem(selectedQueue.id, historyId);
+    refreshQueues();
+  };
+
   const handleAddWorkflowTask = async () => {
     if (!api || !selectedWorkflow) {
       return;
@@ -318,6 +335,37 @@ export default function App() {
     }
     await api.updateWorkflowSettings(selectedWorkflow.id, updates);
     refreshWorkflows();
+  };
+
+  const handleRemoveWorkflowFile = async (fileId: string) => {
+    if (!api || !selectedWorkflow) {
+      return;
+    }
+    await api.removeWorkflowFile(selectedWorkflow.id, fileId);
+    refreshWorkflows();
+  };
+
+  const handleRemoveWorkflowHistoryItem = async (historyId: string) => {
+    if (!api || !selectedWorkflow) {
+      return;
+    }
+    await api.removeWorkflowHistoryItem(selectedWorkflow.id, historyId);
+    refreshWorkflows();
+  };
+
+  const handleClearWorkflowHistory = async () => {
+    if (!api || !selectedWorkflow) {
+      return;
+    }
+    await api.clearWorkflowHistory(selectedWorkflow.id);
+    refreshWorkflows();
+  };
+
+  const handleExportWorkflowHistory = async () => {
+    if (!api || !selectedWorkflow) {
+      return;
+    }
+    await api.exportWorkflowHistory(selectedWorkflow.id);
   };
 
   const handleSaveWatcherConfig = async () => {
@@ -577,10 +625,69 @@ export default function App() {
                         <p className="muted">
                           Task: {file.currentTaskIndex}/{selectedWorkflow.tasks.length}
                         </p>
+                        <button
+                          className="secondary"
+                          onClick={() => handleRemoveWorkflowFile(file.id)}
+                          disabled={file.status === 'processing'}
+                        >
+                          Remove
+                        </button>
                       </div>
                       <div>
                         <p className="path">{file.filePath}</p>
                         {file.error && <p className="error">{file.error}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="history">
+              <div className="history-header">
+                <h3>Workflow History</h3>
+                <div className="actions">
+                  <button className="secondary" onClick={handleExportWorkflowHistory}>
+                    Export JSON
+                  </button>
+                  <button className="secondary" onClick={handleClearWorkflowHistory}>
+                    Clear All
+                  </button>
+                </div>
+              </div>
+              {selectedWorkflow.history.length === 0 ? (
+                <p className="muted">No workflow history yet.</p>
+              ) : (
+                <div className="history-list">
+                  {selectedWorkflow.history.map((entry: WorkflowFileHistory) => (
+                    <div key={entry.id} className="history-card">
+                      <div>
+                        <h4>{getBaseName(entry.filePath)}</h4>
+                        <p className="muted">Status: {entry.status}</p>
+                        <p className="muted">Started: {formatTimestamp(entry.startedAt)}</p>
+                        <p className="muted">Completed: {formatTimestamp(entry.completedAt)}</p>
+                        <button
+                          className="secondary"
+                          onClick={() => handleRemoveWorkflowHistoryItem(entry.id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div>
+                        <p className="path">{entry.filePath}</p>
+                        {entry.error && <p className="error">{entry.error}</p>}
+                      </div>
+                      <div>
+                        <p className="muted">Task History:</p>
+                        <ul className="task-history">
+                          {entry.taskStatuses.map((task) => (
+                            <li key={task.taskId}>
+                              <span>{task.order + 1}. {task.name}</span>
+                              <span className="muted">{task.status}</span>
+                              {task.error && <span className="error">{task.error}</span>}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
                   ))}
@@ -832,6 +939,12 @@ export default function App() {
                         <h4>{entry.task.name}</h4>
                         <p className="muted">Type: {taskLabels[entry.task.type]}</p>
                         <p className="muted">Status: {entry.task.status}</p>
+                        <button
+                          className="secondary"
+                          onClick={() => handleRemoveQueueHistoryItem(entry.id)}
+                        >
+                          Remove
+                        </button>
                       </div>
                       <div>
                         <p className="muted">Started: {formatTimestamp(entry.task.startedAt)}</p>

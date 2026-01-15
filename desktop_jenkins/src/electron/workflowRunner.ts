@@ -1,8 +1,19 @@
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import type { Task, Workflow, WorkflowFile, WorkflowTask } from '../src/shared/types';
+import type {
+  Task,
+  Workflow,
+  WorkflowFile,
+  WorkflowTask,
+  WorkflowTaskStatus
+} from '../src/shared/types';
 import { runTask } from './taskRunner';
-import { getWorkflowById, updateWorkflowFileStatus, updateWorkflowStatus } from './workflows';
+import {
+  archiveWorkflowFile,
+  getWorkflowById,
+  updateWorkflowFileStatus,
+  updateWorkflowStatus
+} from './workflows';
 
 const runningWorkflows = new Map<string, { cancelled: boolean }>();
 
@@ -56,6 +67,7 @@ export const runWorkflow = async (workflowId: string) => {
     }
     const startedAt = new Date().toISOString();
     updateWorkflowFileStatus(file.id, 'processing', { startedAt, currentTaskIndex: 0 });
+    const taskStatuses: WorkflowTaskStatus[] = [];
 
     for (let index = 0; index < tasks.length; index += 1) {
       if (controller.cancelled) {
@@ -63,9 +75,21 @@ export const runWorkflow = async (workflowId: string) => {
         return;
       }
       updateWorkflowFileStatus(file.id, 'processing', { currentTaskIndex: index + 1 });
-      const task = buildWorkflowTask(tasks[index], file.filePath);
+      const workflowTask = tasks[index];
+      const task = buildWorkflowTask(workflowTask, file.filePath);
+      const taskStartedAt = new Date().toISOString();
       try {
         await runTask(task as Task);
+        const taskCompletedAt = new Date().toISOString();
+        taskStatuses.push({
+          taskId: workflowTask.id,
+          name: workflowTask.name,
+          type: workflowTask.type,
+          order: workflowTask.order,
+          status: 'completed',
+          startedAt: taskStartedAt,
+          completedAt: taskCompletedAt
+        });
       } catch (error) {
         const completedAt = new Date().toISOString();
         const errorMessage = (error as Error).message;
@@ -74,6 +98,29 @@ export const runWorkflow = async (workflowId: string) => {
           completedAt,
           currentTaskIndex: index + 1
         });
+        taskStatuses.push({
+          taskId: workflowTask.id,
+          name: workflowTask.name,
+          type: workflowTask.type,
+          order: workflowTask.order,
+          status: 'failed',
+          startedAt: taskStartedAt,
+          completedAt,
+          error: errorMessage
+        });
+        archiveWorkflowFile(
+          workflowId,
+          {
+            ...file,
+            status: 'failed',
+            startedAt,
+            completedAt,
+            error: errorMessage,
+            currentTaskIndex: index + 1
+          },
+          'failed',
+          taskStatuses
+        );
         return;
       }
     }
@@ -83,6 +130,18 @@ export const runWorkflow = async (workflowId: string) => {
       completedAt,
       currentTaskIndex: tasks.length
     });
+    archiveWorkflowFile(
+      workflowId,
+      {
+        ...file,
+        status: 'completed',
+        startedAt,
+        completedAt,
+        currentTaskIndex: tasks.length
+      },
+      'completed',
+      taskStatuses
+    );
   };
 
   if (workflow.executionMode === 'parallel') {

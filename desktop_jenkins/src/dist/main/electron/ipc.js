@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerIpcHandlers = void 0;
 const electron_1 = require("electron");
+const promises_1 = __importDefault(require("node:fs/promises"));
 const queues_1 = require("./queues");
 const workflows_1 = require("./workflows");
 const watchers_1 = require("./watchers");
@@ -58,6 +62,7 @@ const registerIpcHandlers = () => {
     electron_1.ipcMain.handle('queues:create', (_event, name) => (0, queues_1.createQueue)(name));
     electron_1.ipcMain.handle('queues:add-task', (_event, queueId, task) => (0, queues_1.addTaskToQueue)(queueId, { name: task.name, type: task.type, config: task.config }));
     electron_1.ipcMain.handle('queues:remove-task', (_event, queueId, taskId) => (0, queues_1.removeTaskFromQueue)(queueId, taskId));
+    electron_1.ipcMain.handle('queues:remove-history-item', (_event, queueId, historyId) => (0, queues_1.removeQueueHistoryItem)(queueId, historyId));
     electron_1.ipcMain.handle('queues:run', (_event, queueId) => runQueue(queueId));
     electron_1.ipcMain.handle('queues:pause', (_event, queueId) => {
         runningQueues.delete(queueId);
@@ -76,6 +81,30 @@ const registerIpcHandlers = () => {
     });
     electron_1.ipcMain.handle('workflows:watcher-stop', async (_event, workflowId) => {
         await (0, watchers_1.stopWorkflowWatcher)(workflowId);
+    });
+    electron_1.ipcMain.handle('workflows:remove-file', (_event, workflowId, fileId) => (0, workflows_1.removeWorkflowFile)(workflowId, fileId));
+    electron_1.ipcMain.handle('workflows:remove-history-item', (_event, workflowId, historyId) => (0, workflows_1.removeWorkflowHistoryItem)(workflowId, historyId));
+    electron_1.ipcMain.handle('workflows:clear-history', (_event, workflowId) => (0, workflows_1.clearWorkflowHistory)(workflowId));
+    electron_1.ipcMain.handle('workflows:export-history', async (_event, workflowId) => {
+        const workflow = (0, workflows_1.getWorkflowById)(workflowId);
+        if (!workflow) {
+            return null;
+        }
+        const browserWindow = electron_1.BrowserWindow.getFocusedWindow();
+        const suggestedName = `${workflow.name.replace(/\s+/g, '-').toLowerCase()}-history.json`;
+        const dialogOptions = {
+            title: 'Export Workflow History',
+            defaultPath: suggestedName,
+            filters: [{ name: 'JSON', extensions: ['json'] }]
+        };
+        const result = browserWindow
+            ? await electron_1.dialog.showSaveDialog(browserWindow, dialogOptions)
+            : await electron_1.dialog.showSaveDialog(dialogOptions);
+        if (result.canceled || !result.filePath) {
+            return null;
+        }
+        await promises_1.default.writeFile(result.filePath, JSON.stringify(workflow.history, null, 2), 'utf-8');
+        return result.filePath;
     });
     electron_1.ipcMain.handle('workflows:run', (_event, workflowId) => (0, workflowRunner_1.runWorkflow)(workflowId));
     electron_1.ipcMain.handle('workflows:pause', (_event, workflowId) => {

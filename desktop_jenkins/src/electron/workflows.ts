@@ -6,8 +6,10 @@ import type {
   Workflow,
   WorkflowExecutionMode,
   WorkflowFile,
+  WorkflowFileHistory,
   WorkflowTask,
-  WorkflowTaskConfig
+  WorkflowTaskConfig,
+  WorkflowTaskStatus
 } from '../src/shared/types';
 import { getDatabase } from './db';
 
@@ -71,6 +73,17 @@ const deserializeWorkflowFile = (row: any): WorkflowFile => ({
   completedAt: row.completed_at ?? undefined
 });
 
+const deserializeWorkflowHistory = (row: any): WorkflowFileHistory => ({
+  id: row.id,
+  workflowId: row.workflow_id,
+  filePath: row.file_path,
+  status: row.status,
+  startedAt: row.started_at ?? undefined,
+  completedAt: row.completed_at ?? undefined,
+  error: row.error ?? undefined,
+  taskStatuses: JSON.parse(row.task_statuses) as WorkflowTaskStatus[]
+});
+
 export const listWorkflows = (): Workflow[] => {
   const db = getDatabase();
   const workflowRows = db.prepare('SELECT * FROM workflows ORDER BY created_at ASC').all();
@@ -82,6 +95,9 @@ export const listWorkflows = (): Workflow[] => {
     const fileRows = db
       .prepare('SELECT * FROM workflow_files WHERE workflow_id = ? ORDER BY added_at ASC')
       .all(workflowRow.id);
+    const historyRows = db
+      .prepare('SELECT * FROM workflow_history WHERE workflow_id = ? ORDER BY created_at DESC')
+      .all(workflowRow.id);
 
     return {
       id: workflowRow.id,
@@ -91,6 +107,7 @@ export const listWorkflows = (): Workflow[] => {
       executionMode: workflowRow.execution_mode as WorkflowExecutionMode,
       maxParallel: workflowRow.max_parallel ?? undefined,
       fileQueue: fileRows.map(deserializeWorkflowFile),
+      history: historyRows.map(deserializeWorkflowHistory),
       status: workflowRow.status,
       watcherConfig: normalizeWatcherConfig(workflowRow.watcher_config),
       createdAt: workflowRow.created_at,
@@ -110,6 +127,7 @@ export const createWorkflow = (name: string): Workflow => {
     executionMode: 'sequential',
     maxParallel: 2,
     fileQueue: [],
+    history: [],
     status: 'idle',
     watcherConfig: { ...defaultWatcherConfig },
     createdAt: now,
@@ -254,6 +272,9 @@ export const updateWorkflowSettings = (
   const files = db
     .prepare('SELECT * FROM workflow_files WHERE workflow_id = ? ORDER BY added_at ASC')
     .all(workflowId) as any[];
+  const historyRows = db
+    .prepare('SELECT * FROM workflow_history WHERE workflow_id = ? ORDER BY created_at DESC')
+    .all(workflowId) as any[];
 
   return {
     id: row.id,
@@ -263,6 +284,7 @@ export const updateWorkflowSettings = (
     executionMode: row.execution_mode,
     maxParallel: row.max_parallel ?? undefined,
     fileQueue: files.map(deserializeWorkflowFile),
+    history: historyRows.map(deserializeWorkflowHistory),
     status: row.status,
     watcherConfig: normalizeWatcherConfig(row.watcher_config),
     createdAt: row.created_at,
@@ -289,6 +311,9 @@ export const updateWorkflowWatcherConfig = (
   const files = db
     .prepare('SELECT * FROM workflow_files WHERE workflow_id = ? ORDER BY added_at ASC')
     .all(workflowId) as any[];
+  const historyRows = db
+    .prepare('SELECT * FROM workflow_history WHERE workflow_id = ? ORDER BY created_at DESC')
+    .all(workflowId) as any[];
 
   return {
     id: row.id,
@@ -298,6 +323,7 @@ export const updateWorkflowWatcherConfig = (
     executionMode: row.execution_mode,
     maxParallel: row.max_parallel ?? undefined,
     fileQueue: files.map(deserializeWorkflowFile),
+    history: historyRows.map(deserializeWorkflowHistory),
     status: row.status,
     watcherConfig: normalizeWatcherConfig(row.watcher_config),
     createdAt: row.created_at,
@@ -317,6 +343,9 @@ export const getWorkflowById = (workflowId: string): Workflow | null => {
   const files = db
     .prepare('SELECT * FROM workflow_files WHERE workflow_id = ? ORDER BY added_at ASC')
     .all(workflowId) as any[];
+  const historyRows = db
+    .prepare('SELECT * FROM workflow_history WHERE workflow_id = ? ORDER BY created_at DESC')
+    .all(workflowId) as any[];
 
   return {
     id: row.id,
@@ -326,6 +355,7 @@ export const getWorkflowById = (workflowId: string): Workflow | null => {
     executionMode: row.execution_mode,
     maxParallel: row.max_parallel ?? undefined,
     fileQueue: files.map(deserializeWorkflowFile),
+    history: historyRows.map(deserializeWorkflowHistory),
     status: row.status,
     watcherConfig: normalizeWatcherConfig(row.watcher_config),
     createdAt: row.created_at,
@@ -350,6 +380,33 @@ export const recordProcessedFile = (workflowId: string, filePath: string) => {
   } catch {
     // ignore duplicates
   }
+};
+
+export const archiveWorkflowFile = (
+  workflowId: string,
+  file: WorkflowFile,
+  status: WorkflowFileHistory['status'],
+  taskStatuses: WorkflowTaskStatus[]
+) => {
+  const db = getDatabase();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO workflow_history (id, workflow_id, file_path, status, started_at, completed_at, error, task_statuses, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    file.id,
+    workflowId,
+    file.filePath,
+    status,
+    file.startedAt ?? null,
+    file.completedAt ?? null,
+    file.error ?? null,
+    JSON.stringify(taskStatuses),
+    now
+  );
+
+  db.prepare('DELETE FROM workflow_files WHERE id = ?').run(file.id);
+  db.prepare('UPDATE workflows SET updated_at = ? WHERE id = ?').run(now, workflowId);
 };
 
 export const updateWorkflowStatus = (workflowId: string, status: Workflow['status']) => {
@@ -377,4 +434,35 @@ export const updateWorkflowFileStatus = (
     extra?.currentTaskIndex ?? null,
     fileId
   );
+};
+
+export const removeWorkflowFile = (workflowId: string, fileId: string) => {
+  const db = getDatabase();
+  const result = db
+    .prepare('DELETE FROM workflow_files WHERE id = ? AND workflow_id = ?')
+    .run(fileId, workflowId);
+  if (result.changes > 0) {
+    db.prepare('UPDATE workflows SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), workflowId);
+  }
+  return result.changes > 0;
+};
+
+export const removeWorkflowHistoryItem = (workflowId: string, historyId: string) => {
+  const db = getDatabase();
+  const result = db
+    .prepare('DELETE FROM workflow_history WHERE id = ? AND workflow_id = ?')
+    .run(historyId, workflowId);
+  if (result.changes > 0) {
+    db.prepare('UPDATE workflows SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), workflowId);
+  }
+  return result.changes > 0;
+};
+
+export const clearWorkflowHistory = (workflowId: string) => {
+  const db = getDatabase();
+  const result = db.prepare('DELETE FROM workflow_history WHERE workflow_id = ?').run(workflowId);
+  if (result.changes > 0) {
+    db.prepare('UPDATE workflows SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), workflowId);
+  }
+  return result.changes;
 };

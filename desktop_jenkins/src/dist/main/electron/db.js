@@ -58,6 +58,18 @@ const schemaStatements = [
     completed_at TEXT,
     FOREIGN KEY (workflow_id) REFERENCES workflows(id) ON DELETE CASCADE
   )`,
+    `CREATE TABLE IF NOT EXISTS workflow_history (
+    id TEXT PRIMARY KEY,
+    workflow_id TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    status TEXT NOT NULL,
+    started_at TEXT,
+    completed_at TEXT,
+    error TEXT,
+    task_statuses TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (workflow_id) REFERENCES workflows(id) ON DELETE CASCADE
+  )`,
     `CREATE TABLE IF NOT EXISTS processed_files (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     workflow_id TEXT NOT NULL,

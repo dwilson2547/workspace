@@ -51,15 +51,28 @@ const runWorkflow = async (workflowId) => {
         }
         const startedAt = new Date().toISOString();
         (0, workflows_1.updateWorkflowFileStatus)(file.id, 'processing', { startedAt, currentTaskIndex: 0 });
+        const taskStatuses = [];
         for (let index = 0; index < tasks.length; index += 1) {
             if (controller.cancelled) {
                 (0, workflows_1.updateWorkflowFileStatus)(file.id, 'pending', { currentTaskIndex: index });
                 return;
             }
             (0, workflows_1.updateWorkflowFileStatus)(file.id, 'processing', { currentTaskIndex: index + 1 });
-            const task = buildWorkflowTask(tasks[index], file.filePath);
+            const workflowTask = tasks[index];
+            const task = buildWorkflowTask(workflowTask, file.filePath);
+            const taskStartedAt = new Date().toISOString();
             try {
                 await (0, taskRunner_1.runTask)(task);
+                const taskCompletedAt = new Date().toISOString();
+                taskStatuses.push({
+                    taskId: workflowTask.id,
+                    name: workflowTask.name,
+                    type: workflowTask.type,
+                    order: workflowTask.order,
+                    status: 'completed',
+                    startedAt: taskStartedAt,
+                    completedAt: taskCompletedAt
+                });
             }
             catch (error) {
                 const completedAt = new Date().toISOString();
@@ -69,6 +82,24 @@ const runWorkflow = async (workflowId) => {
                     completedAt,
                     currentTaskIndex: index + 1
                 });
+                taskStatuses.push({
+                    taskId: workflowTask.id,
+                    name: workflowTask.name,
+                    type: workflowTask.type,
+                    order: workflowTask.order,
+                    status: 'failed',
+                    startedAt: taskStartedAt,
+                    completedAt,
+                    error: errorMessage
+                });
+                (0, workflows_1.archiveWorkflowFile)(workflowId, {
+                    ...file,
+                    status: 'failed',
+                    startedAt,
+                    completedAt,
+                    error: errorMessage,
+                    currentTaskIndex: index + 1
+                }, 'failed', taskStatuses);
                 return;
             }
         }
@@ -77,6 +108,13 @@ const runWorkflow = async (workflowId) => {
             completedAt,
             currentTaskIndex: tasks.length
         });
+        (0, workflows_1.archiveWorkflowFile)(workflowId, {
+            ...file,
+            status: 'completed',
+            startedAt,
+            completedAt,
+            currentTaskIndex: tasks.length
+        }, 'completed', taskStatuses);
     };
     if (workflow.executionMode === 'parallel') {
         const maxParallel = Math.max(1, workflow.maxParallel ?? 2);

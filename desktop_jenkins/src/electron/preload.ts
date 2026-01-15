@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('queues:add-task', queueId, task),
   removeTask: (queueId: string, taskId: string): Promise<boolean> =>
     ipcRenderer.invoke('queues:remove-task', queueId, taskId),
+  removeQueueHistoryItem: (queueId: string, historyId: string): Promise<boolean> =>
+    ipcRenderer.invoke('queues:remove-history-item', queueId, historyId),
   runQueue: (queueId: string): Promise<void> => ipcRenderer.invoke('queues:run', queueId),
   pauseQueue: (queueId: string): Promise<void> => ipcRenderer.invoke('queues:pause', queueId),
   listWorkflows: (): Promise<Workflow[]> => ipcRenderer.invoke('workflows:list'),
@@ -38,6 +40,14 @@ contextBridge.exposeInMainWorld('api', {
     workflowId: string,
     config: DirectoryWatcherConfig
   ): Promise<Workflow> => ipcRenderer.invoke('workflows:update-watcher-config', workflowId, config),
+  removeWorkflowFile: (workflowId: string, fileId: string): Promise<boolean> =>
+    ipcRenderer.invoke('workflows:remove-file', workflowId, fileId),
+  removeWorkflowHistoryItem: (workflowId: string, historyId: string): Promise<boolean> =>
+    ipcRenderer.invoke('workflows:remove-history-item', workflowId, historyId),
+  clearWorkflowHistory: (workflowId: string): Promise<number> =>
+    ipcRenderer.invoke('workflows:clear-history', workflowId),
+  exportWorkflowHistory: (workflowId: string): Promise<string | null> =>
+    ipcRenderer.invoke('workflows:export-history', workflowId),
   startWorkflowWatcher: (workflowId: string): Promise<void> =>
     ipcRenderer.invoke('workflows:watcher-start', workflowId),
   stopWorkflowWatcher: (workflowId: string): Promise<void> =>

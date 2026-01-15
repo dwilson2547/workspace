@@ -80,6 +80,28 @@ export interface WorkflowFile {
   completedAt?: string;
 }
 
+export interface WorkflowTaskStatus {
+  taskId: string;
+  name: string;
+  type: TaskType;
+  order: number;
+  status: 'completed' | 'failed';
+  startedAt?: string;
+  completedAt?: string;
+  error?: string;
+}
+
+export interface WorkflowFileHistory {
+  id: string;
+  workflowId: string;
+  filePath: string;
+  status: 'completed' | 'failed';
+  startedAt?: string;
+  completedAt?: string;
+  error?: string;
+  taskStatuses: WorkflowTaskStatus[];
+}
+
 export interface Workflow {
   id: string;
   name: string;
@@ -88,6 +110,7 @@ export interface Workflow {
   executionMode: WorkflowExecutionMode;
   maxParallel?: number;
   fileQueue: WorkflowFile[];
+  history: WorkflowFileHistory[];
   status: 'idle' | 'running' | 'paused';
   watcherConfig?: DirectoryWatcherConfig;
   createdAt: string;
@@ -111,6 +134,7 @@ export interface ElectronAPI {
   createQueue: (name: string) => Promise<Queue>;
   addTask: (queueId: string, task: Omit<Task, 'id' | 'status' | 'createdAt'>) => Promise<Task>;
   removeTask: (queueId: string, taskId: string) => Promise<boolean>;
+  removeQueueHistoryItem: (queueId: string, historyId: string) => Promise<boolean>;
   runQueue: (queueId: string) => Promise<void>;
   pauseQueue: (queueId: string) => Promise<void>;
   listWorkflows: () => Promise<Workflow[]>;
@@ -130,6 +154,10 @@ export interface ElectronAPI {
     workflowId: string,
     config: DirectoryWatcherConfig
   ) => Promise<Workflow>;
+  removeWorkflowFile: (workflowId: string, fileId: string) => Promise<boolean>;
+  removeWorkflowHistoryItem: (workflowId: string, historyId: string) => Promise<boolean>;
+  clearWorkflowHistory: (workflowId: string) => Promise<number>;
+  exportWorkflowHistory: (workflowId: string) => Promise<string | null>;
   startWorkflowWatcher: (workflowId: string) => Promise<void>;
   stopWorkflowWatcher: (workflowId: string) => Promise<void>;
   runWorkflow: (workflowId: string) => Promise<void>;

@@ -1,4 +1,5 @@
 import { BrowserWindow, dialog, ipcMain } from 'electron';
+import fs from 'node:fs/promises';
 import type {
   DirectoryWatcherConfig,
   FilePickerOptions,
@@ -12,6 +13,7 @@ import {
   archiveTask,
   createQueue,
   listQueues,
+  removeQueueHistoryItem,
   removeTaskFromQueue,
   updateQueueStatus,
   updateTaskStatus,
@@ -21,8 +23,12 @@ import {
   addWorkflowFiles,
   addWorkflowFolder,
   addWorkflowTask,
+  clearWorkflowHistory,
   createWorkflow,
+  getWorkflowById,
   listWorkflows,
+  removeWorkflowFile,
+  removeWorkflowHistoryItem,
   removeWorkflowTask,
   updateWorkflowWatcherConfig,
   updateWorkflowSettings
@@ -94,6 +100,9 @@ export const registerIpcHandlers = () => {
   ipcMain.handle('queues:remove-task', (_event, queueId: string, taskId: string) =>
     removeTaskFromQueue(queueId, taskId)
   );
+  ipcMain.handle('queues:remove-history-item', (_event, queueId: string, historyId: string) =>
+    removeQueueHistoryItem(queueId, historyId)
+  );
   ipcMain.handle('queues:run', (_event, queueId: string) => runQueue(queueId));
   ipcMain.handle('queues:pause', (_event, queueId: string) => {
     runningQueues.delete(queueId);
@@ -128,6 +137,36 @@ export const registerIpcHandlers = () => {
   });
   ipcMain.handle('workflows:watcher-stop', async (_event, workflowId: string) => {
     await stopWorkflowWatcher(workflowId);
+  });
+  ipcMain.handle('workflows:remove-file', (_event, workflowId: string, fileId: string) =>
+    removeWorkflowFile(workflowId, fileId)
+  );
+  ipcMain.handle('workflows:remove-history-item', (_event, workflowId: string, historyId: string) =>
+    removeWorkflowHistoryItem(workflowId, historyId)
+  );
+  ipcMain.handle('workflows:clear-history', (_event, workflowId: string) =>
+    clearWorkflowHistory(workflowId)
+  );
+  ipcMain.handle('workflows:export-history', async (_event, workflowId: string) => {
+    const workflow = getWorkflowById(workflowId);
+    if (!workflow) {
+      return null;
+    }
+    const browserWindow = BrowserWindow.getFocusedWindow();
+    const suggestedName = `${workflow.name.replace(/\s+/g, '-').toLowerCase()}-history.json`;
+    const dialogOptions = {
+      title: 'Export Workflow History',
+      defaultPath: suggestedName,
+      filters: [{ name: 'JSON', extensions: ['json'] }]
+    };
+    const result = browserWindow
+      ? await dialog.showSaveDialog(browserWindow, dialogOptions)
+      : await dialog.showSaveDialog(dialogOptions);
+    if (result.canceled || !result.filePath) {
+      return null;
+    }
+    await fs.writeFile(result.filePath, JSON.stringify(workflow.history, null, 2), 'utf-8');
+    return result.filePath;
   });
   ipcMain.handle('workflows:run', (_event, workflowId: string) => runWorkflow(workflowId));
   ipcMain.handle('workflows:pause', (_event, workflowId: string) => {

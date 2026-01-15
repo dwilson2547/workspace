@@ -140,6 +140,17 @@ export const removeTaskFromQueue = (queueId: string, taskId: string) => {
   return result.changes > 0;
 };
 
+export const removeQueueHistoryItem = (queueId: string, historyId: string) => {
+  const db = getDatabase();
+  const result = db
+    .prepare('DELETE FROM task_history WHERE id = ? AND queue_id = ?')
+    .run(historyId, queueId);
+  if (result.changes > 0) {
+    db.prepare('UPDATE queues SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), queueId);
+  }
+  return result.changes > 0;
+};
+
 export const updateQueueStatus = (queueId: string, status: Queue['status']) => {
   const db = getDatabase();
   const now = new Date().toISOString();

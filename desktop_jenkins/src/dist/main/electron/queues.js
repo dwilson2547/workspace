@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.archiveTask = exports.updateQueueCurrentIndex = exports.updateTaskStatus = exports.updateQueueStatus = exports.removeTaskFromQueue = exports.addTaskToQueue = exports.createQueue = exports.listQueues = void 0;
+exports.archiveTask = exports.updateQueueCurrentIndex = exports.updateTaskStatus = exports.updateQueueStatus = exports.removeQueueHistoryItem = exports.removeTaskFromQueue = exports.addTaskToQueue = exports.createQueue = exports.listQueues = void 0;
 const node_crypto_1 = require("node:crypto");
 const db_1 = require("./db");
 const serializeTask = (task) => ({
@@ -110,6 +110,17 @@ const removeTaskFromQueue = (queueId, taskId) => {
     return result.changes > 0;
 };
 exports.removeTaskFromQueue = removeTaskFromQueue;
+const removeQueueHistoryItem = (queueId, historyId) => {
+    const db = (0, db_1.getDatabase)();
+    const result = db
+        .prepare('DELETE FROM task_history WHERE id = ? AND queue_id = ?')
+        .run(historyId, queueId);
+    if (result.changes > 0) {
+        db.prepare('UPDATE queues SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), queueId);
+    }
+    return result.changes > 0;
+};
+exports.removeQueueHistoryItem = removeQueueHistoryItem;
 const updateQueueStatus = (queueId, status) => {
     const db = (0, db_1.getDatabase)();
     const now = new Date().toISOString();
