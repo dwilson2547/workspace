@@ -1,6 +1,42 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
+import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
+import { useTheme } from '../context/ThemeContext';
+import codeSyntaxHighlight from '@toast-ui/editor-plugin-code-syntax-highlight';
+import '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css';
+import Prism from 'prismjs';
+import '../styles/prism-theme.css'; // Custom theme that supports dark mode
+
+// Import base dependencies first
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-markup-templating';
+
+// Import commonly used languages
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-php';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-yaml';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-scss';
+import 'prismjs/components/prism-docker';
+import 'prismjs/components/prism-git';
+
 import { attachmentsAPI } from '../services/api';
 
 export default function MarkdownEditor({ 
@@ -12,6 +48,7 @@ export default function MarkdownEditor({
   placeholder = 'Start writing...'
 }) {
   const editorRef = useRef(null);
+  const { theme } = useTheme();
 
   // Handle image upload (drag-drop or button)
   const handleImageUpload = useCallback(async (blob, callback) => {
@@ -120,17 +157,22 @@ export default function MarkdownEditor({
 
   return (
     <Editor
+      key={theme}
       ref={editorRef}
       initialValue={initialValue}
       previewStyle="vertical"
       height={height}
       initialEditType="markdown"
       useCommandShortcut={true}
+      usageStatistics={false}
       placeholder={placeholder}
       onChange={handleChange}
+      theme={theme}
+      autofocus={false}
       hooks={{
         addImageBlobHook: handleImageUpload
       }}
+      plugins={[[codeSyntaxHighlight, { highlighter: Prism }]]}
       toolbarItems={[
         ['heading', 'bold', 'italic', 'strike'],
         ['hr', 'quote'],
@@ -139,6 +181,9 @@ export default function MarkdownEditor({
         ['code', 'codeblock'],
         ['scrollSync'],
       ]}
+      customHTMLRenderer={{
+        // Enable better markdown rendering
+      }}
     />
   );
 }

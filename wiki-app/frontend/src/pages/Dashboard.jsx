@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Book, Lock, Globe, MoreVertical, Trash2, Settings } from 'lucide-react';
+import { Plus, Book, Lock, Globe, MoreVertical, Trash2, Settings, Home, Sparkles } from 'lucide-react';
 import { wikisAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Search from '../components/Search';
+import UserMenu from '../components/UserMenu';
 
 export default function Dashboard() {
   const [wikis, setWikis] = useState([]);
@@ -14,7 +15,7 @@ export default function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(null);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,31 +66,53 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem' }}>
-      <header className="flex justify-between items-center mb-6">
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>My Wikis</h1>
-          <p className="text-secondary text-sm">
-            Welcome back, {user?.display_name || user?.username}
-          </p>
-        </div>
-        <div className="flex gap-2 items-center">
-          <button className="btn btn-secondary" onClick={logout}>
-            Logout
-          </button>
-          <button 
-            className="btn btn-primary"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <Plus size={18} />
-            New Wiki
-          </button>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      {/* Header */}
+      <header style={{ 
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--card)',
+        padding: '1rem 0'
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <Book size={32} style={{ color: 'var(--primary)' }} />
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
+                My Wikis
+              </h1>
+            </div>
+            <div className="flex gap-2 items-center">
+              <Link to="/search" className="btn btn-ghost">
+                <Sparkles size={18} />
+                AI Search
+              </Link>
+              <Link to="/" className="btn btn-ghost">
+                <Home size={18} />
+                Explore Public Wikis
+              </Link>
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <Plus size={18} />
+                New Wiki
+              </button>
+              <UserMenu />
+            </div>
+          </div>
         </div>
       </header>
 
-      <div className="mb-6" style={{ maxWidth: 400 }}>
-        <Search placeholder="Search across all wikis..." />
-      </div>
+      {/* Main Content */}
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem' }}>
+        <div className="mb-4">
+          <p className="text-secondary text-sm mb-4">
+            Welcome back, {user?.display_name || user?.username}
+          </p>
+          <div style={{ maxWidth: 400 }}>
+            <Search placeholder="Search across all wikis..." />
+          </div>
+        </div>
 
       {loading ? (
         <div className="loading-container">
@@ -174,6 +197,7 @@ export default function Dashboard() {
           ))}
         </div>
       )}
+      </main>
 
       <Modal
         isOpen={showCreateModal}

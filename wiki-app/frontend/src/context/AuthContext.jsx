@@ -9,12 +9,15 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
+    console.log('AuthContext: Checking token on mount', token ? 'Token exists' : 'No token');
     if (token) {
       authAPI.getMe()
         .then(response => {
+          console.log('AuthContext: getMe success', response.data.user);
           setUser(response.data.user);
         })
-        .catch(() => {
+        .catch((error) => {
+          console.log('AuthContext: getMe failed', error.response?.status, error.message);
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
         })
@@ -27,7 +30,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (username, password) => {
+    console.log('AuthContext: Attempting login', username);
     const response = await authAPI.login({ username, password });
+    console.log('AuthContext: Login response', response.data);
     const { user, access_token, refresh_token } = response.data;
     
     localStorage.setItem('access_token', access_token);
@@ -54,12 +59,23 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await authAPI.getMe();
+      setUser(response.data.user);
+      return response.data.user;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      throw error;
+    }
+  };
+
   const updateUser = (userData) => {
     setUser(prev => ({ ...prev, ...userData }));
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

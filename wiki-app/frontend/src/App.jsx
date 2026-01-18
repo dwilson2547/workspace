@@ -1,15 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Pages
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import UserSettings from './pages/UserSettings';
 import WikiLayout from './pages/WikiLayout';
 import WikiHome from './pages/WikiHome';
 import WikiSettings from './pages/WikiSettings';
 import PageView from './pages/PageView';
 import PageEdit from './pages/PageEdit';
+import SemanticSearchPage from './pages/SemanticSearchPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -51,16 +55,21 @@ function PublicRoute({ children }) {
   }
   
   if (user) {
-    return <Navigate to="/" />;
+    return <Navigate to="/dashboard" />;
   }
   
   return children;
 }
 
 function AppRoutes() {
+  const { user } = useAuth();
+  
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public Home Page - accessible to everyone */}
+      <Route path="/" element={<Home />} />
+      
+      {/* Auth routes */}
       <Route path="/login" element={
         <PublicRoute>
           <Login />
@@ -73,9 +82,21 @@ function AppRoutes() {
       } />
       
       {/* Protected routes */}
-      <Route path="/" element={
+      <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <UserSettings />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/search" element={
+        <ProtectedRoute>
+          <SemanticSearchPage />
         </ProtectedRoute>
       } />
       
@@ -90,7 +111,7 @@ function AppRoutes() {
         <Route path="page/:pageId/edit" element={<PageEdit />} />
       </Route>
       
-      {/* Catch all */}
+      {/* Catch all - redirect to home */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
@@ -99,9 +120,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

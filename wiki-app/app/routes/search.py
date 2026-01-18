@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, case
 from app.models import db, User, Wiki, Page
 
 search_bp = Blueprint('search', __name__, url_prefix='/api/search')
@@ -37,7 +37,7 @@ def search_pages():
     - limit: max results (default 20)
     - offset: pagination offset (default 0)
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     query = request.args.get('q', '').strip()
     if not query:
@@ -79,7 +79,7 @@ def search_pages():
     # Get results with pagination
     pages = base_query.order_by(
         # Prioritize title matches
-        func.case(
+        case(
             (Page.title.ilike(search_term), 0),
             else_=1
         ),
@@ -129,7 +129,7 @@ def search_pages():
 @jwt_required()
 def search_wiki_pages(wiki_id):
     """Search pages within a specific wiki."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     # Verify wiki access
     wiki = Wiki.query.get(wiki_id)

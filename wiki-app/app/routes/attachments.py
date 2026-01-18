@@ -77,7 +77,7 @@ def check_page_access(wiki_id: int, page_id: int, user_id: int, require_edit: bo
 @jwt_required()
 def list_attachments(wiki_id, page_id):
     """List all attachments for a page."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     page, error = check_page_access(wiki_id, page_id, current_user_id)
     
     if error:
@@ -95,7 +95,7 @@ def list_attachments(wiki_id, page_id):
 @jwt_required()
 def upload_attachment(wiki_id, page_id):
     """Upload a file attachment to a page."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     page, error = check_page_access(wiki_id, page_id, current_user_id, require_edit=True)
     
     if error:
@@ -154,7 +154,7 @@ def upload_attachment(wiki_id, page_id):
 @jwt_required()
 def get_attachment_info(attachment_id):
     """Get attachment metadata."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     attachment = Attachment.query.get(attachment_id)
     
     if not attachment:
@@ -173,7 +173,7 @@ def get_attachment_info(attachment_id):
 @jwt_required()
 def download_attachment(attachment_id):
     """Download an attachment file."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     attachment = Attachment.query.get(attachment_id)
     
     if not attachment:
@@ -200,7 +200,7 @@ def download_attachment(attachment_id):
 @jwt_required()
 def view_attachment(attachment_id):
     """View an attachment inline (for images, PDFs, etc.)."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     attachment = Attachment.query.get(attachment_id)
     
     if not attachment:
@@ -227,7 +227,7 @@ def view_attachment(attachment_id):
 @jwt_required()
 def delete_attachment(attachment_id):
     """Delete an attachment."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     attachment = Attachment.query.get(attachment_id)
     
     if not attachment:
@@ -257,7 +257,7 @@ def upload_editor_image(wiki_id, page_id):
     Upload an image from the markdown editor.
     Returns URL that can be embedded in markdown.
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     page, error = check_page_access(wiki_id, page_id, current_user_id, require_edit=True)
     
     if error:

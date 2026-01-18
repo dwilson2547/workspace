@@ -4,7 +4,7 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity, get_jwt
 )
 from marshmallow import Schema, fields, validate, ValidationError
-from app.models import db, User
+from app.models import db, User, Wiki
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -52,8 +52,8 @@ def register():
     db.session.commit()
     
     # Generate tokens
-    access_token = create_access_token(identity=user.id)
-    refresh_token = create_refresh_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id), fresh=True)
+    refresh_token = create_refresh_token(identity=str(user.id))
     
     return jsonify({
         'message': 'User registered successfully',
@@ -83,8 +83,8 @@ def login():
         return jsonify({'error': 'Account is disabled'}), 403
     
     # Generate tokens
-    access_token = create_access_token(identity=user.id)
-    refresh_token = create_refresh_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id), fresh=True)
+    refresh_token = create_refresh_token(identity=str(user.id))
     
     return jsonify({
         'message': 'Login successful',
@@ -98,13 +98,13 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     """Refresh an access token."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user or not user.is_active:
         return jsonify({'error': 'Invalid user'}), 401
     
-    access_token = create_access_token(identity=current_user_id)
+    access_token = create_access_token(identity=str(current_user_id))
     return jsonify({'access_token': access_token}), 200
 
 
@@ -112,7 +112,7 @@ def refresh():
 @jwt_required()
 def get_current_user():
     """Get current authenticated user's profile."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -125,7 +125,7 @@ def get_current_user():
 @jwt_required()
 def update_current_user():
     """Update current user's profile."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -147,7 +147,7 @@ def update_current_user():
 @jwt_required()
 def change_password():
     """Change the current user's password."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -168,3 +168,46 @@ def change_password():
     db.session.commit()
     
     return jsonify({'message': 'Password changed successfully'}), 200
+
+
+@auth_bp.route('/me', methods=['DELETE'])
+@jwt_required()
+def delete_account():
+    """
+    Delete the current user's account.
+    
+    JSON body:
+    - delete_wikis: bool - if True, delete all owned wikis; if False, keep wikis as orphaned
+    """
+    current_user_id = int(get_jwt_identity())
+    user = User.query.get(current_user_id)
+    
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    data = request.get_json() or {}
+    delete_wikis = data.get('delete_wikis', False)
+    
+    # Handle wikis
+    owned_wikis = Wiki.query.filter_by(owner_id=current_user_id).all()
+    
+    if delete_wikis:
+        # Delete all owned wikis (cascade will handle pages, attachments, etc.)
+        for wiki in owned_wikis:
+            db.session.delete(wiki)
+    else:
+        # Keep wikis but they become orphaned (owner_id will be null or transferred)
+        # For now, we'll just leave them as-is since they have a foreign key constraint
+        # In production, you might want to transfer ownership to an admin or system account
+        # Or make owner_id nullable and set it to None
+        pass
+    
+    # Delete the user account
+    db.session.delete(user)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Account deleted successfully',
+        'wikis_deleted': delete_wikis,
+        'wikis_count': len(owned_wikis)
+    }), 200

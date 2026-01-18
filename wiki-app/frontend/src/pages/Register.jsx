@@ -46,7 +46,7 @@ export default function Register() {
         password: formData.password,
         display_name: formData.display_name || formData.username
       });
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
@@ -143,6 +143,9 @@ export default function Register() {
           <p className="text-center mt-4 text-sm text-secondary">
             Already have an account?{' '}
             <Link to="/login">Sign in</Link>
+          </p>
+          <p className="text-center mt-2 text-sm text-secondary">
+            <Link to="/">← Back to Home</Link>
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useOutletContext, Link, useNavigate } from 'react-router-dom';
 import { 
   Edit, Trash2, Clock, User, ChevronRight, 
@@ -7,10 +7,46 @@ import {
 import { pagesAPI, attachmentsAPI } from '../services/api';
 import { Viewer } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
+import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
+import { useTheme } from '../context/ThemeContext';
+import codeSyntaxHighlight from '@toast-ui/editor-plugin-code-syntax-highlight';
+import '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css';
+import Prism from 'prismjs';
+import '../styles/prism-theme.css';
+
+// Import base dependencies first
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-markup-templating';
+
+// Import commonly used languages for syntax highlighting
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-php';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-yaml';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-scss';
+import 'prismjs/components/prism-docker';
+import 'prismjs/components/prism-git';
 
 export default function PageView() {
   const { wikiId, pageId } = useParams();
   const { wiki, refreshPages } = useOutletContext();
+  const { theme } = useTheme();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [attachments, setAttachments] = useState([]);
@@ -18,11 +54,89 @@ export default function PageView() {
   const [showRevisions, setShowRevisions] = useState(false);
   const [revisions, setRevisions] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const viewerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadPage();
   }, [pageId]);
+
+  // Add IDs to headings and handle anchor link clicks
+  useEffect(() => {
+    if (!page?.content) return;
+
+    // Generate slug from text (similar to markdown processors)
+    const generateSlug = (text) => {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '') // Remove special chars except spaces and hyphens
+        .replace(/[\s_]+/g, '-')  // Replace spaces and underscores with hyphens
+        .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    };
+
+    const handleAnchorClick = (e) => {
+      // Check if clicked element is an anchor link
+      const link = e.target.closest('a[href^="#"]');
+      if (!link) return;
+
+      const hash = link.getAttribute('href');
+      if (!hash || !hash.startsWith('#')) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const targetId = hash.slice(1);
+      const targetElement = document.getElementById(targetId);
+      
+      if (targetElement) {
+        // Get header height to offset the scroll
+        const header = document.querySelector('.wiki-header') || document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 80; // Default to 80px if header not found
+        const offset = headerHeight + 20; // Add extra 20px padding
+        
+        const elementPosition = targetElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        
+        window.history.replaceState(null, '', hash);
+      }
+    };
+
+    // Add slight delay to ensure viewer is fully rendered
+    const timer = setTimeout(() => {
+      const contentDiv = viewerRef.current?.querySelector('.toastui-editor-contents') || 
+                        document.querySelector('.toastui-editor-contents');
+      
+      if (contentDiv) {
+        // Add IDs to all headings
+        const headings = contentDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+          const text = heading.textContent || '';
+          const id = generateSlug(text);
+          if (id) {
+            heading.id = id;
+          }
+        });
+
+        // Add click handler for anchor links
+        contentDiv.addEventListener('click', handleAnchorClick, true);
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      const contentDiv = viewerRef.current?.querySelector('.toastui-editor-contents') || 
+                        document.querySelector('.toastui-editor-contents');
+      if (contentDiv) {
+        contentDiv.removeEventListener('click', handleAnchorClick, true);
+      }
+    };
+  }, [page, theme]);
 
   const loadPage = async () => {
     setLoading(true);
@@ -202,10 +316,15 @@ export default function PageView() {
       </div>
 
       {/* Page Content */}
-      <div className="card mt-4">
+      <div className="card mt-4" ref={viewerRef}>
         <div className="card-body">
           {page.content ? (
-            <Viewer initialValue={page.content} />
+            <Viewer 
+              key={theme}
+              initialValue={page.content} 
+              plugins={[[codeSyntaxHighlight, { highlighter: Prism }]]}
+              theme={theme}
+            />
           ) : (
             <p className="text-secondary text-center py-8">
               This page is empty.{' '}

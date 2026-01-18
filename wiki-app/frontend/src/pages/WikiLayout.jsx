@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { Outlet, Link, useParams, useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, Plus, Settings, Home, FileText, 
-  Search as SearchIcon, Menu, X 
+  Search as SearchIcon, Menu, X, Book, ArrowLeft
 } from 'lucide-react';
 import { wikisAPI, pagesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import PageTree from '../components/PageTree';
 import Search from '../components/Search';
 import Modal from '../components/Modal';
+import UserMenu from '../components/UserMenu';
 
 export default function WikiLayout() {
   const { wikiId } = useParams();
@@ -99,27 +100,72 @@ export default function WikiLayout() {
   const flatPages = flattenPages(pages);
 
   return (
-    <div className="app-layout">
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      {/* Header */}
+      <header style={{ 
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--card)',
+        padding: '1rem 0',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
+      }}>
+        <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 2rem' }}>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <button
+                className="btn btn-ghost btn-icon"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                title="Toggle sidebar"
+              >
+                <Menu size={20} />
+              </button>
+              <Book size={28} style={{ color: 'var(--primary)' }} />
+              <div>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>
+                  {wiki?.name}
+                </h1>
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <Link to="/dashboard" className="btn btn-ghost">
+                <ArrowLeft size={18} />
+                My Wikis
+              </Link>
+              <Link to="/" className="btn btn-ghost">
+                <Home size={18} />
+                Home
+              </Link>
+              <Link 
+                to={`/wiki/${wikiId}/settings`}
+                className="btn btn-ghost"
+              >
+                <Settings size={18} />
+                Wiki Settings
+              </Link>
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <Plus size={18} />
+                New Page
+              </button>
+              <UserMenu />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="app-layout">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? '' : 'hidden'}`} style={{
         transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform 0.2s ease'
+        transition: 'transform 0.2s ease',
+        top: '65px'
       }}>
         <div className="sidebar-header">
-          <div className="flex items-center justify-between mb-2">
-            <Link to="/" className="flex items-center gap-2 text-secondary">
-              <ChevronLeft size={16} />
-              <span className="text-sm">All Wikis</span>
-            </Link>
-            <button
-              className="btn btn-ghost btn-icon btn-sm"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X size={18} />
-            </button>
-          </div>
-          <h2 className="font-semibold" style={{ fontSize: '1.125rem' }}>
-            {wiki?.name}
+          <h2 className="font-semibold" style={{ fontSize: '1.125rem', marginBottom: '1rem' }}>
+            Pages
           </h2>
         </div>
 
@@ -128,48 +174,19 @@ export default function WikiLayout() {
         </div>
 
         <div className="sidebar-content">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-secondary font-medium uppercase">Pages</span>
-            <button
-              className="btn btn-ghost btn-icon btn-sm"
-              onClick={() => setShowCreateModal(true)}
-              title="New page"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-          
           <PageTree pages={pages} wikiId={wikiId} />
-        </div>
-
-        <div className="sidebar-footer">
-          <Link 
-            to={`/wiki/${wikiId}/settings`}
-            className="btn btn-ghost w-full justify-start"
-          >
-            <Settings size={16} />
-            Wiki Settings
-          </Link>
         </div>
       </aside>
 
       {/* Main content */}
       <main className="main-content" style={{
         marginLeft: sidebarOpen ? '260px' : '0',
-        transition: 'margin-left 0.2s ease'
+        transition: 'margin-left 0.2s ease',
+        marginTop: '65px'
       }}>
-        {!sidebarOpen && (
-          <button
-            className="btn btn-ghost btn-icon"
-            onClick={() => setSidebarOpen(true)}
-            style={{ position: 'fixed', top: '1rem', left: '1rem', zIndex: 40 }}
-          >
-            <Menu size={20} />
-          </button>
-        )}
-        
         <Outlet context={{ wiki, pages, refreshPages }} />
       </main>
+    </div>
 
       {/* Create Page Modal */}
       <Modal

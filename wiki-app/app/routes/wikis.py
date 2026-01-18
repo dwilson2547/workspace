@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from marshmallow import Schema, fields, validate, ValidationError
 from slugify import slugify
+from sqlalchemy import func
 from app.models import db, User, Wiki, wiki_members
 
 wikis_bp = Blueprint('wikis', __name__, url_prefix='/api/wikis')
@@ -38,11 +40,73 @@ def get_user_wikis(user_id: int):
     return list(all_wikis.values())
 
 
+@wikis_bp.route('/public', methods=['GET'])
+def list_public_wikis():
+    """
+    List all public wikis organized by author.
+    No authentication required.
+    
+    Query params:
+    - group_by: 'author' to group by owner (default), 'none' for flat list
+    - search: filter by name or description
+    - limit: max results per author (default 10)
+    """
+    group_by = request.args.get('group_by', 'author')
+    search_term = request.args.get('search', '').strip()
+    limit_per_author = min(request.args.get('limit', 10, type=int), 50)
+    
+    # Base query for public wikis
+    query = Wiki.query.filter_by(is_public=True)
+    
+    # Apply search filter if provided
+    if search_term:
+        search_pattern = f'%{search_term}%'
+        query = query.filter(
+            db.or_(
+                Wiki.name.ilike(search_pattern),
+                Wiki.description.ilike(search_pattern)
+            )
+        )
+    
+    if group_by == 'author':
+        # Get all public wikis with their owners
+        wikis = query.order_by(Wiki.updated_at.desc()).all()
+        
+        # Group by author
+        authors_dict = {}
+        for wiki in wikis:
+            owner_id = wiki.owner_id
+            if owner_id not in authors_dict:
+                authors_dict[owner_id] = {
+                    'author': wiki.owner.to_dict(),
+                    'wikis': []
+                }
+            if len(authors_dict[owner_id]['wikis']) < limit_per_author:
+                authors_dict[owner_id]['wikis'].append(wiki.to_dict())
+        
+        # Convert to list and sort by number of wikis
+        authors = list(authors_dict.values())
+        authors.sort(key=lambda x: len(x['wikis']), reverse=True)
+        
+        return jsonify({
+            'authors': authors,
+            'total_authors': len(authors),
+            'total_wikis': len(wikis)
+        }), 200
+    else:
+        # Flat list
+        wikis = query.order_by(Wiki.updated_at.desc()).limit(100).all()
+        return jsonify({
+            'wikis': [w.to_dict() for w in wikis],
+            'count': len(wikis)
+        }), 200
+
+
 @wikis_bp.route('', methods=['GET'])
 @jwt_required()
 def list_wikis():
     """List all wikis the current user has access to."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wikis = get_user_wikis(current_user_id)
     
     return jsonify({
@@ -55,7 +119,7 @@ def list_wikis():
 @jwt_required()
 def create_wiki():
     """Create a new wiki."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     try:
         data = wiki_schema.load(request.get_json())
@@ -91,7 +155,7 @@ def create_wiki():
 @jwt_required()
 def get_wiki(wiki_id):
     """Get a specific wiki by ID."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki = Wiki.query.get(wiki_id)
     
     if not wiki:
@@ -111,7 +175,7 @@ def get_wiki(wiki_id):
 @jwt_required()
 def update_wiki(wiki_id):
     """Update a wiki."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki = Wiki.query.get(wiki_id)
     
     if not wiki:
@@ -150,7 +214,7 @@ def update_wiki(wiki_id):
 @jwt_required()
 def delete_wiki(wiki_id):
     """Delete a wiki and all its pages."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki = Wiki.query.get(wiki_id)
     
     if not wiki:
@@ -173,7 +237,7 @@ def delete_wiki(wiki_id):
 @jwt_required()
 def list_members(wiki_id):
     """List all members of a wiki."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki = Wiki.query.get(wiki_id)
     
     if not wiki:
@@ -210,7 +274,7 @@ def list_members(wiki_id):
 @jwt_required()
 def add_member(wiki_id):
     """Add a member to a wiki."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki = Wiki.query.get(wiki_id)
     
     if not wiki:
@@ -247,7 +311,7 @@ def add_member(wiki_id):
 @jwt_required()
 def update_member(wiki_id, user_id):
     """Update a member's role."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki = Wiki.query.get(wiki_id)
     
     if not wiki:
@@ -277,7 +341,7 @@ def update_member(wiki_id, user_id):
 @jwt_required()
 def remove_member(wiki_id, user_id):
     """Remove a member from a wiki."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki = Wiki.query.get(wiki_id)
     
     if not wiki:

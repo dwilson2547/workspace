@@ -3,6 +3,10 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import Schema, fields, validate, ValidationError
 from slugify import slugify
 from app.models import db, User, Wiki, Page, PageRevision
+from app.tasks import enqueue_page_embedding
+import logging
+
+logger = logging.getLogger(__name__)
 
 pages_bp = Blueprint('pages', __name__, url_prefix='/api/wikis/<int:wiki_id>/pages')
 
@@ -68,7 +72,7 @@ def check_wiki_access(wiki_id: int, user_id: int, require_edit: bool = False) ->
 @jwt_required()
 def list_pages(wiki_id):
     """List all pages in a wiki, optionally as a tree structure."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id)
     
     if error:
@@ -97,7 +101,7 @@ def list_pages(wiki_id):
 @jwt_required()
 def create_page(wiki_id):
     """Create a new page in a wiki."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id, require_edit=True)
     
     if error:
@@ -134,11 +138,20 @@ def create_page(wiki_id):
         sort_order=data.get('sort_order', 0),
         wiki_id=wiki_id,
         created_by_id=current_user_id,
-        last_modified_by_id=current_user_id
+        last_modified_by_id=current_user_id,
+        embeddings_status='pending'  # Initialize embedding status
     )
     
     db.session.add(page)
     db.session.commit()
+    
+    # Enqueue embedding generation task
+    try:
+        job = enqueue_page_embedding(page.id)
+        logger.info(f"Enqueued embedding task for page {page.id}, job: {job.id}")
+    except Exception as e:
+        logger.error(f"Failed to enqueue embedding task for page {page.id}: {e}")
+        # Don't fail the request if task queue fails
     
     return jsonify({
         'message': 'Page created successfully',
@@ -150,7 +163,7 @@ def create_page(wiki_id):
 @jwt_required()
 def get_page(wiki_id, page_id):
     """Get a specific page."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id)
     
     if error:
@@ -169,7 +182,7 @@ def get_page(wiki_id, page_id):
 @jwt_required()
 def get_page_by_path(wiki_id, page_path):
     """Get a page by its path (e.g., 'parent-slug/child-slug')."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id)
     
     if error:
@@ -198,7 +211,7 @@ def get_page_by_path(wiki_id, page_path):
 @jwt_required()
 def update_page(wiki_id, page_id):
     """Update a page."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id, require_edit=True)
     
     if error:
@@ -266,7 +279,22 @@ def update_page(wiki_id, page_id):
             page.parent_id = None
     
     page.last_modified_by_id = current_user_id
+    
+    # Track if content changed to decide whether to regenerate embeddings
+    content_changed = 'content' in data or 'title' in data
+    
     db.session.commit()
+    
+    # Enqueue embedding regeneration if content changed
+    if content_changed:
+        try:
+            page.embeddings_status = 'pending'
+            db.session.commit()
+            job = enqueue_page_embedding(page.id, force_regenerate=True)
+            logger.info(f"Enqueued embedding regeneration for page {page.id}, job: {job.id}")
+        except Exception as e:
+            logger.error(f"Failed to enqueue embedding task for page {page.id}: {e}")
+            # Don't fail the request if task queue fails
     
     return jsonify({'page': page.to_dict(include_content=True)}), 200
 
@@ -275,7 +303,7 @@ def update_page(wiki_id, page_id):
 @jwt_required()
 def delete_page(wiki_id, page_id):
     """Delete a page and all its children."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id, require_edit=True)
     
     if error:
@@ -303,7 +331,7 @@ def delete_page(wiki_id, page_id):
 @jwt_required()
 def move_page(wiki_id, page_id):
     """Move a page to a new parent."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id, require_edit=True)
     
     if error:
@@ -342,7 +370,7 @@ def move_page(wiki_id, page_id):
 @jwt_required()
 def get_page_children(wiki_id, page_id):
     """Get direct children of a page."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id)
     
     if error:
@@ -364,7 +392,7 @@ def get_page_children(wiki_id, page_id):
 @jwt_required()
 def get_page_revisions(wiki_id, page_id):
     """Get revision history for a page."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id)
     
     if error:
@@ -388,7 +416,7 @@ def get_page_revisions(wiki_id, page_id):
 @jwt_required()
 def get_page_revision(wiki_id, page_id, revision_id):
     """Get a specific revision's content."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id)
     
     if error:
@@ -408,7 +436,7 @@ def get_page_revision(wiki_id, page_id, revision_id):
 @jwt_required()
 def restore_revision(wiki_id, page_id, revision_id):
     """Restore a page to a previous revision."""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     wiki, error = check_wiki_access(wiki_id, current_user_id, require_edit=True)
     
     if error:

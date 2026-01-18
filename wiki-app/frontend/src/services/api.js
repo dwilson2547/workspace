@@ -58,11 +58,13 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
   updateMe: (data) => api.patch('/auth/me', data),
   changePassword: (data) => api.post('/auth/change-password', data),
+  deleteAccount: (data) => api.delete('/auth/me', { data }),
 };
 
 // Wikis API
 export const wikisAPI = {
   list: () => api.get('/wikis'),
+  listPublic: (params = {}) => axios.get(`${API_BASE}/wikis/public`, { params }), // No auth required
   create: (data) => api.post('/wikis', data),
   get: (id, includePages = false) => api.get(`/wikis/${id}`, { params: { include_pages: includePages } }),
   update: (id, data) => api.patch(`/wikis/${id}`, data),
@@ -126,6 +128,12 @@ export const searchAPI = {
     api.get(`/search/wikis/${wikiId}/pages`, { params: { q: query, limit, offset } }),
   searchUsers: (query, limit = 10) => 
     api.get('/search/users', { params: { q: query, limit } }),
+  
+  // Semantic search
+  semanticSearch: (query, wikiId = null, limit = 20, offset = 0, threshold = 0.5) =>
+    api.get('/search/semantic', { params: { q: query, wiki_id: wikiId, limit, offset, threshold } }),
+  hybridSearch: (query, wikiId = null, limit = 20, semanticWeight = 0.7) =>
+    api.get('/search/hybrid', { params: { q: query, wiki_id: wikiId, limit, semantic_weight: semanticWeight } }),
 };
 
 export default api;

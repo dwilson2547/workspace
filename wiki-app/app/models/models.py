@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 from slugify import slugify
+from pgvector.sqlalchemy import Vector
 import bcrypt
 
 db = SQLAlchemy()
@@ -187,6 +188,10 @@ class Page(db.Model):
     is_published = db.Column(db.Boolean, default=True)
     sort_order = db.Column(db.Integer, default=0)  # For ordering siblings
     
+    # Embedding status tracking
+    embeddings_status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
+    embeddings_updated_at = db.Column(db.DateTime, nullable=True)
+    
     # Foreign keys
     wiki_id = db.Column(db.Integer, db.ForeignKey('wikis.id'), nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('pages.id'), nullable=True)
@@ -210,6 +215,8 @@ class Page(db.Model):
                                        back_populates='pages_modified')
     attachments = db.relationship('Attachment', back_populates='page', lazy='dynamic',
                                   cascade='all, delete-orphan')
+    embeddings = db.relationship('PageEmbedding', back_populates='page', lazy='dynamic',
+                                 cascade='all, delete-orphan')
     
     # Unique constraint on slug within a wiki
     __table_args__ = (
@@ -348,3 +355,46 @@ class PageRevision(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'change_summary': self.change_summary,
         }
+
+
+class PageEmbedding(db.Model):
+    """Store embeddings for page content chunks."""
+    __tablename__ = 'page_embeddings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    page_id = db.Column(db.Integer, db.ForeignKey('pages.id'), nullable=False, index=True)
+    chunk_index = db.Column(db.Integer, nullable=False)  # Order of chunk in page
+    chunk_text = db.Column(db.Text, nullable=False)  # The actual text chunk
+    heading_path = db.Column(db.String(500))  # e.g., "Introduction > Setup > Installation"
+    token_count = db.Column(db.Integer)
+    
+    # pgvector column - dimension 384 for all-MiniLM-L6-v2
+    # Can be updated to 768 for larger models like all-mpnet-base-v2
+    embedding = db.Column(Vector(384))
+    
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    # Relationships
+    page = db.relationship('Page', back_populates='embeddings')
+    
+    # Unique constraint and vector index
+    __table_args__ = (
+        db.UniqueConstraint('page_id', 'chunk_index', name='unique_page_chunk'),
+        # Vector similarity index - created via migration
+        # db.Index('idx_page_embeddings_vector', 'embedding', postgresql_using='ivfflat'),
+    )
+    
+    def to_dict(self, include_embedding: bool = False) -> dict:
+        """Serialize embedding to dictionary."""
+        data = {
+            'id': self.id,
+            'page_id': self.page_id,
+            'chunk_index': self.chunk_index,
+            'chunk_text': self.chunk_text[:200] + '...' if len(self.chunk_text) > 200 else self.chunk_text,
+            'heading_path': self.heading_path,
+            'token_count': self.token_count,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+        if include_embedding and self.embedding is not None:
+            data['embedding'] = self.embedding
+        return data

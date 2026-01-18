@@ -23,6 +23,10 @@ def create_app(config_name: str = None) -> Flask:
     
     # Initialize extensions
     db.init_app(app)
+    
+    # Disable CSRF for JWT since we're using Authorization headers
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+    
     jwt.init_app(app)
     migrate.init_app(app, db)
     
@@ -44,13 +48,14 @@ def create_app(config_name: str = None) -> Flask:
     app.config['UPLOAD_FOLDER'] = upload_folder
     
     # Register blueprints
-    from app.routes import auth_bp, wikis_bp, pages_bp, attachments_bp, search_bp
+    from app.routes import auth_bp, wikis_bp, pages_bp, attachments_bp, search_bp, semantic_search_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(wikis_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(attachments_bp)
     app.register_blueprint(search_bp)
+    app.register_blueprint(semantic_search_bp)
     
     # JWT error handlers
     @jwt.expired_token_loader
@@ -62,9 +67,11 @@ def create_app(config_name: str = None) -> Flask:
     
     @jwt.invalid_token_loader
     def invalid_token_callback(error):
+        app.logger.error(f"Invalid token error: {error}")
         return jsonify({
             'error': 'Invalid token',
-            'code': 'invalid_token'
+            'code': 'invalid_token',
+            'details': str(error)
         }), 401
     
     @jwt.unauthorized_loader
@@ -79,6 +86,14 @@ def create_app(config_name: str = None) -> Flask:
         return jsonify({
             'error': 'Token has been revoked',
             'code': 'token_revoked'
+        }), 401
+    
+    @jwt.token_verification_failed_loader
+    def token_verification_failed_callback(jwt_header, jwt_payload):
+        return jsonify({
+            'error': 'Token verification failed',
+            'code': 'token_verification_failed',
+            'details': str(jwt_payload)
         }), 401
     
     # Health check endpoint

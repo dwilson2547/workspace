@@ -1,22 +1,56 @@
 # AI-Powered Wiki Application
 
-A Flask-based wiki application with user management, hierarchical pages, file attachments, and designed for future AI-powered features like semantic search and auto-linking.
+A modern full-stack wiki application with user management, hierarchical pages, file attachments, and a beautiful React UI with dark mode support.
 
 ## Features
 
+### Core Features
 - **User Management**: Registration, authentication with JWT, role-based permissions
-- **Multiple Wikis**: Users can create and manage multiple wikis
-- **Hierarchical Pages**: Pages can have parent-child relationships
-- **File Attachments**: Upload images and documents to pages
+- **Multiple Wikis**: Users can create and manage multiple wikis with public/private visibility
+- **Public Home Page**: Browse public wikis organized by author without authentication
+- **Hierarchical Pages**: Pages can have parent-child relationships for organized content
+- **Rich Markdown Editor**: Toast UI Editor with image upload and syntax highlighting
+- **Syntax Highlighting**: Support for 30+ programming languages in code blocks
+- **File Attachments**: Upload images and documents to pages with drag-and-drop
 - **Revision History**: Track changes with ability to restore previous versions
 - **Collaboration**: Share wikis with team members (viewer, editor, admin roles)
-- **Search**: Basic keyword search (ready for semantic search enhancement)
+- **AI-Powered Semantic Search**: Vector similarity search using locally-run open source models
+  - Three search modes: AI Search (semantic), Hybrid (semantic + keyword), Traditional (keyword)
+  - Automatic embedding generation via background tasks when pages are created or edited
+  - Intelligent markdown-aware text chunking for long documents
+  - GPU-accelerated embedding service using sentence-transformers
+  - Adjustable similarity thresholds and hybrid search weights
+
+### User Interface
+- **Dark Mode**: Full theme support with light and dark modes
+- **User Settings**: Comprehensive settings page for profile, appearance, and wiki management
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **User Avatars**: Customizable profile pictures with initials fallback
+- **Modern UI**: Clean, intuitive interface built with React
 
 ## Tech Stack
 
-- **Backend**: Flask, SQLAlchemy, Flask-JWT-Extended
-- **Database**: SQLite (dev) / PostgreSQL (prod)
-- **Authentication**: JWT with access/refresh tokens
+### Backend
+- **Framework**: Flask with SQLAlchemy ORM
+- **Database**: PostgreSQL with pgvector extension for vector similarity search
+- **Authentication**: JWT with access/refresh tokens (Flask-JWT-Extended)
+- **Validation**: Marshmallow schemas
+- **Task Queue**: Redis Queue (RQ) for background embedding generation
+- **AI/ML**: sentence-transformers for embeddings, tiktoken for text chunking
+- **Embedding Service**: Standalone Flask microservice with GPU support
+
+### Frontend
+- **Framework**: React 18 with Vite
+- **Router**: React Router v6
+- **Editor**: Toast UI Editor with Prism.js syntax highlighting
+- **Icons**: Lucide React
+- **State**: Context API for auth, theme, and search management
+
+### Infrastructure
+- **Containerization**: Docker Compose for PostgreSQL and Redis
+- **Vector Database**: PostgreSQL 16 with pgvector extension
+- **Message Queue**: Redis 7 with persistence for background tasks
+- **Worker Process**: RQ worker for asynchronous embedding generation
 
 ## Quick Start
 
@@ -29,37 +63,76 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment
+### 2. Start Docker Services
+
+Start PostgreSQL with pgvector and Redis:
+
+```bash
+docker-compose up -d
+```
+
+### 3. Configure Environment
 
 ```bash
 cp .env.example .env
-# Edit .env with your settings
+# Edit .env with your settings:
+# - DATABASE_URL (PostgreSQL connection string)
+# - REDIS_URL (Redis connection string)
+# - EMBEDDING_SERVICE_URL (embedding microservice URL, default: http://localhost:8001)
 ```
 
-### 3. Initialize Database
+### 4. Initialize Database
 
 ```bash
-flask init-db
-# Or with migrations:
 flask db init
-flask db migrate -m "Initial migration"
+flask db migrate -m "Initial migration with embeddings support"
 flask db upgrade
 ```
 
-### 4. Seed Demo Data (Optional)
+### 5. Seed Demo Data (Optional)
 
 ```bash
 flask seed-demo
 ```
 
-### 5. Run the Server
+### 6. Install Frontend Dependencies
 
 ```bash
-python run.py
-# Or: flask run
+cd frontend
+npm install
 ```
 
-Server runs at `http://localhost:5000`
+### 7. Start All Services
+
+From the `frontend` directory, start all services concurrently (frontend, API, embedding service, and worker):
+
+```bash
+npm run dev
+```
+
+This will start:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5000
+- **Embedding Service**: http://localhost:8001
+- **Background Worker**: RQ worker for embedding tasks
+
+Alternatively, you can start each service individually in separate terminals:
+
+```bash
+# Terminal 1: Frontend
+cd frontend
+npm run dev:frontend
+
+# Terminal 2: Backend API
+python run.py
+
+# Terminal 3: Embedding Service
+cd embedding_service
+python app.py
+
+# Terminal 4: Background Worker
+python worker.py
+```
 
 ## API Endpoints
 
@@ -71,7 +144,8 @@ Server runs at `http://localhost:5000`
 | POST | `/api/auth/login` | Login and get tokens |
 | POST | `/api/auth/refresh` | Refresh access token |
 | GET | `/api/auth/me` | Get current user |
-| PATCH | `/api/auth/me` | Update profile |
+| PATCH | `/api/auth/me` | Update profile (display name, avatar) |
+| DELETE | `/api/auth/me` | Delete account (with/without wikis) |
 | POST | `/api/auth/change-password` | Change password |
 
 ### Wikis
@@ -79,6 +153,7 @@ Server runs at `http://localhost:5000`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/wikis` | List user's wikis |
+| GET | `/api/wikis/public` | List all public wikis (grouped by author) |
 | POST | `/api/wikis` | Create wiki |
 | GET | `/api/wikis/:id` | Get wiki |
 | PATCH | `/api/wikis/:id` | Update wiki |
@@ -119,9 +194,11 @@ Server runs at `http://localhost:5000`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/search/pages?q=...` | Search all pages |
-| GET | `/api/search/wikis/:id/pages?q=...` | Search wiki pages |
+| GET | `/api/search/pages?q=...` | Search all pages (keyword) |
+| GET | `/api/search/wikis/:id/pages?q=...` | Search wiki pages (keyword) |
 | GET | `/api/search/users?q=...` | Search users |
+| POST | `/api/search/semantic` | AI-powered semantic search |
+| POST | `/api/search/hybrid` | Hybrid search (semantic + keyword) |
 
 ## API Examples
 
@@ -170,23 +247,30 @@ curl -X POST http://localhost:5000/api/wikis/1/pages/1/upload-image \
   -F "file=@/path/to/image.png"
 ```
 
-## Frontend Integration
+## Frontend Application
 
-### Recommended Markdown Editors
+The application includes a complete React frontend located in the `frontend/` directory.
 
-1. **Toast UI Editor** - Full-featured WYSIWYG + markdown
-   ```bash
-   npm install @toast-ui/editor
-   ```
+### Key Features
 
-2. **Milkdown** - Modern, plugin-based
-   ```bash
-   npm install @milkdown/core @milkdown/preset-commonmark
-   ```
+- **Public Home**: Browse public wikis without login
+- **User Dashboard**: Manage your wikis and settings
+- **Markdown Editor**: Toast UI Editor with image upload and syntax highlighting
+- **Dark Mode**: Toggle between light and dark themes
+- **User Settings**: Manage profile, avatars, wikis, and account
+- **AI Search Page**: Dedicated semantic search interface with three modes and adjustable parameters
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ### Editor Image Upload Integration
 
-Both editors support custom image upload handlers. Use the `/upload-image` endpoint:
+The editor supports image upload via drag-and-drop or paste. Images are uploaded to the `/upload-image` endpoint:
 
 ```javascript
 // Toast UI Editor example
@@ -216,39 +300,108 @@ const editor = new Editor({
 
 ```
 wiki-app/
-├── app/
+├── app/                      # Backend (Flask)
 │   ├── __init__.py          # App factory
 │   ├── config.py            # Configuration
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── models.py        # SQLAlchemy models
-│   └── routes/
-│       ├── __init__.py
-│       ├── auth.py          # Authentication
-│       ├── wikis.py         # Wiki CRUD
-│       ├── pages.py         # Page CRUD
-│       ├── attachments.py   # File handling
-│       └── search.py        # Search functionality
+│   │   └── models.py        # SQLAlchemy models (including PageEmbedding)
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── auth.py          # Authentication & user management
+│   │   ├── wikis.py         # Wiki CRUD & public listing
+│   │   ├── pages.py         # Page CRUD & revisions
+│   │   ├── attachments.py   # File handling & uploads
+│   │   ├── search.py        # Keyword search functionality
+│   │   └── semantic_search.py  # AI semantic & hybrid search
+│   ├── services/
+│   │   ├── chunking.py      # Markdown-aware text chunking
+│   │   └── embeddings.py    # Embedding service HTTP client
+│   └── tasks/
+│       └── embedding_tasks.py  # RQ background tasks for embeddings
+├── embedding_service/        # GPU-accelerated embedding microservice
+│   ├── app.py               # Flask app with /embed endpoint
+│   └── requirements.txt     # sentence-transformers, torch, etc.
+├── frontend/                 # Frontend (React)
+│   ├── src/
+│   │   ├── components/      # Reusable components
+│   │   │   ├── MarkdownEditor.jsx
+│   │   │   ├── UserMenu.jsx
+│   │   │   ├── SemanticSearch.jsx  # AI search component
+│   │   │   └── ...
+│   │   ├── pages/           # Route pages
+│   │   │   ├── Home.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── UserSettings.jsx
+│   │   │   ├── WikiLayout.jsx
+│   │   │   ├── PageView.jsx
+│   │   │   ├── SemanticSearchPage.jsx  # Dedicated AI search page
+│   │   │   └── ...
+│   │   ├── context/         # State management
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── ThemeContext.jsx
+│   │   ├── services/        # API clients
+│   │   │   └── api.js       # Including semantic search APIs
+│   │   ├── styles/          # CSS files
+│   │   │   ├── index.css
+│   │   │   ├── prism-theme.css
+│   │   │   └── semantic-search.css
+│   │   └── App.jsx          # Main app component
+│   ├── package.json
+│   └── vite.config.js
 ├── uploads/                  # File uploads directory
-├── requirements.txt
-├── run.py                   # Entry point
-└── .env.example
+├── docker-compose.yml        # PostgreSQL + Redis containers
+├── worker.py                 # RQ worker for background tasks
+├── requirements.txt          # Python dependencies
+├── run.py                   # Backend entry point
+├── .env.example
+└── CHANGELOG.md             # Version history
 ```
 
-## Future Enhancements
+## AI-Powered Features
 
-This backend is designed to support AI features:
+### Semantic Search (Implemented)
 
-1. **Semantic Search**: Add vector embeddings to pages for concept-based search
-2. **Auto-Linking**: Use embeddings + LLM to suggest links between pages
-3. **Page Suggestions**: Analyze content gaps and suggest new topics
-4. **Smart Summaries**: Auto-generate page summaries
+The application includes a complete semantic search implementation using locally-run open source models:
 
-To add these features, you would:
-1. Add a vector column to the Page model (using pgvector)
-2. Generate embeddings on page create/update
-3. Add semantic search endpoints
-4. Add AI suggestion endpoints
+- **Vector Database**: PostgreSQL with pgvector extension for efficient similarity search
+- **Embedding Model**: sentence-transformers/all-MiniLM-L6-v2 (384 dimensions)
+- **Background Processing**: Redis Queue (RQ) for asynchronous embedding generation
+- **Intelligent Chunking**: Markdown-aware text splitting with ~400 token chunks and 50 token overlap
+- **GPU Acceleration**: Standalone Flask microservice for fast embedding generation
+- **Search Modes**:
+  - **AI Search**: Pure vector similarity search
+  - **Hybrid Search**: Combines semantic and keyword search with adjustable weights
+  - **Traditional**: Standard keyword search
+
+### Semantic Search API
+
+**AI Search** (POST `/api/search/semantic`):
+```json
+{
+  "query": "how to optimize database queries",
+  "threshold": 0.5,
+  "limit": 10
+}
+```
+
+**Hybrid Search** (POST `/api/search/hybrid`):
+```json
+{
+  "query": "database performance",
+  "semantic_weight": 0.7,
+  "keyword_weight": 0.3,
+  "threshold": 0.5,
+  "limit": 10
+}
+```
+
+### Future AI Enhancements
+
+1. **Auto-Linking**: Use embeddings + LLM to suggest links between related pages
+2. **Page Suggestions**: Analyze content gaps and suggest new topics to cover
+3. **Smart Summaries**: Auto-generate page summaries and TL;DR sections
+4. **Question Answering**: RAG-based Q&A over wiki content
 
 ## License
 
