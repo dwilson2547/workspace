@@ -1,4 +1,15 @@
-export type TaskType = 'copy' | 'move' | 'delete';
+export type TaskType =
+  | 'copy'
+  | 'move'
+  | 'delete'
+  | 'rsync'
+  | 'ffmpeg'
+  | 'archiveCreate'
+  | 'archiveExtract'
+  | 'chmod'
+  | 'chown'
+  | 'ftp'
+  | 'sftp';
 
 export type WorkflowExecutionMode = 'sequential' | 'parallel';
 
@@ -11,10 +22,57 @@ export interface FilePickerOptions {
 export interface TaskConfig {
   sourcePath: string;
   destinationPath?: string;
+  rsyncArgs?: string;
+  ffmpegArgs?: string;
+  ffmpegCodec?: string;
+  ffmpegCq?: number;
+  outputExtension?: string;
+  archiveFormat?: 'zip' | 'tar' | 'tar.gz';
+  chmodMode?: string;
+  chmodRecursive?: boolean;
+  chownUser?: string;
+  chownGroup?: string;
+  chownRecursive?: boolean;
+  ftpHost?: string;
+  ftpPort?: number;
+  ftpUsername?: string;
+  ftpPassword?: string;
+  ftpRemotePath?: string;
+  ftpDirection?: 'upload' | 'download';
+  ftpSecure?: boolean;
+  sftpHost?: string;
+  sftpPort?: number;
+  sftpUsername?: string;
+  sftpPassword?: string;
+  sftpRemotePath?: string;
+  sftpDirection?: 'upload' | 'download';
 }
 
 export interface WorkflowTaskConfig {
   destinationDirectory?: string;
+  destinationName?: string;
+  rsyncArgs?: string;
+  ffmpegArgs?: string;
+  ffmpegCodec?: string;
+  ffmpegCq?: number;
+  outputExtension?: string;
+  archiveFormat?: 'zip' | 'tar' | 'tar.gz';
+  chmodMode?: string;
+  chmodRecursive?: boolean;
+  chownUser?: string;
+  chownGroup?: string;
+  chownRecursive?: boolean;
+  ftpHost?: string;
+  ftpPort?: number;
+  ftpUsername?: string;
+  ftpPassword?: string;
+  ftpRemotePath?: string;
+  ftpSecure?: boolean;
+  sftpHost?: string;
+  sftpPort?: number;
+  sftpUsername?: string;
+  sftpPassword?: string;
+  sftpRemotePath?: string;
 }
 
 export interface FileFilter {

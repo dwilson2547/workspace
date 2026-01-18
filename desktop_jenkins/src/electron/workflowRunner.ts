@@ -17,11 +17,46 @@ import {
 
 const runningWorkflows = new Map<string, { cancelled: boolean }>();
 
+const replaceExtension = (fileName: string, extension?: string) => {
+  if (!extension) {
+    return fileName;
+  }
+  const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`;
+  const parsed = path.parse(fileName);
+  return `${parsed.name}${normalizedExtension}`;
+};
+
+const resolveArchiveExtension = (format?: string) => {
+  if (format === 'tar') {
+    return '.tar';
+  }
+  if (format === 'tar.gz') {
+    return '.tar.gz';
+  }
+  return '.zip';
+};
+
 const buildWorkflowTask = (template: WorkflowTask, filePath: string): Task => {
   const destinationDirectory = template.config?.destinationDirectory?.trim();
-  const destinationPath = destinationDirectory
-    ? path.join(destinationDirectory, path.basename(filePath))
-    : undefined;
+  const destinationName = template.config?.destinationName?.trim();
+  const baseName = path.basename(filePath);
+
+  let destinationPath: string | undefined;
+
+  if (destinationDirectory) {
+    if (template.type === 'ffmpeg') {
+      const outputName = destinationName || replaceExtension(baseName, template.config?.outputExtension);
+      destinationPath = path.join(destinationDirectory, outputName);
+    } else if (template.type === 'archiveCreate') {
+      const archiveName =
+        destinationName || `${path.parse(baseName).name}${resolveArchiveExtension(template.config?.archiveFormat)}`;
+      destinationPath = path.join(destinationDirectory, archiveName);
+    } else if (template.type === 'archiveExtract') {
+      destinationPath = destinationDirectory;
+    } else {
+      destinationPath = path.join(destinationDirectory, destinationName || baseName);
+    }
+  }
 
   return {
     id: randomUUID(),
@@ -29,7 +64,31 @@ const buildWorkflowTask = (template: WorkflowTask, filePath: string): Task => {
     name: template.name,
     config: {
       sourcePath: filePath,
-      destinationPath
+      destinationPath,
+      rsyncArgs: template.config?.rsyncArgs,
+      ffmpegArgs: template.config?.ffmpegArgs,
+      ffmpegCodec: template.config?.ffmpegCodec,
+      ffmpegCq: template.config?.ffmpegCq,
+      outputExtension: template.config?.outputExtension,
+      archiveFormat: template.config?.archiveFormat,
+      chmodMode: template.config?.chmodMode,
+      chmodRecursive: template.config?.chmodRecursive,
+      chownUser: template.config?.chownUser,
+      chownGroup: template.config?.chownGroup,
+      chownRecursive: template.config?.chownRecursive,
+      ftpHost: template.config?.ftpHost,
+      ftpPort: template.config?.ftpPort,
+      ftpUsername: template.config?.ftpUsername,
+      ftpPassword: template.config?.ftpPassword,
+      ftpRemotePath: template.config?.ftpRemotePath,
+      ftpDirection: 'upload',
+      ftpSecure: template.config?.ftpSecure,
+      sftpHost: template.config?.sftpHost,
+      sftpPort: template.config?.sftpPort,
+      sftpUsername: template.config?.sftpUsername,
+      sftpPassword: template.config?.sftpPassword,
+      sftpRemotePath: template.config?.sftpRemotePath,
+      sftpDirection: 'upload'
     },
     status: 'pending',
     createdAt: new Date().toISOString()

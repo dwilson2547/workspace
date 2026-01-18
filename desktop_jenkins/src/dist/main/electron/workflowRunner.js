@@ -9,18 +9,75 @@ const node_path_1 = __importDefault(require("node:path"));
 const taskRunner_1 = require("./taskRunner");
 const workflows_1 = require("./workflows");
 const runningWorkflows = new Map();
+const replaceExtension = (fileName, extension) => {
+    if (!extension) {
+        return fileName;
+    }
+    const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`;
+    const parsed = node_path_1.default.parse(fileName);
+    return `${parsed.name}${normalizedExtension}`;
+};
+const resolveArchiveExtension = (format) => {
+    if (format === 'tar') {
+        return '.tar';
+    }
+    if (format === 'tar.gz') {
+        return '.tar.gz';
+    }
+    return '.zip';
+};
 const buildWorkflowTask = (template, filePath) => {
     const destinationDirectory = template.config?.destinationDirectory?.trim();
-    const destinationPath = destinationDirectory
-        ? node_path_1.default.join(destinationDirectory, node_path_1.default.basename(filePath))
-        : undefined;
+    const destinationName = template.config?.destinationName?.trim();
+    const baseName = node_path_1.default.basename(filePath);
+    let destinationPath;
+    if (destinationDirectory) {
+        if (template.type === 'ffmpeg') {
+            const outputName = destinationName || replaceExtension(baseName, template.config?.outputExtension);
+            destinationPath = node_path_1.default.join(destinationDirectory, outputName);
+        }
+        else if (template.type === 'archiveCreate') {
+            const archiveName = destinationName || `${node_path_1.default.parse(baseName).name}${resolveArchiveExtension(template.config?.archiveFormat)}`;
+            destinationPath = node_path_1.default.join(destinationDirectory, archiveName);
+        }
+        else if (template.type === 'archiveExtract') {
+            destinationPath = destinationDirectory;
+        }
+        else {
+            destinationPath = node_path_1.default.join(destinationDirectory, destinationName || baseName);
+        }
+    }
     return {
         id: (0, node_crypto_1.randomUUID)(),
         type: template.type,
         name: template.name,
         config: {
             sourcePath: filePath,
-            destinationPath
+            destinationPath,
+            rsyncArgs: template.config?.rsyncArgs,
+            ffmpegArgs: template.config?.ffmpegArgs,
+            ffmpegCodec: template.config?.ffmpegCodec,
+            ffmpegCq: template.config?.ffmpegCq,
+            outputExtension: template.config?.outputExtension,
+            archiveFormat: template.config?.archiveFormat,
+            chmodMode: template.config?.chmodMode,
+            chmodRecursive: template.config?.chmodRecursive,
+            chownUser: template.config?.chownUser,
+            chownGroup: template.config?.chownGroup,
+            chownRecursive: template.config?.chownRecursive,
+            ftpHost: template.config?.ftpHost,
+            ftpPort: template.config?.ftpPort,
+            ftpUsername: template.config?.ftpUsername,
+            ftpPassword: template.config?.ftpPassword,
+            ftpRemotePath: template.config?.ftpRemotePath,
+            ftpDirection: 'upload',
+            ftpSecure: template.config?.ftpSecure,
+            sftpHost: template.config?.sftpHost,
+            sftpPort: template.config?.sftpPort,
+            sftpUsername: template.config?.sftpUsername,
+            sftpPassword: template.config?.sftpPassword,
+            sftpRemotePath: template.config?.sftpRemotePath,
+            sftpDirection: 'upload'
         },
         status: 'pending',
         createdAt: new Date().toISOString()
