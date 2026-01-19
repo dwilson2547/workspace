@@ -420,9 +420,19 @@ class Tag(db.Model):
     color = db.Column(db.String(7))  # Hex color code like #FF5733
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
+    # AI/Automation tracking fields
+    source = db.Column(db.String(20), default='human')  # 'human', 'ai', 'automated', 'imported'
+    auto_generated = db.Column(db.Boolean, default=False, nullable=False)  # True if created by automation
+    confidence = db.Column(db.Float)  # Confidence score for AI-generated tags (0.0 to 1.0)
+    model_name = db.Column(db.String(100))  # Name/version of AI model that generated the tag
+    verified = db.Column(db.Boolean, default=False, nullable=False)  # True if reviewed/approved by human
+    verified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # User who verified the tag
+    verified_at = db.Column(db.DateTime)  # When the tag was verified
+    
     # Relationships
     wiki = db.relationship('Wiki')
     pages = db.relationship('Page', secondary=page_tags, back_populates='tags')
+    verified_by = db.relationship('User', foreign_keys=[verified_by_id])
     
     # Unique constraint on tag name per wiki
     __table_args__ = (
@@ -437,4 +447,11 @@ class Tag(db.Model):
             'color': self.color,
             'wiki_id': self.wiki_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
+            'source': self.source,
+            'auto_generated': self.auto_generated,
+            'confidence': self.confidence,
+            'model_name': self.model_name,
+            'verified': self.verified,
+            'verified_by_id': self.verified_by_id,
+            'verified_at': self.verified_at.isoformat() if self.verified_at else None,
         }

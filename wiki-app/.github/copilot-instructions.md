@@ -4,6 +4,16 @@
 
 This is a full-stack AI-powered wiki application with semantic search capabilities. The project consists of multiple interconnected services that work together.
 
+## Changelog
+- All notable changes to this project will be documented CHANGELOG.md.
+- The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+- and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Readme
+- Location: `README.md` in the project root.
+- Contains setup instructions, features, and usage details.
+- Any time project changes are made that impact the readme, update it accordingly.
+
 ## Architecture
 
 ### Core Services (4 components)

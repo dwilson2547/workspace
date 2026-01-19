@@ -90,11 +90,11 @@ input, textarea, select {
   display: flex;
   flex-direction: column;
   position: fixed;
-  top: 65px;
   left: 0;
+  top: 65px;
   height: calc(100vh - 65px);
-  overflow-y: auto;
-  position: relative;
+  overflow-y: hidden;
+  z-index: 40;
 }
 
 .sidebar-resize-handle {
@@ -126,6 +126,7 @@ input, textarea, select {
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-footer {
@@ -136,8 +137,9 @@ input, textarea, select {
 .main-content {
   flex: 1;
   margin-left: 0px;
-  margin-top: 65px;
   min-height: calc(100vh - 65px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Buttons */
@@ -597,8 +599,10 @@ input, textarea, select {
 
 /* Page content styling */
 .page-content {
-  margin: 0 auto;
+  margin: 0 0;
   padding: 2rem;
+  /* max-width: 1200px; */
+  width: 100%;
 }
 
 .page-header {

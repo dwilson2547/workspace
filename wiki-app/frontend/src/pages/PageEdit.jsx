@@ -3,6 +3,7 @@ import { useParams, useOutletContext, useNavigate, Link } from 'react-router-dom
 import { Save, X, ChevronRight, Upload, Paperclip, Trash2 } from 'lucide-react';
 import { pagesAPI, attachmentsAPI } from '../services/api';
 import MarkdownEditor from '../components/MarkdownEditor';
+import TagManager from '../components/TagManager';
 
 export default function PageEdit() {
   const { wikiId, pageId } = useParams();
@@ -140,14 +141,23 @@ export default function PageEdit() {
             Cancel
           </button>
           
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Page title"
-            className="form-input"
-            style={{ fontSize: '1.25rem', fontWeight: 600, maxWidth: 400 }}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, maxWidth: 600 }}>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Page title"
+              className="form-input"
+              style={{ fontSize: '1.25rem', fontWeight: 600 }}
+            />
+            {page && (
+              <TagManager
+                wikiId={wikiId}
+                pageId={pageId}
+                initialTags={page.tags || []}
+              />
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

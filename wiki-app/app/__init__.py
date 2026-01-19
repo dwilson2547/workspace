@@ -49,7 +49,8 @@ def create_app(config_name: str = None) -> Flask:
     
     # Register blueprints
     from app.routes import (auth_bp, wikis_bp, pages_bp, attachments_bp, 
-                           search_bp, semantic_search_bp, bulk_import_bp, admin_bp)
+                           search_bp, semantic_search_bp, bulk_import_bp, admin_bp,
+                           tags_bp, page_tags_bp)
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(wikis_bp)
@@ -59,6 +60,8 @@ def create_app(config_name: str = None) -> Flask:
     app.register_blueprint(semantic_search_bp)
     app.register_blueprint(bulk_import_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(tags_bp)
+    app.register_blueprint(page_tags_bp)
     
     # JWT error handlers
     @jwt.expired_token_loader
@@ -102,7 +105,7 @@ def create_app(config_name: str = None) -> Flask:
     # Health check endpoint
     @app.route('/api/health')
     def health_check():
-        return jsonify({'status': 'healthy', 'version': '1.0.0'}), 200
+        return jsonify({'status': 'healthy', 'version': '1.1.0'}), 200
     
     # Error handlers
     @app.errorhandler(404)

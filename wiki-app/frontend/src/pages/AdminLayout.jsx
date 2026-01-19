@@ -217,6 +217,8 @@ export default function AdminLayout() {
         {/* Main content */}
         <main className="main-content" style={{
         //   marginLeft: sidebarOpen ? `${sidebarWidth}px` : '0',
+          marginLeft: sidebarOpen ? `${sidebarWidth}px` : '0',
+          width: sidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
           transition: isResizing ? 'none' : 'margin-left 0.2s ease',
           marginTop: '65px'
         }}>

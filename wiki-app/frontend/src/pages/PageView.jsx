@@ -13,6 +13,7 @@ import codeSyntaxHighlight from '@toast-ui/editor-plugin-code-syntax-highlight';
 import '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css';
 import Prism from 'prismjs';
 import '../styles/prism-theme.css';
+import TagManager from '../components/TagManager';
 
 // Import base dependencies first
 import 'prismjs/components/prism-clike';
@@ -278,13 +279,15 @@ export default function PageView() {
           <h1 className="page-title">{page.title}</h1>
           
           <div className="flex gap-2">
-            <Link 
-              to={`/wiki/${wikiId}/page/${pageId}/edit`}
-              className="btn btn-primary"
-            >
-              <Edit size={16} />
-              Edit
-            </Link>
+            <div className=''>
+              <Link 
+                to={`/wiki/${wikiId}/page/${pageId}/edit`}
+                className="btn btn-primary"
+              >
+                <Edit size={16} />
+                Edit
+              </Link>
+            </div>
             
             <div className="dropdown">
               <button 
@@ -350,6 +353,18 @@ export default function PageView() {
               {attachments.length} attachment{attachments.length !== 1 ? 's' : ''}
             </button>
           )}
+        </div>
+
+        {/* Tags Section */}
+        <div className="mt-3">
+          <TagManager
+            wikiId={wikiId}
+            pageId={pageId}
+            initialTags={page.tags || []}
+            onTagsChange={(updatedTags) => {
+              setPage({ ...page, tags: updatedTags });
+            }}
+          />
         </div>
       </div>
 

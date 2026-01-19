@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-01-19
+
+### Fixed
+- **Layout & Scrolling**: Fixed main content and sidebar layout issues
+  - Fixed main content width calculation to properly account for resizable sidebar
+  - Made sidebar fixed position for consistent visibility across all pages
+  - Implemented independent scrolling for sidebar and main content areas
+  - Added responsive max-width (1200px) to page content for optimal readability
+  - Prevented content overflow that was hiding the sidebar
+  - Improved smooth transitions when toggling or resizing sidebar
+
+## [1.1.0] - 2026-01-18
+
+### Added
+- **Tag Management System**: Full-featured tagging system for wiki pages
+  - Create, edit, and delete tags with custom colors
+  - Add and remove tags from pages in both view and edit modes
+  - Visual tag badges with color customization
+  - Reusable TagManager React component
+  - Tag API endpoints for CRUD operations
+  - Page-level tag associations with many-to-many relationship
+  - Random color picker for new tags
+  - Real-time tag updates without page refresh
+  
+- **AI Tag Tracking**: Comprehensive metadata for automated tagging systems
+  - `source` field to distinguish human/AI/automated/imported tags
+  - `auto_generated` boolean flag for quick filtering
+  - `confidence` score (0.0-1.0) for AI-generated tags
+  - `model_name` field to track which AI model/version created tags
+  - `verified` status for human review of AI tags
+  - `verified_by_id` and `verified_at` for audit trail
+  - Visual indicators: Bot icon for AI tags, User icon for human tags, Check icon for verified tags
+  - Tag verification endpoint for human-in-the-loop workflows
+  - Hover tooltips showing confidence scores and model information
+  - Database migration for new tag tracking fields
+  
+- **Tag UI Features**:
+  - Existing tag selection dropdown with color-coded buttons
+  - New tag creation form with color picker
+  - Tag removal with confirmation
+  - Permission-based editing (editors can modify, viewers see read-only)
+  - Dark theme support for all tag components
+  - AI/automation badges and verification indicators
+  - Dedicated tag styling with special borders for AI-generated tags
+  
+- **Documentation**: AI Tagging Integration Guide
+  - Comprehensive guide for integrating tagging microservices
+  - API usage examples for AI tag generation
+  - Best practices for confidence thresholds and verification
+  - Example tagging service implementation
+  - Database schema reference
+  - Future enhancement suggestions
+
+### Changed
+- **Tag Model**: Extended Tag model with AI/automation tracking fields
+- **API Routes**: Enhanced tag routes to handle AI metadata in create/update operations
+- **Frontend Components**: Updated PageView and PageEdit to include tag management
+
 ## [Unreleased]
 
 ### Added

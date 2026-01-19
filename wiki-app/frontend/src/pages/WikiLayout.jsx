@@ -199,8 +199,7 @@ export default function WikiLayout() {
       <aside className={`sidebar ${sidebarOpen ? '' : 'hidden'}`} style={{
         width: `${sidebarWidth}px`,
         transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: isResizing ? 'none' : 'transform 0.2s ease',
-        top: '65px'
+        transition: isResizing ? 'none' : 'transform 0.2s ease'
       }}>
         <div className="sidebar-header">
           <h2 className="font-semibold" style={{ fontSize: '1.125rem', marginBottom: '1rem' }}>
@@ -229,9 +228,9 @@ export default function WikiLayout() {
 
       {/* Main content */}
       <main className="main-content" style={{
-        // marginLeft: sidebarOpen ? `${sidebarWidth}px` : '0',
-        transition: isResizing ? 'none' : 'margin-left 0.2s ease',
-        marginTop: '65px'
+        marginLeft: sidebarOpen ? `${sidebarWidth}px` : '0',
+        width: sidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
+        transition: isResizing ? 'none' : 'margin-left 0.2s ease, width 0.2s ease'
       }}>
         <Outlet context={{ wiki, pages, refreshPages }} />
       </main>

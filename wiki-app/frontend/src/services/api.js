@@ -151,6 +151,20 @@ export const searchAPI = {
     api.get('/search/hybrid', { params: { q: query, wiki_id: wikiId, limit, semantic_weight: semanticWeight } }),
 };
 
+// Tags API
+export const tagsAPI = {
+  list: (wikiId) => api.get(`/wikis/${wikiId}/tags`),
+  create: (wikiId, data) => api.post(`/wikis/${wikiId}/tags`, data),
+  update: (wikiId, tagId, data) => api.patch(`/wikis/${wikiId}/tags/${tagId}`, data),
+  delete: (wikiId, tagId) => api.delete(`/wikis/${wikiId}/tags/${tagId}`),
+  verify: (wikiId, tagId) => api.post(`/wikis/${wikiId}/tags/${tagId}/verify`),
+  
+  // Page tags
+  getPageTags: (wikiId, pageId) => api.get(`/wikis/${wikiId}/pages/${pageId}/tags`),
+  addTagToPage: (wikiId, pageId, tagId) => api.post(`/wikis/${wikiId}/pages/${pageId}/tags/${tagId}`),
+  removeTagFromPage: (wikiId, pageId, tagId) => api.delete(`/wikis/${wikiId}/pages/${pageId}/tags/${tagId}`),
+};
+
 // Admin API
 export const adminAPI = {
   getStats: () => api.get('/admin/stats'),
