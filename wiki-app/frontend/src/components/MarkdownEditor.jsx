@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
@@ -39,14 +39,14 @@ import 'prismjs/components/prism-git';
 
 import { attachmentsAPI } from '../services/api';
 
-export default function MarkdownEditor({ 
+const MarkdownEditor = forwardRef(function MarkdownEditor({ 
   wikiId, 
   pageId, 
   initialValue = '', 
   onChange,
   height = '500px',
   placeholder = 'Start writing...'
-}) {
+}, ref) {
   const editorRef = useRef(null);
   const { theme } = useTheme();
 
@@ -133,6 +133,50 @@ export default function MarkdownEditor({
     }
   }, [onChange]);
 
+  // Add auth tokens to attachment images in preview
+  useEffect(() => {
+    const addTokenToPreviewImages = () => {
+      const editorInstance = editorRef.current?.getInstance();
+      if (!editorInstance) return;
+
+      const previewEl = editorInstance.getEditorElements()?.preview;
+      if (!previewEl) return;
+
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        const images = previewEl.querySelectorAll('img[src*="/api/attachments/"]');
+        images.forEach(img => {
+          const src = img.getAttribute('src');
+          if (src && !src.includes('token=')) {
+            const separator = src.includes('?') ? '&' : '?';
+            img.setAttribute('src', `${src}${separator}token=${encodeURIComponent(token)}`);
+          }
+        });
+      }
+    };
+
+    // Set up a mutation observer to watch for changes in the preview pane
+    const editorInstance = editorRef.current?.getInstance();
+    if (editorInstance) {
+      const previewEl = editorInstance.getEditorElements()?.preview;
+      if (previewEl) {
+        const observer = new MutationObserver(() => {
+          addTokenToPreviewImages();
+        });
+
+        observer.observe(previewEl, {
+          childList: true,
+          subtree: true
+        });
+
+        // Initial processing
+        addTokenToPreviewImages();
+
+        return () => observer.disconnect();
+      }
+    }
+  }, []);
+
   // Get markdown content
   const getMarkdown = useCallback(() => {
     const editorInstance = editorRef.current?.getInstance();
@@ -147,13 +191,20 @@ export default function MarkdownEditor({
     }
   }, []);
 
-  // Expose methods via ref
-  useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.getMarkdown = getMarkdown;
-      editorRef.current.setMarkdown = setMarkdown;
+  // Insert text at cursor position
+  const insertText = useCallback((text) => {
+    const editorInstance = editorRef.current?.getInstance();
+    if (editorInstance) {
+      editorInstance.insertText(text);
     }
-  }, [getMarkdown, setMarkdown]);
+  }, []);
+
+  // Expose methods via imperative handle
+  useImperativeHandle(ref, () => ({
+    getMarkdown,
+    setMarkdown,
+    insertText
+  }), [getMarkdown, setMarkdown, insertText]);
 
   return (
     <Editor
@@ -186,4 +237,6 @@ export default function MarkdownEditor({
       }}
     />
   );
-}
+});
+
+export default MarkdownEditor;

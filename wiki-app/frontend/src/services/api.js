@@ -131,8 +131,14 @@ export const attachmentsAPI = {
   },
   get: (attachmentId) => api.get(`/attachments/${attachmentId}`),
   delete: (attachmentId) => api.delete(`/attachments/${attachmentId}`),
-  getDownloadUrl: (attachmentId) => `/api/attachments/${attachmentId}/download`,
-  getViewUrl: (attachmentId) => `/api/attachments/${attachmentId}/view`,
+  getDownloadUrl: (attachmentId) => {
+    const token = localStorage.getItem('access_token');
+    return `/api/attachments/${attachmentId}/download${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  },
+  getViewUrl: (attachmentId) => {
+    const token = localStorage.getItem('access_token');
+    return `/api/attachments/${attachmentId}/view${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  },
 };
 
 // Search API

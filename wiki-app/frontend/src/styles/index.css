@@ -273,7 +273,7 @@ input, textarea, select {
 }
 
 .page-tree-item {
-  margin-bottom: 0.25rem;
+  /* margin-bottom: 0.25rem; */
 }
 
 .page-tree-link {
@@ -298,7 +298,7 @@ input, textarea, select {
 }
 
 .page-tree-children {
-  margin-left: 1.25rem;
+  margin-left: 0.5rem;
   padding-left: 0.75rem;
   border-left: 1px solid var(--border);
 }

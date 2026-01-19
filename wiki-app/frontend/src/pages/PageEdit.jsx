@@ -23,6 +23,7 @@ export default function PageEdit() {
   const [uploading, setUploading] = useState(false);
   
   const fileInputRef = useRef(null);
+  const editorRef = useRef(null);
 
   useEffect(() => {
     loadPage();
@@ -183,6 +184,7 @@ export default function PageEdit() {
       {/* Editor */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <MarkdownEditor
+          ref={editorRef}
           wikiId={parseInt(wikiId)}
           pageId={parseInt(pageId)}
           initialValue={content}
@@ -306,7 +308,24 @@ export default function PageEdit() {
                             onClick={() => {
                               const url = `/api/attachments/${att.id}/view`;
                               const markdown = `![${att.filename}](${url})`;
-                              setContent(prev => prev + '\n' + markdown);
+                              if (editorRef.current?.insertText) {
+                                editorRef.current.insertText('\n' + markdown + '\n');
+                              }
+                              setShowAttachments(false);
+                            }}
+                          >
+                            Insert
+                          </button>
+                        )}
+                        {att.file_type !== 'image' && (
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => {
+                              const url = `/api/attachments/${att.id}/download`;
+                              const markdown = `[${att.filename}](${url})`;
+                              if (editorRef.current?.insertText) {
+                                editorRef.current.insertText('\n' + markdown + '\n');
+                              }
                               setShowAttachments(false);
                             }}
                           >

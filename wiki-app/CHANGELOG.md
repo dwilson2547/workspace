@@ -5,6 +5,94 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-01-19
+
+### Added
+- **AI Tagging Microservice**: GPU-enabled FastAPI service for automated wiki page tagging using local LLMs
+  - Standalone microservice running on GPU-enabled machines with HTTP/REST API
+  - Gemma 2 2B model support with 4-bit quantization (configurable to other models up to 70B)
+  - Bearer token authentication for all endpoints
+  - Hybrid tag generation: LLM-based contextual analysis + semantic matching against existing tags
+  - Sentence transformers for tag similarity matching to prevent tag proliferation
+  - Four specialized prompt templates: detailed, quick, technical, and general
+  - Synchronous `/analyze` endpoint for real-time tag generation
+  - Asynchronous `/analyze/batch` endpoint for bulk processing via Redis Queue
+  - Integration with existing RQ infrastructure using new `tagging` queue
+  - Persistent job queue that survives service restarts
+  - Support for multiple worker instances on different GPU machines
+  - Confidence scoring (0.0-1.0) for each suggested tag
+  - Category classification (technology, concept, domain, level, type, platform)
+  - Tag embedding cache for faster similarity matching
+  - GPU memory tracking and health monitoring
+  - `/health` endpoint with GPU utilization metrics
+  - `/info` endpoint with model capabilities and configuration details
+  - `/jobs/{job_id}` endpoint for batch job status tracking
+  - Comprehensive error handling and retry logic
+  - Configurable via environment variables for easy model swapping
+  - Complete API documentation via FastAPI's built-in Swagger UI
+  
+- **Tagging Service Components**:
+  - `tagging_api/app.py`: FastAPI application with authentication and endpoints
+  - `tagging_api/worker.py`: RQ worker for background batch processing
+  - `tagging_api/config.py`: Environment-based configuration management
+  - `tagging_api/models.py`: Pydantic models for request/response validation
+  - `tagging_api/llm_service.py`: LLM loading, inference, and tag generation logic
+  - `tagging_api/prompts/`: Modular prompt template system with registry
+  - `tagging_api/requirements.txt`: All dependencies including transformers, FastAPI, RQ
+  - `tagging_api/.env.example`: Comprehensive configuration template
+  - `tagging_api/README_QUICK.md`: Quick start guide
+  - `tagging_api/readme.md`: Full requirements and architecture documentation
+
+- **Documentation**:
+  - Comprehensive requirements document covering architecture, API design, model options, deployment
+  - 8 recommended model options ranked by size (2B to 70B parameters)
+  - Prompt engineering guidelines and templates
+  - Integration patterns with wiki application
+  - Performance targets and monitoring recommendations
+  - Security considerations and best practices
+  - Development roadmap with phased implementation plan
+
+### Technical
+- **Model Support**: Gemma 2 2B (default), Phi-3 Mini, Gemma 2 9B, Llama 3.1, Mistral 7B, and more
+- **Quantization**: 4-bit and 8-bit quantization support via BitsAndBytes
+- **Hardware Requirements**: 8GB+ VRAM for small models, 40GB+ for large models
+- **Queue Architecture**: Persistent Redis Queue with FIFO ordering and automatic retry
+- **Caching Strategy**: Tag embedding cache with configurable TTL
+- **Resource Management**: One request per worker to prevent GPU OOM
+- **Dependencies**: torch, transformers, accelerate, bitsandbytes, sentence-transformers, FastAPI, RQ
+
+## [1.1.3] - 2026-01-19
+
+### Added
+- **404 Not Found Page**: User-friendly error page for broken or invalid links
+  - Custom NotFound component with helpful messaging and navigation options
+  - "Go Back" button to return to previous page
+  - "Go to Home" button for quick navigation to homepage
+  - Helpful tips section explaining common causes and solutions
+  - Consistent styling with existing design system using CSS variables
+  - Replaces generic redirect behavior for better user experience
+  - Handles broken wiki links and non-existent page routes gracefully
+
+## [1.1.2] - 2026-01-19
+
+### Fixed
+- **Attachment Viewing Authentication**: Fixed 401 UNAUTHORIZED errors when viewing uploaded images
+  - Modified `/api/attachments/<id>/view` and `/api/attachments/<id>/download` endpoints to support optional JWT authentication
+  - Added query parameter authentication fallback (`?token=...`) for browser image requests
+  - Public wiki attachments now viewable without authentication
+  - Frontend dynamically adds auth tokens to attachment URLs after rendering
+  - Implemented post-processing in PageView to append tokens to `<img>` tags
+  - Added MutationObserver in MarkdownEditor to handle preview pane images
+  - Stored markdown remains clean without embedded tokens (prevents token expiration issues)
+
+- **Attachment Insert Button**: Fixed non-functional insert button in attachments modal during page editing
+  - Converted MarkdownEditor to forwardRef component with useImperativeHandle
+  - Added `insertText()` method to insert markdown at current cursor position
+  - Fixed insert button to properly interact with Toast UI Editor instance instead of React state
+  - Added insert functionality for non-image attachments (creates download links)
+  - Image attachments insert as `![filename](url)`, other files as `[filename](url)`
+  - Modal automatically closes after successful insertion
+
 ## [1.1.1] - 2026-01-19
 
 ### Fixed

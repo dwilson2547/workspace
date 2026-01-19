@@ -15,13 +15,14 @@ function PageTreeItem({ page, wikiId, level = 0 }) {
           <button
             className="btn btn-ghost btn-icon btn-sm"
             onClick={() => setExpanded(!expanded)}
-            style={{ marginLeft: level * 8 }}
+            // style={{ marginLeft: level * 8 }}
           >
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </button>
         )}
         {!hasChildren && (
-          <span style={{ width: 28, marginLeft: level * 8 }} />
+          // <span style={{ width: 28, marginLeft: level * 8 }} />
+          <span style={{ width: 28 }} />
         )}
         <Link
           to={`/wiki/${wikiId}/page/${page.id}`}

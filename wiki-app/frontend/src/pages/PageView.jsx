@@ -76,6 +76,28 @@ export default function PageView() {
         .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
     };
 
+    // Add auth token to attachment image URLs
+    const addTokenToAttachmentImages = () => {
+      const contentDiv = viewerRef.current?.querySelector('.toastui-editor-contents') || 
+                        document.querySelector('.toastui-editor-contents');
+      
+      if (contentDiv) {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          // Find all images with attachment URLs
+          const images = contentDiv.querySelectorAll('img[src*="/api/attachments/"]');
+          images.forEach(img => {
+            const src = img.getAttribute('src');
+            // Only add token if not already present
+            if (src && !src.includes('token=')) {
+              const separator = src.includes('?') ? '&' : '?';
+              img.setAttribute('src', `${src}${separator}token=${encodeURIComponent(token)}`);
+            }
+          });
+        }
+      }
+    };
+
     const handleAnchorClick = (e) => {
       // Check if clicked element is an anchor link
       const link = e.target.closest('a[href^="#"]');
@@ -125,6 +147,9 @@ export default function PageView() {
 
         // Add click handler for anchor links
         contentDiv.addEventListener('click', handleAnchorClick, true);
+        
+        // Add auth tokens to attachment images
+        addTokenToAttachmentImages();
         
         // Handle URL hash on initial load
         const hash = window.location.hash;

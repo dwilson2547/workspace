@@ -19,6 +19,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import UserManagement from './pages/UserManagement';
 import EmbeddingsManagement from './pages/EmbeddingsManagement';
 import WikiManagement from './pages/WikiManagement';
+import NotFound from './pages/NotFound';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -128,8 +129,8 @@ function AppRoutes() {
         <Route path="embeddings" element={<EmbeddingsManagement />} />
       </Route>
       
-      {/* Catch all - redirect to home */}
-      <Route path="*" element={<Navigate to="/" />} />
+      {/* 404 Not Found - catch all unmatched routes */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

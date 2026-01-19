@@ -14,6 +14,12 @@ This is a full-stack AI-powered wiki application with semantic search capabiliti
 - Contains setup instructions, features, and usage details.
 - Any time project changes are made that impact the readme, update it accordingly.
 
+## Large Feature Documentation
+- Major features (e.g., AI semantic search, embedding service) have dedicated docs in `large-feature-documentation/`.
+- These documents provide in-depth explanations, architecture diagrams, and design decisions.
+- Update these docs when significant changes are made to the respective features.
+- When starting on new large features, add a new markdown file in that directory.
+
 ## Architecture
 
 ### Core Services (4 components)
@@ -82,6 +88,7 @@ This is a full-stack AI-powered wiki application with semantic search capabiliti
 - `app/config.py` - Flask config classes
 - `.env` - Environment variables (not in git)
 - `.env.example` - Template for env vars
+- `.env.docker` - Template for docker local development env vars
 - `docker-compose.yml` - Database and Redis setup
 
 ### Models & Database

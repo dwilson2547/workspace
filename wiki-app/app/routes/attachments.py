@@ -170,20 +170,50 @@ def get_attachment_info(attachment_id):
 
 
 @attachments_bp.route('/api/attachments/<int:attachment_id>/download', methods=['GET'])
-@jwt_required()
+@jwt_required(optional=True)
 def download_attachment(attachment_id):
     """Download an attachment file."""
-    current_user_id = int(get_jwt_identity())
+    from flask_jwt_extended import verify_jwt_in_request
+    from jwt.exceptions import DecodeError
+    
+    # Try to get user from JWT (either from header or query param)
+    current_user_id = None
+    try:
+        # First try Authorization header
+        identity = get_jwt_identity()
+        if identity:
+            current_user_id = int(identity)
+    except Exception:
+        # If header auth fails, try query parameter
+        token = request.args.get('token')
+        if token:
+            try:
+                from flask_jwt_extended import decode_token
+                decoded = decode_token(token)
+                current_user_id = int(decoded['sub'])
+            except Exception:
+                pass
+    
     attachment = Attachment.query.get(attachment_id)
     
     if not attachment:
         return jsonify({'error': 'Attachment not found'}), 404
     
     page = attachment.page
-    _, error = check_page_access(page.wiki_id, page.id, current_user_id)
+    wiki = page.wiki
     
-    if error:
-        return jsonify({'error': error}), 403
+    # Check access - allow public wiki access without authentication
+    if wiki.is_public:
+        # Public wikis allow downloading attachments without authentication
+        pass
+    elif current_user_id:
+        # Authenticated user - check permissions
+        _, error = check_page_access(page.wiki_id, page.id, current_user_id)
+        if error:
+            return jsonify({'error': error}), 403
+    else:
+        # No authentication and not public
+        return jsonify({'error': 'Authentication required'}), 401
     
     if not os.path.exists(attachment.file_path):
         return jsonify({'error': 'File not found on server'}), 404
@@ -197,20 +227,50 @@ def download_attachment(attachment_id):
 
 
 @attachments_bp.route('/api/attachments/<int:attachment_id>/view', methods=['GET'])
-@jwt_required()
+@jwt_required(optional=True)
 def view_attachment(attachment_id):
     """View an attachment inline (for images, PDFs, etc.)."""
-    current_user_id = int(get_jwt_identity())
+    from flask_jwt_extended import verify_jwt_in_request
+    from jwt.exceptions import DecodeError
+    
+    # Try to get user from JWT (either from header or query param)
+    current_user_id = None
+    try:
+        # First try Authorization header
+        identity = get_jwt_identity()
+        if identity:
+            current_user_id = int(identity)
+    except Exception:
+        # If header auth fails, try query parameter
+        token = request.args.get('token')
+        if token:
+            try:
+                from flask_jwt_extended import decode_token
+                decoded = decode_token(token)
+                current_user_id = int(decoded['sub'])
+            except Exception:
+                pass
+    
     attachment = Attachment.query.get(attachment_id)
     
     if not attachment:
         return jsonify({'error': 'Attachment not found'}), 404
     
     page = attachment.page
-    _, error = check_page_access(page.wiki_id, page.id, current_user_id)
+    wiki = page.wiki
     
-    if error:
-        return jsonify({'error': error}), 403
+    # Check access - allow public wiki access without authentication
+    if wiki.is_public:
+        # Public wikis allow viewing attachments without authentication
+        pass
+    elif current_user_id:
+        # Authenticated user - check permissions
+        _, error = check_page_access(page.wiki_id, page.id, current_user_id)
+        if error:
+            return jsonify({'error': error}), 403
+    else:
+        # No authentication and not public
+        return jsonify({'error': 'Authentication required'}), 401
     
     if not os.path.exists(attachment.file_path):
         return jsonify({'error': 'File not found on server'}), 404
