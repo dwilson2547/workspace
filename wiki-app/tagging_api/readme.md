@@ -670,35 +670,35 @@ services:
 
 ## Development Roadmap
 
-### Phase 1: MVP (Current Scope)
-- [ ] FastAPI application structure
-- [ ] Authentication middleware
-- [ ] `/analyze` synchronous endpoint
-- [ ] Basic LLM integration (Gemma 2B)
-- [ ] Prompt engineering
-- [ ] Response formatting
-- [ ] Error handling
-- [ ] Logging setup
+### Phase 1: MVP ✅ **COMPLETE**
+- [x] FastAPI application structure
+- [x] Authentication middleware
+- [x] `/analyze` synchronous endpoint
+- [x] Basic LLM integration (Gemma 2B)
+- [x] Prompt engineering (4 templates: detailed, quick, technical, general)
+- [x] Response formatting
+- [x] Error handling
+- [x] Logging setup
 
-### Phase 2: Queue Integration
-- [ ] Redis Queue setup
-- [ ] `/analyze/batch` endpoint
-- [ ] RQ worker implementation
-- [ ] Job status tracking
-- [ ] Retry logic
-- [ ] Job results storage
+### Phase 2: Queue Integration ✅ **COMPLETE**
+- [x] Redis Queue setup
+- [x] `/analyze/batch` endpoint
+- [x] RQ worker implementation
+- [x] Job status tracking
+- [x] Retry logic
+- [x] Job results storage
 
-### Phase 3: Production Readiness
+### Phase 3: Production Readiness 🚧 **IN PROGRESS**
 - [ ] Docker containerization
-- [ ] Environment configuration
-- [ ] Health checks
-- [ ] Metrics/monitoring
-- [ ] API documentation (Swagger)
+- [x] Environment configuration
+- [x] Health checks
+- [ ] Metrics/monitoring (logging implemented, metrics TBD)
+- [x] API documentation (Swagger auto-generated at /docs)
 - [ ] Performance optimization
 
-### Phase 4: Advanced Features
-- [ ] Multiple model support
-- [ ] Tag caching strategy
+### Phase 4: Advanced Features 📋 **PLANNED**
+- [ ] Multiple model support (configurable via env, no runtime switching yet)
+- [x] Tag caching strategy (embedding cache implemented)
 - [ ] Webhook callbacks
 - [ ] Model swapping API
 - [ ] Fine-tuning capabilities
