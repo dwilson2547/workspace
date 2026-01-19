@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { User, Settings, LogOut, Sun, Moon, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -108,6 +108,30 @@ export default function UserMenu() {
           </div>
 
           <div style={{ padding: '0.5rem 0' }}>
+            {user.is_admin && (
+              <Link
+                to="/admin"
+                className="dropdown-item"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.625rem 1rem',
+                  color: 'var(--primary)',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  transition: 'background 0.15s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--hover)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <Shield size={16} />
+                <span>Admin Panel</span>
+              </Link>
+            )}
+            
             <Link
               to="/settings"
               className="dropdown-item"

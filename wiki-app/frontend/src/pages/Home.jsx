@@ -45,7 +45,10 @@ export default function Home() {
       <header style={{ 
         borderBottom: '1px solid var(--border)',
         background: 'var(--card)',
-        padding: '1rem 0'
+        padding: '1rem 0',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
           <div className="flex justify-between items-center">

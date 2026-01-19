@@ -36,6 +36,40 @@ page_schema = PageSchema()
 page_update_schema = PageUpdateSchema()
 
 
+def generate_unique_slug(wiki_id: int, base_title: str, parent_id: int = None, exclude_page_id: int = None) -> str:
+    """Generate a unique slug for a page within a wiki.
+    
+    Note: Slugs must be unique across the entire wiki, not just within the same parent,
+    due to the database constraint on (wiki_id, slug).
+    
+    Args:
+        wiki_id: The wiki ID
+        base_title: The title to generate slug from
+        parent_id: Optional parent page ID (not used for uniqueness check, kept for API compatibility)
+        exclude_page_id: Optional page ID to exclude from uniqueness check (for updates)
+    
+    Returns:
+        A unique slug string
+    """
+    base_slug = slugify(base_title)
+    slug = base_slug
+    counter = 1
+    
+    # Check if slug already exists anywhere in this wiki
+    while True:
+        query = Page.query.filter_by(wiki_id=wiki_id, slug=slug)
+        if exclude_page_id:
+            query = query.filter(Page.id != exclude_page_id)
+        
+        if not query.first():
+            break
+            
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+    
+    return slug
+
+
 def check_wiki_access(wiki_id: int, user_id: int, require_edit: bool = False) -> tuple[Wiki | None, str | None]:
     """Check if user has access to a wiki. Returns (wiki, error_message)."""
     wiki = Wiki.query.get(wiki_id)
@@ -113,20 +147,16 @@ def create_page(wiki_id):
     except ValidationError as err:
         return jsonify({'error': 'Validation failed', 'details': err.messages}), 400
     
-    # Generate slug if not provided
-    slug = data.get('slug') or slugify(data['title'])
-    
-    # Check for duplicate slug in this wiki
-    existing = Page.query.filter_by(wiki_id=wiki_id, slug=slug).first()
-    if existing:
-        return jsonify({'error': 'A page with this slug already exists in this wiki'}), 409
-    
     # Validate parent_id if provided
     parent_id = data.get('parent_id')
     if parent_id:
         parent = Page.query.filter_by(id=parent_id, wiki_id=wiki_id).first()
         if not parent:
             return jsonify({'error': 'Parent page not found in this wiki'}), 404
+    
+    # Generate unique slug (use provided slug if given, otherwise generate from title)
+    base_title = data.get('slug') or data['title']
+    slug = generate_unique_slug(wiki_id, base_title, parent_id)
     
     page = Page(
         title=data['title'],
@@ -256,11 +286,9 @@ def update_page(wiki_id, page_id):
     if 'sort_order' in data:
         page.sort_order = data['sort_order']
     if 'slug' in data:
-        # Check for conflicts
-        existing = Page.query.filter_by(wiki_id=wiki_id, slug=data['slug']).first()
-        if existing and existing.id != page_id:
-            return jsonify({'error': 'Slug already in use'}), 409
-        page.slug = data['slug']
+        # Generate unique slug if the requested one conflicts
+        new_slug = generate_unique_slug(wiki_id, data['slug'], page.parent_id, exclude_page_id=page_id)
+        page.slug = new_slug
     
     # Handle parent change
     if 'parent_id' in data:

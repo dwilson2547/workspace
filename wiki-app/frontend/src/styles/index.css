@@ -94,6 +94,27 @@ input, textarea, select {
   left: 0;
   height: calc(100vh - 65px);
   overflow-y: auto;
+  position: relative;
+}
+
+.sidebar-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: ew-resize;
+  background: transparent;
+  transition: background 0.2s ease;
+  z-index: 10;
+}
+
+.sidebar-resize-handle:hover {
+  background: var(--primary);
+}
+
+.sidebar-resize-handle:active {
+  background: var(--primary);
 }
 
 .sidebar-header {
@@ -114,7 +135,7 @@ input, textarea, select {
 
 .main-content {
   flex: 1;
-  margin-left: 260px;
+  margin-left: 0px;
   margin-top: 65px;
   min-height: calc(100vh - 65px);
 }
@@ -327,7 +348,7 @@ input, textarea, select {
 }
 
 .search-results {
-  position: absolute;
+  /* position: absolute; */
   top: 100%;
   left: 0;
   right: 0;
@@ -353,6 +374,12 @@ input, textarea, select {
 
 .search-result-item:last-child {
   border-bottom: none;
+}
+
+.search-query-clear {
+  position: absolute;
+  right: 3px;
+  top: 3px;
 }
 
 /* Modal */

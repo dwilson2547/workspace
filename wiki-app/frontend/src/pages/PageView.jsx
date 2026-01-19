@@ -107,8 +107,7 @@ export default function PageView() {
       }
     };
 
-    // Add slight delay to ensure viewer is fully rendered
-    const timer = setTimeout(() => {
+    const processHeadings = () => {
       const contentDiv = viewerRef.current?.querySelector('.toastui-editor-contents') || 
                         document.querySelector('.toastui-editor-contents');
       
@@ -125,11 +124,50 @@ export default function PageView() {
 
         // Add click handler for anchor links
         contentDiv.addEventListener('click', handleAnchorClick, true);
+        
+        // Handle URL hash on initial load
+        const hash = window.location.hash;
+        if (hash) {
+          const targetId = hash.slice(1);
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            setTimeout(() => {
+              const header = document.querySelector('.wiki-header') || document.querySelector('header');
+              const headerHeight = header ? header.offsetHeight : 80;
+              const offset = headerHeight + 20;
+              
+              const elementPosition = targetElement.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.pageYOffset - offset;
+              
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+              });
+            }, 150);
+          }
+        }
+        
+        return true;
       }
-    }, 100);
+      return false;
+    };
+
+    // Try processing immediately
+    if (!processHeadings()) {
+      // If not ready, try again after a short delay
+      const timer = setTimeout(processHeadings, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        const contentDiv = viewerRef.current?.querySelector('.toastui-editor-contents') || 
+                          document.querySelector('.toastui-editor-contents');
+        if (contentDiv) {
+          contentDiv.removeEventListener('click', handleAnchorClick, true);
+        }
+      };
+    }
 
     return () => {
-      clearTimeout(timer);
       const contentDiv = viewerRef.current?.querySelector('.toastui-editor-contents') || 
                         document.querySelector('.toastui-editor-contents');
       if (contentDiv) {

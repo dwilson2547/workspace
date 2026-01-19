@@ -17,6 +17,11 @@ export default function WikiLayout() {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('wikiSidebarWidth');
+    return saved ? parseInt(saved, 10) : 260;
+  });
+  const [isResizing, setIsResizing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPage, setNewPage] = useState({ title: '', parent_id: null });
   const [creating, setCreating] = useState(false);
@@ -26,6 +31,39 @@ export default function WikiLayout() {
   useEffect(() => {
     loadWikiData();
   }, [wikiId]);
+
+  // Save sidebar width to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('wikiSidebarWidth', sidebarWidth.toString());
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing) return;
+      const newWidth = e.clientX;
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
 
   const loadWikiData = async () => {
     setLoading(true);
@@ -159,8 +197,9 @@ export default function WikiLayout() {
       <div className="app-layout">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? '' : 'hidden'}`} style={{
+        width: `${sidebarWidth}px`,
         transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform 0.2s ease',
+        transition: isResizing ? 'none' : 'transform 0.2s ease',
         top: '65px'
       }}>
         <div className="sidebar-header">
@@ -176,12 +215,22 @@ export default function WikiLayout() {
         <div className="sidebar-content">
           <PageTree pages={pages} wikiId={wikiId} />
         </div>
+        
+        {/* Resize handle */}
+        <div 
+          className="sidebar-resize-handle"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setIsResizing(true);
+          }}
+          title="Drag to resize sidebar"
+        />
       </aside>
 
       {/* Main content */}
       <main className="main-content" style={{
-        marginLeft: sidebarOpen ? '260px' : '0',
-        transition: 'margin-left 0.2s ease',
+        // marginLeft: sidebarOpen ? `${sidebarWidth}px` : '0',
+        transition: isResizing ? 'none' : 'margin-left 0.2s ease',
         marginTop: '65px'
       }}>
         <Outlet context={{ wiki, pages, refreshPages }} />

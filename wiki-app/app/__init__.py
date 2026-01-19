@@ -48,7 +48,8 @@ def create_app(config_name: str = None) -> Flask:
     app.config['UPLOAD_FOLDER'] = upload_folder
     
     # Register blueprints
-    from app.routes import auth_bp, wikis_bp, pages_bp, attachments_bp, search_bp, semantic_search_bp
+    from app.routes import (auth_bp, wikis_bp, pages_bp, attachments_bp, 
+                           search_bp, semantic_search_bp, bulk_import_bp, admin_bp)
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(wikis_bp)
@@ -56,6 +57,8 @@ def create_app(config_name: str = None) -> Flask:
     app.register_blueprint(attachments_bp)
     app.register_blueprint(search_bp)
     app.register_blueprint(semantic_search_bp)
+    app.register_blueprint(bulk_import_bp)
+    app.register_blueprint(admin_bp)
     
     # JWT error handlers
     @jwt.expired_token_loader

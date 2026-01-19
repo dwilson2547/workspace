@@ -47,18 +47,6 @@ export default function SemanticSearchPage() {
           <div style={{ width: '140px' }} /> {/* Spacer for centering */}
         </div>
 
-        {/* Info Banner */}
-        <div className="alert alert-info mb-6">
-          <Info size={20} />
-          <div>
-            <h4 className="font-semibold">How it works</h4>
-            <p className="text-sm">
-              AI Search understands the meaning of your query, not just keywords. 
-              Try asking questions naturally like "how to install dependencies" or "authentication setup".
-            </p>
-          </div>
-        </div>
-
         {/* Main Search Component */}
         <div className="card p-6">
           <SemanticSearch 
@@ -70,7 +58,7 @@ export default function SemanticSearchPage() {
           />
         </div>
 
-        {/* Feature Highlights */}
+        {/* Feature Highlights
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
           <div className="card p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -103,7 +91,7 @@ export default function SemanticSearchPage() {
           </div>
         </div>
 
-        {/* Tips Section */}
+        {/* Tips Section *
         <div className="card p-6 mt-8">
           <h3 className="text-xl font-bold mb-4">Search Tips</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -126,7 +114,7 @@ export default function SemanticSearchPage() {
               </ul>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

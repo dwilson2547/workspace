@@ -24,6 +24,10 @@ def get_accessible_wiki_ids(user_id: int) -> List[int]:
     if not user:
         return []
     
+    # Admins can access all wikis
+    if user.is_admin:
+        return [w.id for w in Wiki.query.all()]
+    
     # Get owned wikis
     owned_ids = [w.id for w in user.owned_wikis]
     

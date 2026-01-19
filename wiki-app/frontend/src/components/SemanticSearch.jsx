@@ -124,7 +124,7 @@ export default function SemanticSearch({
           />
           {query && (
             <button
-              className="btn btn-ghost btn-icon btn-sm"
+              className="btn btn-ghost btn-icon btn-sm search-query-clear"
               onClick={() => {
                 setQuery('');
                 setResults([]);

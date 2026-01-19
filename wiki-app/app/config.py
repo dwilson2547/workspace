@@ -24,7 +24,7 @@ class Config:
     
     # File upload configuration
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH = 500 * 1024 * 1024  # 500MB max file size for bulk imports
     ALLOWED_EXTENSIONS = {
         'images': {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'},
         'documents': {'pdf', 'doc', 'docx', 'txt', 'md', 'csv', 'xlsx'},

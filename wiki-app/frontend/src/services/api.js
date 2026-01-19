@@ -75,6 +75,21 @@ export const wikisAPI = {
   addMember: (wikiId, data) => api.post(`/wikis/${wikiId}/members`, data),
   updateMember: (wikiId, userId, data) => api.patch(`/wikis/${wikiId}/members/${userId}`, data),
   removeMember: (wikiId, userId) => api.delete(`/wikis/${wikiId}/members/${userId}`),
+  
+  // Bulk import
+  importArchive: (formData, onProgress) => {
+    return api.post('/wikis/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onProgress,
+    });
+  },
+  importToExisting: (wikiId, formData, onProgress) => {
+    return api.post(`/wikis/${wikiId}/import`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onProgress,
+    });
+  },
+  getPageTree: (wikiId) => api.get(`/wikis/${wikiId}/pages/tree`),
 };
 
 // Pages API
@@ -134,6 +149,25 @@ export const searchAPI = {
     api.get('/search/semantic', { params: { q: query, wiki_id: wikiId, limit, offset, threshold } }),
   hybridSearch: (query, wikiId = null, limit = 20, semanticWeight = 0.7) =>
     api.get('/search/hybrid', { params: { q: query, wiki_id: wikiId, limit, semantic_weight: semanticWeight } }),
+};
+
+// Admin API
+export const adminAPI = {
+  getStats: () => api.get('/admin/stats'),
+  listUsers: (params = {}) => api.get('/admin/users', { params }),
+  getUser: (userId) => api.get(`/admin/users/${userId}`),
+  updateUser: (userId, data) => api.patch(`/admin/users/${userId}`, data),
+  deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
+  
+  // Embeddings management
+  listPendingEmbeddings: (params = {}) => api.get('/admin/embeddings/pending', { params }),
+  generatePageEmbedding: (pageId) => api.post(`/admin/embeddings/generate/${pageId}`),
+  generateAllEmbeddings: (data = {}) => api.post('/admin/embeddings/generate-all', data),
+  
+  // Wiki management
+  listWikis: (params = {}) => api.get('/admin/wikis', { params }),
+  deleteWiki: (wikiId) => api.delete(`/admin/wikis/${wikiId}`),
+  transferWikiOwnership: (wikiId, data) => api.post(`/admin/wikis/${wikiId}/transfer`, data),
 };
 
 export default api;

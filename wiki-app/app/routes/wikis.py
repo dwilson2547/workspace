@@ -163,7 +163,8 @@ def get_wiki(wiki_id):
     
     # Check access
     user = User.query.get(current_user_id)
-    if not wiki.is_public and wiki.owner_id != current_user_id:
+    # Admins can access all wikis
+    if not user.is_admin and not wiki.is_public and wiki.owner_id != current_user_id:
         if not user.get_wiki_role(wiki_id):
             return jsonify({'error': 'Access denied'}), 403
     
@@ -182,7 +183,7 @@ def update_wiki(wiki_id):
         return jsonify({'error': 'Wiki not found'}), 404
     
     user = User.query.get(current_user_id)
-    if not user.can_admin_wiki(wiki_id):
+    if not user.is_admin and not user.can_admin_wiki(wiki_id):
         return jsonify({'error': 'Permission denied'}), 403
     
     data = request.get_json()
@@ -244,7 +245,7 @@ def list_members(wiki_id):
         return jsonify({'error': 'Wiki not found'}), 404
     
     user = User.query.get(current_user_id)
-    if wiki.owner_id != current_user_id and not user.get_wiki_role(wiki_id):
+    if not user.is_admin and wiki.owner_id != current_user_id and not user.get_wiki_role(wiki_id):
         return jsonify({'error': 'Access denied'}), 403
     
     # Get members with their roles
@@ -281,7 +282,7 @@ def add_member(wiki_id):
         return jsonify({'error': 'Wiki not found'}), 404
     
     current_user = User.query.get(current_user_id)
-    if not current_user.can_admin_wiki(wiki_id):
+    if not current_user.is_admin and not current_user.can_admin_wiki(wiki_id):
         return jsonify({'error': 'Permission denied'}), 403
     
     try:
@@ -318,7 +319,7 @@ def update_member(wiki_id, user_id):
         return jsonify({'error': 'Wiki not found'}), 404
     
     current_user = User.query.get(current_user_id)
-    if not current_user.can_admin_wiki(wiki_id):
+    if not current_user.is_admin and not current_user.can_admin_wiki(wiki_id):
         return jsonify({'error': 'Permission denied'}), 403
     
     member = User.query.get(user_id)
@@ -348,8 +349,8 @@ def remove_member(wiki_id, user_id):
         return jsonify({'error': 'Wiki not found'}), 404
     
     current_user = User.query.get(current_user_id)
-    # Allow self-removal or admin removal
-    if user_id != current_user_id and not current_user.can_admin_wiki(wiki_id):
+    # Allow self-removal, site admin, or wiki admin removal
+    if user_id != current_user_id and not current_user.is_admin and not current_user.can_admin_wiki(wiki_id):
         return jsonify({'error': 'Permission denied'}), 403
     
     member = User.query.get(user_id)

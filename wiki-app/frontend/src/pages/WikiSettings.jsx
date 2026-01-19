@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
-import { Save, UserPlus, Trash2, X } from 'lucide-react';
+import { Save, UserPlus, Trash2, X, Upload, FileArchive } from 'lucide-react';
 import { wikisAPI, searchAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
@@ -28,6 +28,16 @@ export default function WikiSettings() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [newMemberRole, setNewMemberRole] = useState('viewer');
   const [addingMember, setAddingMember] = useState(false);
+  
+  // Import state
+  const [showImport, setShowImport] = useState(false);
+  const [archiveFile, setArchiveFile] = useState(null);
+  const [pageTree, setPageTree] = useState([]);
+  const [selectedParentPage, setSelectedParentPage] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [importResult, setImportResult] = useState(null);
+  const [importError, setImportError] = useState('');
 
   useEffect(() => {
     if (wiki) {
@@ -134,6 +144,82 @@ export default function WikiSettings() {
       navigate('/');
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to delete wiki');
+    }
+  };
+  
+  const loadPageTree = async () => {
+    try {
+      const response = await wikisAPI.getPageTree(wikiId);
+      setPageTree(response.data.pages);
+    } catch (err) {
+      console.error('Failed to load page tree:', err);
+    }
+  };
+  
+  const handleShowImport = () => {
+    setShowImport(true);
+    loadPageTree();
+  };
+  
+  const handleArchiveFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validExtensions = ['.zip', '.tar', '.tar.gz', '.tgz'];
+      const fileName = file.name.toLowerCase();
+      const isValid = validExtensions.some(ext => fileName.endsWith(ext));
+      
+      if (!isValid) {
+        setImportError('Invalid file type. Please upload a .zip or .tar.gz file');
+        setArchiveFile(null);
+        return;
+      }
+      
+      const maxSize = 500 * 1024 * 1024;
+      if (file.size > maxSize) {
+        setImportError(`File too large. Maximum size is 500MB (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
+        setArchiveFile(null);
+        return;
+      }
+      
+      setArchiveFile(file);
+      setImportError('');
+    }
+  };
+  
+  const handleImport = async () => {
+    if (!archiveFile) return;
+    
+    setImporting(true);
+    setImportError('');
+    setImportResult(null);
+    
+    try {
+      const formData = new FormData();
+      formData.append('archive', archiveFile);
+      if (selectedParentPage) {
+        formData.append('parent_page_id', selectedParentPage.toString());
+      }
+      
+      const response = await wikisAPI.importToExisting(wikiId, formData, (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setUploadProgress(percentCompleted);
+      });
+      
+      setImportResult(response.data.import_result);
+      
+      // Reset form after short delay
+      setTimeout(() => {
+        setShowImport(false);
+        setArchiveFile(null);
+        setSelectedParentPage(null);
+        setUploadProgress(0);
+      }, 3000);
+    } catch (err) {
+      setImportError(err.response?.data?.error || 'Import failed');
+      setImportResult(err.response?.data?.details || null);
+    } finally {
+      setImporting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -283,6 +369,28 @@ export default function WikiSettings() {
         </div>
       </div>
 
+      {/* Import Section */}
+      {(isOwner || user?.can_edit_wiki?.(wikiId)) && (
+        <div className="card mb-6">
+          <div className="card-header flex justify-between items-center">
+            <h3 className="font-semibold">Import Pages from Archive</h3>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleShowImport}
+            >
+              <FileArchive size={16} />
+              Import Archive
+            </button>
+          </div>
+          <div className="card-body">
+            <p className="text-sm text-secondary">
+              Upload a .zip or .tar.gz archive containing markdown files and other assets. 
+              The directory structure will be preserved as page hierarchy, and non-markdown files will be imported as attachments.
+            </p>
+          </div>
+        </div>
+      )}
+
       {isOwner && (
         <div className="card" style={{ borderColor: 'var(--danger)' }}>
           <div className="card-header">
@@ -387,6 +495,143 @@ export default function WikiSettings() {
           </select>
         </div>
       </Modal>
+      
+      {/* Import Archive Modal */}
+      <Modal
+        isOpen={showImport}
+        onClose={() => {
+          setShowImport(false);
+          setArchiveFile(null);
+          setSelectedParentPage(null);
+          setImportError('');
+          setImportResult(null);
+          setUploadProgress(0);
+        }}
+        title="Import Pages from Archive"
+        footer={
+          <>
+            <button 
+              className="btn btn-secondary"
+              onClick={() => setShowImport(false)}
+              disabled={importing}
+            >
+              Cancel
+            </button>
+            <button 
+              className="btn btn-primary"
+              onClick={handleImport}
+              disabled={!archiveFile || importing}
+            >
+              {importing ? (uploadProgress > 0 ? `Importing... ${uploadProgress}%` : 'Processing...') : 'Import'}
+            </button>
+          </>
+        }
+      >
+        {importError && <div className="alert alert-error mb-4">{importError}</div>}
+        
+        {importResult && (
+          <div className={`alert ${importResult.failure_count > 0 ? 'alert-warning' : 'alert-success'} mb-4`}>
+            <strong>Import completed!</strong>
+            <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
+              <li>{importResult.success_count} pages imported successfully</li>
+              {importResult.attachments_created?.length > 0 && (
+                <li>{importResult.attachments_created.length} attachments imported</li>
+              )}
+              {importResult.failure_count > 0 && (
+                <li>{importResult.failure_count} items failed</li>
+              )}
+            </ul>
+            {importResult.errors?.length > 0 && (
+              <details style={{ marginTop: '0.5rem' }}>
+                <summary style={{ cursor: 'pointer', color: 'var(--error)' }}>View errors</summary>
+                <ul style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  {importResult.errors.map((err, idx) => (
+                    <li key={idx}>{err.item}: {err.error}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        )}
+        
+        <div className="form-group">
+          <label className="form-label flex items-center gap-2">
+            <Upload size={16} />
+            Archive File (.zip, .tar.gz)
+          </label>
+          <input
+            type="file"
+            accept=".zip,.tar,.tar.gz,.tgz"
+            onChange={handleArchiveFileChange}
+            className="form-input"
+            style={{ padding: '0.5rem' }}
+          />
+          {archiveFile && (
+            <p className="text-sm text-secondary mt-2">
+              Selected: {archiveFile.name} ({(archiveFile.size / (1024 * 1024)).toFixed(2)} MB)
+            </p>
+          )}
+          <p className="text-xs text-secondary mt-2">
+            Maximum file size: 500MB. Supported formats: .zip, .tar, .tar.gz, .tgz
+          </p>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Import Location (Optional)</label>
+          <select
+            className="form-input"
+            value={selectedParentPage || ''}
+            onChange={(e) => setSelectedParentPage(e.target.value ? parseInt(e.target.value) : null)}
+          >
+            <option value="">Root level (no parent)</option>
+            {renderPageTreeOptions(pageTree)}
+          </select>
+          <p className="text-xs text-secondary mt-1">
+            Select a parent page to import the archive under, or leave as root level to import at the top level
+          </p>
+        </div>
+        
+        {uploadProgress > 0 && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <div style={{ 
+              background: 'var(--border)', 
+              height: '8px', 
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }}>
+              <div style={{ 
+                background: 'var(--primary)', 
+                height: '100%', 
+                width: `${uploadProgress}%`,
+                transition: 'width 0.3s'
+              }} />
+            </div>
+            <p className="text-xs text-center mt-1">{uploadProgress}%</p>
+          </div>
+        )}
+        
+        <div className="alert alert-info mt-4" style={{ fontSize: '0.875rem' }}>
+          <strong>How it works:</strong>
+          <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
+            <li>Markdown files (.md) become pages</li>
+            <li>Directory structure maps to page hierarchy</li>
+            <li>Directories with matching .md files: contents become children of that page</li>
+            <li>Directories without .md files: blank page created with directory name</li>
+            <li>Non-markdown files become attachments to their parent page</li>
+            <li>Frontmatter (YAML) in markdown files used for title and tags</li>
+            <li>If no frontmatter title, first H1 heading is used, otherwise filename</li>
+          </ul>
+        </div>
+      </Modal>
     </div>
   );
+}
+
+function renderPageTreeOptions(pages, depth = 0) {
+  return pages.flatMap(page => [
+    <option key={page.id} value={page.id}>
+      {'  '.repeat(depth)}└─ {page.title}
+    </option>,
+    ...renderPageTreeOptions(page.children || [], depth + 1)
+  ]);
 }

@@ -14,6 +14,8 @@ A modern full-stack wiki application with user management, hierarchical pages, f
 - **File Attachments**: Upload images and documents to pages with drag-and-drop
 - **Revision History**: Track changes with ability to restore previous versions
 - **Collaboration**: Share wikis with team members (viewer, editor, admin roles)
+- **Bulk Import**: Create entire wiki structures from .zip or .tar.gz archives with automatic page hierarchy
+- **Tagging System**: Organize pages with tags, supports frontmatter YAML metadata
 - **AI-Powered Semantic Search**: Vector similarity search using locally-run open source models
   - Three search modes: AI Search (semantic), Hybrid (semantic + keyword), Traditional (keyword)
   - Automatic embedding generation via background tasks when pages are created or edited
@@ -85,7 +87,7 @@ cp .env.example .env
 
 ```bash
 flask db init
-flask db migrate -m "Initial migration with embeddings support"
+flask db migrate -m "Initial migration with embeddings and tags support"
 flask db upgrade
 ```
 
@@ -134,6 +136,15 @@ python app.py
 python worker.py
 ```
 
+### 8. Try Bulk Import (Optional)
+
+Create a sample wiki archive and test the bulk import feature:
+
+```bash
+python create_sample_archive.py
+# This creates sample_wiki.zip - use it in the UI or via API
+```
+
 ## API Endpoints
 
 ### Authentication
@@ -155,9 +166,12 @@ python worker.py
 | GET | `/api/wikis` | List user's wikis |
 | GET | `/api/wikis/public` | List all public wikis (grouped by author) |
 | POST | `/api/wikis` | Create wiki |
+| POST | `/api/wikis/import` | Create wiki from archive (.zip, .tar.gz) |
 | GET | `/api/wikis/:id` | Get wiki |
 | PATCH | `/api/wikis/:id` | Update wiki |
 | DELETE | `/api/wikis/:id` | Delete wiki |
+| POST | `/api/wikis/:id/import` | Import archive into existing wiki |
+| GET | `/api/wikis/:id/pages/tree` | Get hierarchical page tree |
 | GET | `/api/wikis/:id/members` | List members |
 | POST | `/api/wikis/:id/members` | Add member |
 | PATCH | `/api/wikis/:id/members/:uid` | Update member role |
@@ -240,6 +254,16 @@ curl -X POST http://localhost:5000/api/wikis/1/pages \
   -d '{"title":"Sub Topic","content":"Details here...","parent_id":1}'
 ```
 
+### Import Wiki from Archive
+```bash
+curl -X POST http://localhost:5000/api/wikis/import \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -F "archive=@my-wiki.zip" \
+  -F "name=My Imported Wiki" \
+  -F "description=Imported from archive" \
+  -F "is_public=false"
+```
+
 ### Upload Image
 ```bash
 curl -X POST http://localhost:5000/api/wikis/1/pages/1/upload-image \
@@ -259,6 +283,7 @@ The application includes a complete React frontend located in the `frontend/` di
 - **Dark Mode**: Toggle between light and dark themes
 - **User Settings**: Manage profile, avatars, wikis, and account
 - **AI Search Page**: Dedicated semantic search interface with three modes and adjustable parameters
+- **Bulk Import**: Upload .zip or .tar.gz archives to create entire wiki structures (see [BULK_IMPORT.md](BULK_IMPORT.md))
 
 ### Frontend Setup
 
@@ -305,7 +330,7 @@ wiki-app/
 │   ├── config.py            # Configuration
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── models.py        # SQLAlchemy models (including PageEmbedding)
+│   │   └── models.py        # SQLAlchemy models (Page, Wiki, Tag, etc.)
 │   ├── routes/
 │   │   ├── __init__.py
 │   │   ├── auth.py          # Authentication & user management
@@ -313,10 +338,12 @@ wiki-app/
 │   │   ├── pages.py         # Page CRUD & revisions
 │   │   ├── attachments.py   # File handling & uploads
 │   │   ├── search.py        # Keyword search functionality
-│   │   └── semantic_search.py  # AI semantic & hybrid search
+│   │   ├── semantic_search.py  # AI semantic & hybrid search
+│   │   └── bulk_import.py   # Archive import endpoints
 │   ├── services/
 │   │   ├── chunking.py      # Markdown-aware text chunking
-│   │   └── embeddings.py    # Embedding service HTTP client
+│   │   ├── embeddings.py    # Embedding service HTTP client
+│   │   └── archive_import.py   # Archive processing & import logic
 │   └── tasks/
 │       └── embedding_tasks.py  # RQ background tasks for embeddings
 ├── embedding_service/        # GPU-accelerated embedding microservice
@@ -354,7 +381,9 @@ wiki-app/
 ├── worker.py                 # RQ worker for background tasks
 ├── requirements.txt          # Python dependencies
 ├── run.py                   # Backend entry point
+├── create_sample_archive.py  # Script to create sample wiki archive
 ├── .env.example
+├── BULK_IMPORT.md           # Bulk import feature documentation
 └── CHANGELOG.md             # Version history
 ```
 

@@ -17,6 +17,13 @@ wiki_members = db.Table(
     db.Column('joined_at', db.DateTime, default=lambda: datetime.now(timezone.utc))
 )
 
+page_tags = db.Table(
+    'page_tags',
+    db.Column('page_id', db.Integer, db.ForeignKey('pages.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True),
+    db.Column('created_at', db.DateTime, default=lambda: datetime.now(timezone.utc))
+)
+
 
 class User(db.Model):
     """User model with authentication and wiki membership."""
@@ -92,6 +99,7 @@ class User(db.Model):
             'display_name': self.display_name or self.username,
             'avatar_url': self.avatar_url,
             'is_active': self.is_active,
+            'is_admin': self.is_admin,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
         if include_email:
@@ -217,6 +225,7 @@ class Page(db.Model):
                                   cascade='all, delete-orphan')
     embeddings = db.relationship('PageEmbedding', back_populates='page', lazy='dynamic',
                                  cascade='all, delete-orphan')
+    tags = db.relationship('Tag', secondary=page_tags, back_populates='pages')
     
     # Unique constraint on slug within a wiki
     __table_args__ = (
@@ -279,6 +288,7 @@ class Page(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
             'attachment_count': self.attachments.count(),
+            'tags': [tag.to_dict() for tag in self.tags],
         }
         if include_content:
             data['content'] = self.content
@@ -398,3 +408,33 @@ class PageEmbedding(db.Model):
         if include_embedding and self.embedding is not None:
             data['embedding'] = self.embedding
         return data
+
+
+class Tag(db.Model):
+    """Tag for categorizing pages."""
+    __tablename__ = 'tags'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True, index=True)
+    wiki_id = db.Column(db.Integer, db.ForeignKey('wikis.id'), nullable=False)
+    color = db.Column(db.String(7))  # Hex color code like #FF5733
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    # Relationships
+    wiki = db.relationship('Wiki')
+    pages = db.relationship('Page', secondary=page_tags, back_populates='tags')
+    
+    # Unique constraint on tag name per wiki
+    __table_args__ = (
+        db.UniqueConstraint('wiki_id', 'name', name='unique_tag_name_per_wiki'),
+    )
+    
+    def to_dict(self) -> dict:
+        """Serialize tag to dictionary."""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'color': self.color,
+            'wiki_id': self.wiki_id,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Book, Lock, Globe, MoreVertical, Trash2, Settings, Home, Sparkles } from 'lucide-react';
+import { Plus, Book, Lock, Globe, MoreVertical, Trash2, Settings, Home, Sparkles, Upload, FileArchive } from 'lucide-react';
 import { wikisAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
@@ -15,6 +15,13 @@ export default function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(null);
+  
+  // Bulk import state
+  const [importMode, setImportMode] = useState(false); // false = manual, true = import from archive
+  const [archiveFile, setArchiveFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [importResult, setImportResult] = useState(null);
+  
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -37,17 +44,81 @@ export default function Dashboard() {
     e.preventDefault();
     setError('');
     setCreating(true);
+    setImportResult(null);
 
     try {
-      const response = await wikisAPI.create(newWiki);
-      setWikis([...wikis, response.data.wiki]);
-      setShowCreateModal(false);
-      setNewWiki({ name: '', description: '', is_public: false });
-      navigate(`/wiki/${response.data.wiki.id}`);
+      if (importMode && archiveFile) {
+        // Import from archive
+        const formData = new FormData();
+        formData.append('archive', archiveFile);
+        formData.append('name', newWiki.name);
+        if (newWiki.description) formData.append('description', newWiki.description);
+        formData.append('is_public', newWiki.is_public.toString());
+        
+        const response = await wikisAPI.importArchive(formData, (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
+        });
+        
+        setImportResult(response.data.import_result);
+        setWikis([...wikis, response.data.wiki]);
+        
+        // Show result modal for a moment before navigating
+        setTimeout(() => {
+          setShowCreateModal(false);
+          resetForm();
+          navigate(`/wiki/${response.data.wiki.id}`);
+        }, 2000);
+      } else {
+        // Create empty wiki
+        const response = await wikisAPI.create(newWiki);
+        setWikis([...wikis, response.data.wiki]);
+        setShowCreateModal(false);
+        resetForm();
+        navigate(`/wiki/${response.data.wiki.id}`);
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create wiki');
+      setImportResult(err.response?.data?.details || null);
     } finally {
       setCreating(false);
+      setUploadProgress(0);
+    }
+  };
+  
+  const resetForm = () => {
+    setNewWiki({ name: '', description: '', is_public: false });
+    setImportMode(false);
+    setArchiveFile(null);
+    setUploadProgress(0);
+    setImportResult(null);
+    setError('');
+  };
+  
+  const handleArchiveFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const validExtensions = ['.zip', '.tar', '.tar.gz', '.tgz'];
+      const fileName = file.name.toLowerCase();
+      const isValid = validExtensions.some(ext => fileName.endsWith(ext));
+      
+      if (!isValid) {
+        setError('Invalid file type. Please upload a .zip or .tar.gz file');
+        setArchiveFile(null);
+        return;
+      }
+      
+      // Validate file size (500MB max)
+      const maxSize = 500 * 1024 * 1024;
+      if (file.size > maxSize) {
+        setError(`File too large. Maximum size is 500MB (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
+        setArchiveFile(null);
+        return;
+      }
+      
+      setArchiveFile(file);
+      setError('');
     }
   };
 
@@ -71,7 +142,10 @@ export default function Dashboard() {
       <header style={{ 
         borderBottom: '1px solid var(--border)',
         background: 'var(--card)',
-        padding: '1rem 0'
+        padding: '1rem 0',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
           <div className="flex justify-between items-center">
@@ -201,29 +275,83 @@ export default function Dashboard() {
 
       <Modal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          resetForm();
+        }}
         title="Create New Wiki"
         footer={
           <>
             <button 
               className="btn btn-secondary"
-              onClick={() => setShowCreateModal(false)}
+              onClick={() => {
+                setShowCreateModal(false);
+                resetForm();
+              }}
             >
               Cancel
             </button>
             <button 
               className="btn btn-primary"
               onClick={handleCreateWiki}
-              disabled={creating || !newWiki.name.trim()}
+              disabled={creating || !newWiki.name.trim() || (importMode && !archiveFile)}
             >
-              {creating ? 'Creating...' : 'Create Wiki'}
+              {creating ? (uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : 'Creating...') : (importMode ? 'Import Wiki' : 'Create Wiki')}
             </button>
           </>
         }
       >
         {error && <div className="alert alert-error">{error}</div>}
         
+        {importResult && (
+          <div className={`alert ${importResult.failure_count > 0 ? 'alert-warning' : 'alert-success'}`}>
+            <strong>Import completed!</strong>
+            <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
+              <li>{importResult.success_count} pages imported successfully</li>
+              {importResult.attachments_created?.length > 0 && (
+                <li>{importResult.attachments_created.length} attachments imported</li>
+              )}
+              {importResult.failure_count > 0 && (
+                <li>{importResult.failure_count} items failed</li>
+              )}
+            </ul>
+            {importResult.errors?.length > 0 && (
+              <details style={{ marginTop: '0.5rem' }}>
+                <summary style={{ cursor: 'pointer', color: 'var(--error)' }}>View errors</summary>
+                <ul style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                  {importResult.errors.map((err, idx) => (
+                    <li key={idx}>{err.item}: {err.error}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        )}
+        
         <form onSubmit={handleCreateWiki}>
+          {/* Import mode toggle */}
+          <div className="form-group" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1rem' }}>
+            <label className="form-label">Creation Method</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className={`btn ${!importMode ? 'btn-primary' : 'btn-secondary'} flex-1`}
+                onClick={() => setImportMode(false)}
+              >
+                <Plus size={16} />
+                Create Empty
+              </button>
+              <button
+                type="button"
+                className={`btn ${importMode ? 'btn-primary' : 'btn-secondary'} flex-1`}
+                onClick={() => setImportMode(true)}
+              >
+                <FileArchive size={16} />
+                Import Archive
+              </button>
+            </div>
+          </div>
+          
           <div className="form-group">
             <label className="form-label">Name</label>
             <input
@@ -260,6 +388,55 @@ export default function Dashboard() {
               Public wikis can be viewed by anyone with the link
             </p>
           </div>
+          
+          {/* Archive upload section */}
+          {importMode && (
+            <div className="form-group" style={{ 
+              border: '2px dashed var(--border)', 
+              borderRadius: '0.5rem', 
+              padding: '1rem',
+              background: 'var(--bg)'
+            }}>
+              <label className="form-label flex items-center gap-2">
+                <Upload size={16} />
+                Archive File (.zip, .tar.gz)
+              </label>
+              <input
+                type="file"
+                accept=".zip,.tar,.tar.gz,.tgz"
+                onChange={handleArchiveFileChange}
+                className="form-input"
+                style={{ padding: '0.5rem' }}
+              />
+              {archiveFile && (
+                <p className="text-sm text-secondary mt-2">
+                  Selected: {archiveFile.name} ({(archiveFile.size / (1024 * 1024)).toFixed(2)} MB)
+                </p>
+              )}
+              <p className="text-xs text-secondary mt-2">
+                The archive will be extracted and pages will be created based on the directory structure.
+                Markdown files (.md) become pages, directories map to hierarchy, and other files become attachments.
+              </p>
+              {uploadProgress > 0 && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <div style={{ 
+                    background: 'var(--border)', 
+                    height: '8px', 
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{ 
+                      background: 'var(--primary)', 
+                      height: '100%', 
+                      width: `${uploadProgress}%`,
+                      transition: 'width 0.3s'
+                    }} />
+                  </div>
+                  <p className="text-xs text-center mt-1">{uploadProgress}%</p>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       </Modal>
     </div>

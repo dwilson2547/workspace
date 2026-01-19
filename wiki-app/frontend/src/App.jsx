@@ -14,6 +14,11 @@ import WikiSettings from './pages/WikiSettings';
 import PageView from './pages/PageView';
 import PageEdit from './pages/PageEdit';
 import SemanticSearchPage from './pages/SemanticSearchPage';
+import AdminLayout from './pages/AdminLayout';
+import AdminDashboard from './pages/AdminDashboard';
+import UserManagement from './pages/UserManagement';
+import EmbeddingsManagement from './pages/EmbeddingsManagement';
+import WikiManagement from './pages/WikiManagement';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -109,6 +114,18 @@ function AppRoutes() {
         <Route path="settings" element={<WikiSettings />} />
         <Route path="page/:pageId" element={<PageView />} />
         <Route path="page/:pageId/edit" element={<PageEdit />} />
+      </Route>
+      
+      {/* Admin routes */}
+      <Route path="/admin" element={
+        <ProtectedRoute>
+          <AdminLayout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<AdminDashboard />} />
+        <Route path="users" element={<UserManagement />} />
+        <Route path="wikis" element={<WikiManagement />} />
+        <Route path="embeddings" element={<EmbeddingsManagement />} />
       </Route>
       
       {/* Catch all - redirect to home */}
