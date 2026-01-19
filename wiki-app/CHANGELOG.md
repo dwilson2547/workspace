@@ -7,7 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Admin Panel**: Comprehensive administrative interface for platform management
+  - User Management: View, search, edit, and deactivate user accounts with pagination
+  - Wiki Management: View all wikis (flat or grouped by owner), delete wikis, transfer ownership
+  - Embeddings Management: View pages without embeddings, manually trigger embedding generation (individual or bulk)
+  - Admin-only access protected by `@require_admin` decorator
+  - Consistent UI with adjustable sidebar matching main application design
+  - Quick action dashboard with statistics overview
+
 ### Fixed
+- **Admin Wiki Management Grouping**: Fixed SQL error when grouping wikis by owner in admin panel
+  - Issue: User table wasn't joined to query when `group_by=owner` parameter was used
+  - Error: `psycopg2.errors.UndefinedTable: missing FROM-clause entry for table "users"`
+  - Solution: Added User table join whenever grouping by owner or searching by username
+  - Admin can now successfully view wikis organized by their owners
+
+- **Site Admin Access Permissions**: Fixed 403 errors when admins tried to access private wikis
+  - Updated all wiki routes to check `user.is_admin` before denying access
+  - Admins can now view, edit, and manage any wiki regardless of ownership or membership
+  - Updated routes: `get_wiki()`, `update_wiki()`, `list_members()`, `add_member()`, `update_member()`, `remove_member()`
+  - Updated `get_accessible_wiki_ids()` in search and semantic search routes to return all wikis for admins
+  - Updated bulk import routes to allow admins to import to any wiki
+  - Pages routes already had admin support via `check_wiki_access()` function
+
+- **Bulk Import Transaction Management**: Fixed silent failure during wiki creation from archive
+  - Wiki objects were being flushed but rolled back on import errors, causing 404 errors after navigation
+  - Moved wiki creation inside try block for proper transaction control
+  - Removed inappropriate `db.session.rollback()` and `db.session.commit()` calls from `ArchiveImporter` service
+  - Transaction lifecycle now properly managed by endpoint layer only
+  - Added comprehensive error logging with stack traces for debugging
+  
+- **Slug Uniqueness in Bulk Import**: Fixed duplicate slug constraint violations during archive import
+  - Added automatic unique slug generation with incremental suffixes (`page-1`, `page-2`, etc.)
+  - Implemented `_generate_unique_slug()` method in `ArchiveImporter` 
+  - Updated `generate_unique_slug()` in pages route to match database constraint
+  - Fixed to check wiki-level uniqueness (not parent-level) per `unique_page_slug_per_wiki` constraint
+  - Prevents import failures when archive contains files/directories with duplicate names
+  
+- **Page Map Scope in Archive Import**: Fixed name collision bug in hierarchical imports
+  - Changed `page_map` from instance variable to local variable scoped per directory level
+  - Prevents cross-contamination when same file/directory names appear in different parts of tree
+  - Example: `/tools/3d_scanner/` and `/projects/3d_scanner/` no longer interfere with each other
+
+- **Page Creation Slug Conflicts**: Applied same unique slug generation to standard page creation
+  - Manual page creation now auto-generates unique slugs instead of returning 409 errors
+  - Page updates with conflicting slugs automatically adjusted to unique values
+  - Consistent behavior across all page creation methods (manual, bulk import, API)
+
 - **Anchor Link Navigation**: Fixed table of contents anchor links not working in wiki pages
   - Dynamically generates and assigns IDs to headings in rendered markdown (ToastUI doesn't add them by default)
   - Implements slug generation matching markdown processor conventions (lowercase, hyphenated)
@@ -97,6 +144,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Search now properly handles case-insensitive matching across wiki pages
 
 ### Technical
+- **Test Infrastructure**:
+  - Added `test_slug_uniqueness.py`: Comprehensive test for slug generation and database constraints
+  - Validates wiki-level uniqueness requirements
+  - Tests incremental suffix generation logic
+  
 - **Dependencies Added**:
   - `@toast-ui/editor-plugin-code-syntax-highlight` for syntax highlighting
   - `prismjs` for code tokenization and highlighting
