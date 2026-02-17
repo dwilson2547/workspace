@@ -582,11 +582,11 @@ window.api.on('task-progress', (data) => {
 - [x] Implement processed file tracking
 
 ### Phase 4: Advanced Tasks
-- [ ] Add rsync support
-- [ ] Add ffmpeg transcode support
-- [ ] Add archive creation/extraction
-- [ ] Add permission changes
-- [ ] Add FTP/SFTP support
+- [x] Add rsync support
+- [x] Add ffmpeg transcode support
+- [x] Add archive creation/extraction
+- [x] Add permission changes
+- [x] Add FTP/SFTP support
 
 ### Phase 5: Polish
 - [ ] Improve error handling and user feedback

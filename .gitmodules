@@ -43,3 +43,9 @@
 [submodule "DanWiki"]
 	path = DanWiki
 	url = git@github.com:dwilson2547/DanWiki.git
+[submodule "tool_wikis"]
+	path = tool_wikis
+	url = git@github.com:dwilson2547/tool_wikis.git
+[submodule "media-apps/media-library-manager"]
+	path = media-apps/media-library-manager
+	url = git@github.com:dwilson2547/media-library-manager.git
