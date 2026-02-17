@@ -49,3 +49,9 @@
 [submodule "media-apps/media-library-manager"]
 	path = media-apps/media-library-manager
 	url = git@github.com:dwilson2547/media-library-manager.git
+[submodule "obsidian_plugins/obsidian-image-resizer"]
+	path = obsidian_plugins/obsidian-image-resizer
+	url = git@github.com:dwilson2547/obsidian-image-resizer.git
+[submodule "obsidian_plugins/obsidian-shell-runner"]
+	path = obsidian_plugins/obsidian-shell-runner
+	url = git@github.com:dwilson2547/obsidian-shell-runner.git
