@@ -55,3 +55,6 @@
 [submodule "obsidian_plugins/obsidian-shell-runner"]
 	path = obsidian_plugins/obsidian-shell-runner
 	url = git@github.com:dwilson2547/obsidian-shell-runner.git
+[submodule "obsidian_plugins/obsidian_html_apps"]
+	path = obsidian_plugins/obsidian_html_apps
+	url = git@github.com:dwilson2547/obsidian_html_apps.git
