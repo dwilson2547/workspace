@@ -40,3 +40,21 @@
 [submodule "helm"]
 	path = helm
 	url = git@github.com:dwilson2547/helm.git
+[submodule "DanWiki"]
+	path = DanWiki
+	url = git@github.com:dwilson2547/DanWiki.git
+[submodule "tool_wikis"]
+	path = tool_wikis
+	url = git@github.com:dwilson2547/tool_wikis.git
+[submodule "media-apps/media-library-manager"]
+	path = media-apps/media-library-manager
+	url = git@github.com:dwilson2547/media-library-manager.git
+[submodule "obsidian_plugins/obsidian-image-resizer"]
+	path = obsidian_plugins/obsidian-image-resizer
+	url = git@github.com:dwilson2547/obsidian-image-resizer.git
+[submodule "obsidian_plugins/obsidian-shell-runner"]
+	path = obsidian_plugins/obsidian-shell-runner
+	url = git@github.com:dwilson2547/obsidian-shell-runner.git
+[submodule "obsidian_plugins/obsidian_html_apps"]
+	path = obsidian_plugins/obsidian_html_apps
+	url = git@github.com:dwilson2547/obsidian_html_apps.git
