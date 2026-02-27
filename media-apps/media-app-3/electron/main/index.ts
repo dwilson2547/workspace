@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { startPythonBackend, stopPythonBackend } from './python'
@@ -14,6 +14,20 @@ function createWindow(): void {
       contextIsolation: true,
       sandbox: true
     }
+  })
+
+  const scriptSrc = is.dev ? "'self' 'unsafe-inline'" : "'self'"
+  const csp = `default-src 'self'; connect-src 'self' http://127.0.0.1:7899 http://localhost:7899 ws://127.0.0.1:7899 ws://localhost:7899; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' http://127.0.0.1:7899 data:`
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const responseHeaders = details.responseHeaders ?? {}
+    delete responseHeaders['content-security-policy']
+    delete responseHeaders['Content-Security-Policy']
+    callback({
+      responseHeaders: {
+        ...responseHeaders,
+        'Content-Security-Policy': [csp]
+      }
+    })
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -44,7 +58,23 @@ app
       optimizer.watchWindowShortcuts(window)
     })
 
-    ipcMain.on('ping', () => console.log('pong'))
+    ipcMain.handle('select-folder', async (event) => {
+      const win = BrowserWindow.fromWebContents(event.sender)
+      const opts = { properties: ['openDirectory' as const] }
+      const result = win
+        ? await dialog.showOpenDialog(win, opts)
+        : await dialog.showOpenDialog(opts)
+      return result.filePaths[0] ?? null
+    })
+
+    ipcMain.handle('select-files', async (event) => {
+      const win = BrowserWindow.fromWebContents(event.sender)
+      const opts = { properties: ['openFile' as const, 'multiSelections' as const] }
+      const result = win
+        ? await dialog.showOpenDialog(win, opts)
+        : await dialog.showOpenDialog(opts)
+      return result.filePaths
+    })
 
     await startPythonBackend()
     createWindow()

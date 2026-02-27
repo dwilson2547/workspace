@@ -4,6 +4,7 @@
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
+    "noImplicitAny": true,
     "paths": {
       "@renderer/*": ["src/*"]
     }

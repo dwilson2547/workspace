@@ -58,3 +58,6 @@
 [submodule "obsidian_plugins/obsidian_html_apps"]
 	path = obsidian_plugins/obsidian_html_apps
 	url = git@github.com:dwilson2547/obsidian_html_apps.git
+[submodule "testing/python-gherkin-testcontainers"]
+	path = testing/python-gherkin-testcontainers
+	url = git@github.com:dwilson2547/python-gherkin-testcontainers.git

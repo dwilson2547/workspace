@@ -16,7 +16,7 @@ A cross-platform desktop media management application (Windows + Linux) for impo
 ## Architecture
 
 - **Frontend:** Electron + React + TypeScript (electron-vite)
-- **Backend:** Python 3.11 + FastAPI, spawned as subprocess by Electron
+- **Backend:** Python 3.13 + FastAPI, spawned as subprocess by Electron on port 7899
 - **Database:** SQLite (global `settings.db` + per-library `library.db`)
 - **Task queue:** Custom asyncio loop + ProcessPoolExecutor, backed by SQLite
 - **ML models:** Downloaded once to `{data_root}/models/` from HuggingFace Hub
@@ -44,9 +44,8 @@ media-app-3/
 ### Prerequisites
 
 - Node.js 18+
-- Python 3.11+
+- Python 3.13
 - npm
-- pip
 
 ### Frontend
 
@@ -58,7 +57,7 @@ npm install
 
 ```bash
 cd backend
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
@@ -75,8 +74,10 @@ npm run dev
 ```bash
 cd backend
 source .venv/bin/activate
-pytest -v
+pytest -v -m "not slow"
 ```
+
+The `not slow` marker excludes the BLIP-2 captioning test which requires the ~5.5 GB model download. To run everything including slow tests, omit the `-m` flag.
 
 ## Documentation
 

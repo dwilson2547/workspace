@@ -7,6 +7,7 @@ This is a cross-platform desktop media management application (Windows + Linux).
 `/home/daniel/documents/workspace/media-apps/media-app-3`
 
 Do not search parent directories or sibling projects for context. All relevant code is under this directory.
+You are not allowed to make commits or push to git repositories. only history checking is allowed.
 
 ## Architecture
 

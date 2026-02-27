@@ -1,15 +1,33 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import AppShell from './components/AppShell'
+import Setup from './pages/Setup'
+import Home from './pages/Home'
+import Library from './pages/Library'
+import MediaDetail from './pages/MediaDetail'
+import People from './pages/People'
+import Settings from './pages/Settings'
+import ImportProgress from './components/ImportProgress'
 
-function App(): JSX.Element {
-  const [count, setCount] = useState(0)
+const queryClient = new QueryClient()
 
+export default function App() {
   return (
-    <div>
-      <h1>Media App</h1>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount((c) => c + 1)}>Increment</button>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/setup" element={<Setup />} />
+          {/* AppShell is a layout route: renders sidebar + <Outlet /> */}
+          <Route element={<AppShell />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/library/:name" element={<Library />} />
+            <Route path="/library/:name/media/:id" element={<MediaDetail />} />
+            <Route path="/library/:name/people" element={<People />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+        </Routes>
+        <ImportProgress />
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }
-
-export default App
