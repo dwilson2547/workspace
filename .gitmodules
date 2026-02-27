@@ -73,3 +73,6 @@
 [submodule "pub_sub/iggy-poc"]
 	path = pub_sub/iggy-poc
 	url = git@github.com:dwilson2547/iggy-poc.git
+[submodule "sensor_transposition"]
+	path = sensor_transposition
+	url = git@github.com:dwilson2547/sensor_transposition.git
