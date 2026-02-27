@@ -61,3 +61,15 @@
 [submodule "testing/python-gherkin-testcontainers"]
 	path = testing/python-gherkin-testcontainers
 	url = git@github.com:dwilson2547/python-gherkin-testcontainers.git
+[submodule "pub_sub/pub-sub-tools"]
+	path = pub_sub/pub-sub-tools
+	url = git@github.com:dwilson2547/pub-sub-tools.git
+[submodule "pub_sub/sub-pub"]
+	path = pub_sub/sub-pub
+	url = git@github.com:dwilson2547/sub-pub.git
+[submodule "pub_sub/pub-sub-perf-tool"]
+	path = pub_sub/pub-sub-perf-tool
+	url = git@github.com:dwilson2547/pub-sub-perf-tool.git
+[submodule "pub_sub/iggy-poc"]
+	path = pub_sub/iggy-poc
+	url = git@github.com:dwilson2547/iggy-poc.git
