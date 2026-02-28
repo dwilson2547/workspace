@@ -76,3 +76,6 @@
 [submodule "sensor_transposition"]
 	path = sensor_transposition
 	url = git@github.com:dwilson2547/sensor_transposition.git
+[submodule "testing/k8s_sandbox"]
+	path = testing/k8s_sandbox
+	url = git@github.com:dwilson2547/k8s_sandbox.git
