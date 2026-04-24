@@ -79,3 +79,12 @@
 [submodule "testing/k8s_sandbox"]
 	path = testing/k8s_sandbox
 	url = git@github.com:dwilson2547/k8s_sandbox.git
+[submodule "obsidian_plugins/obsidian-doc-puller"]
+	path = obsidian_plugins/obsidian-doc-puller
+	url = git@github.com:dwilson2547/obsidian-doc-puller.git
+[submodule "Command-builder-interactive"]
+	path = Command-builder-interactive
+	url = git@github.com:dwilson2547/Command-builder-interactive.git
+[submodule "obsidian_plugins/obsidian-monaco"]
+	path = obsidian_plugins/obsidian-monaco
+	url = git@github.com:dwilson2547/obsidian-monaco.git
