@@ -94,3 +94,12 @@
 [submodule "gyopart"]
 	path = gyopart
 	url = git@github.com:dwilson2547/gyopart.git
+[submodule "cluster_config"]
+	path = cluster_config
+	url = git@github.com:dwilson2547/cluster_config.git
+[submodule "SKILLS"]
+	path = SKILLS
+	url = git@github.com:dwilson2547/SKILLS.git
+[submodule "robo-services"]
+	path = robo-services
+	url = git@github.com:dwilson2547/robo-services.git
