@@ -25,9 +25,6 @@
 [submodule "ai_projects"]
 	path = ai_projects
 	url = git@github.com:dwilson2547/ai_projects.git
-[submodule "arduino_pi_projects"]
-	path = arduino_pi_projects
-	url = git@github.com:dwilson2547/arduino_pi_projects.git
 [submodule "pocs"]
 	path = pocs
 	url = git@github.com:dwilson2547/pocs.git
