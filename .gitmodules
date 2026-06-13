@@ -109,3 +109,6 @@
 [submodule "microcontroller-projects/rtk-base-station"]
 	path = microcontroller-projects/rtk-base-station
 	url = git@github.com:dwilson2547/rtk-base-station.git
+[submodule "microcontroller-projects/dbc-forge"]
+	path = microcontroller-projects/dbc-forge
+	url = git@github.com:dwilson2547/dbc-forge.git
