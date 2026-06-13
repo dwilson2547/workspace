@@ -121,3 +121,9 @@
 [submodule "microcontroller-projects/phone-dbc-repo"]
 	path = microcontroller-projects/phone-dbc-repo
 	url = git@github.com:dwilson2547/dbc_companion.git
+[submodule "microcontroller-projects/rpi_camera"]
+	path = microcontroller-projects/rpi_camera
+	url = git@github.com:dwilson2547/rpi_camera.git
+[submodule "microcontroller-projects/terrestrial-scanner"]
+	path = microcontroller-projects/terrestrial-scanner
+	url = git@github.com:dwilson2547/terrestrial-scanner.git
