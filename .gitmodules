@@ -115,3 +115,6 @@
 [submodule "microcontroller-projects/can-simulator"]
 	path = microcontroller-projects/can-simulator
 	url = git@github.com:dwilson2547/can-simulator.git
+[submodule "microcontroller-projects/media-remote"]
+	path = microcontroller-projects/media-remote
+	url = git@github.com:dwilson2547/media-remote.git
