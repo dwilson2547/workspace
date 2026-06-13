@@ -103,3 +103,9 @@
 [submodule "robo-services"]
 	path = robo-services
 	url = git@github.com:dwilson2547/robo-services.git
+[submodule "microcontroller-projects/ESP32RET"]
+	path = microcontroller-projects/ESP32RET
+	url = git@github.com:dwilson2547/ESP32RET.git
+[submodule "microcontroller-projects/rtk-base-station"]
+	path = microcontroller-projects/rtk-base-station
+	url = git@github.com:dwilson2547/rtk-base-station.git
