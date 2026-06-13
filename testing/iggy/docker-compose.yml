@@ -1,0 +1,33 @@
+services:
+  iggy-server:
+    image: apache/iggy:latest
+    container_name: iggy-server
+    restart: unless-stopped
+    cap_add:
+      - SYS_NICE
+    security_opt:
+      - seccomp:unconfined
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "8090:8090"   # iggy TCP protocol (binary)
+    environment:
+      IGGY_ROOT_USERNAME: iggy
+      IGGY_ROOT_PASSWORD: iggy
+      IGGY_TCP_ADDRESS: "0.0.0.0:8090"
+      IGGY_HTTP_ENABLED: "false"
+      IGGY_QUIC_ENABLED: "false"
+    volumes:
+      - iggy-data:/local_data
+    networks:
+      - iggy
+
+volumes:
+  iggy-data:
+    driver: local
+
+networks:
+  iggy:
+    name: iggy-network

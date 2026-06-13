@@ -124,3 +124,6 @@
 [submodule "microcontroller-projects/terrestrial-scanner"]
 	path = microcontroller-projects/terrestrial-scanner
 	url = git@github.com:dwilson2547/terrestrial-scanner.git
+[submodule "face_app"]
+	path = face_app
+	url = git@github.com:dwilson2547/face_app.git
