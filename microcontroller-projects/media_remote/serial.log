@@ -1,0 +1,40 @@
+
+===== logger started 02:51:17.863 =====
+[02:51:17.865] <<< serial connected >>>
+[02:51:53.900] [BLE] connected: encrypted=0 bonded=0 auth=0
+[02:51:53.901] [BLE] link security now: encrypted=0 bonded=0 auth=0
+[02:51:55.901] [BLE] link security now: encrypted=1 bonded=1 auth=0
+[02:51:58.904] [BLE] KEYBOARD report notifications ENABLED (subValue=1)
+[02:51:58.904] [BLE] CONSUMER report notifications ENABLED (subValue=1)
+[02:51:59.904] [BTN] idx=5 pin=7 name=VOL_DOWN connected=1 heapBefore=254796
+[02:51:59.904] [BTN] idx=5 send returned OK heapAfter=254796
+[02:52:00.905] [BTN] idx=5 pin=7 name=VOL_DOWN connected=1 heapBefore=254796
+[02:52:00.905] [BTN] idx=5 send returned OK heapAfter=254796
+[02:52:00.905] [BTN] idx=5 pin=7 name=VOL_DOWN connected=1 heapBefore=254796
+[02:52:00.905] [BTN] idx=5 send returned OK heapAfter=254796
+[02:52:06.911] [BTN] idx=3 pin=5 name=PREVIOUS connected=1 heapBefore=254796
+[02:52:06.911] [BTN] idx=3 send returned OK heapAfter=254796
+[02:52:07.911] [BTN] idx=4 pin=6 name=VOL_UP connected=1 heapBefore=254796
+[02:52:07.911] [BTN] idx=4 send returned OK heapAfter=254796
+[02:52:07.911] [BTN] idx=4 pin=6 name=VOL_UP connected=1 heapBefore=254796
+[02:52:07.911] [BTN] idx=4 send returned OK heapAfter=254796
+[02:52:08.912] [BTN] idx=4 pin=6 name=VOL_UP connected=1 heapBefore=254796
+[02:52:08.912] [BTN] idx=4 send returned OK heapAfter=254796
+[02:52:09.912] [BTN] idx=4 pin=6 name=VOL_UP connected=1 heapBefore=254796
+[02:52:09.912] [BTN] idx=4 send returned OK heapAfter=254796
+[02:52:10.913] [BTN] idx=4 pin=6 name=VOL_UP connected=1 heapBefore=254796
+[02:52:10.913] [BTN] idx=4 send returned OK heapAfter=254796
+[02:52:12.914] [BTN] idx=0 pin=2 name=PLAY_PAUSE connected=1 heapBefore=254796
+[02:52:12.914] [BTN] idx=0 send returned OK heapAfter=254796
+[02:52:13.915] [BTN] idx=0 pin=2 name=PLAY_PAUSE connected=1 heapBefore=254796
+[02:52:13.915] [BTN] idx=0 send returned OK heapAfter=254796
+[02:52:13.915] [BTN] idx=0 pin=2 name=PLAY_PAUSE connected=1 heapBefore=254796
+[02:52:13.915] [BTN] idx=0 send returned OK heapAfter=254796
+[02:52:15.916] [BTN] idx=0 pin=2 name=PLAY_PAUSE connected=1 heapBefore=254796
+[02:52:15.916] [BTN] idx=0 send returned OK heapAfter=254796
+[02:52:15.916] [BTN] idx=0 pin=2 name=PLAY_PAUSE connected=1 heapBefore=254796
+[02:52:15.916] [BTN] idx=0 send returned OK heapAfter=254796
+[02:52:18.918] [BTN] idx=0 pin=2 name=PLAY_PAUSE connected=1 heapBefore=254796
+[02:52:18.918] [BTN] idx=0 send returned OK heapAfter=254796
+[02:52:21.921] [BTN] idx=0 pin=2 name=PLAY_PAUSE connected=1 heapBefore=254796
+[02:52:21.921] [BTN] idx=0 send returned OK heapAfter=254796
