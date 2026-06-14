@@ -1,0 +1,3 @@
+site url: https://store.mopar.com/
+
+This site appears to be the same as the other sites i scraped for parts-interchange, i'd like you to use the scraper development skill located at: /home/daniel/documents/workspace/web_scrapers/scraper-development-skill to develop a scraper to persist all of the chrysler, dodge, jeep, and ram parts from this site. they list a lot of other brands but they don't have any real parts for them, just filters. Please use this database structure for the data /home/daniel/documents/workspace/parts_interchange/api/src/models.py. Please persist the data to a sqlite database and use sqlalchemy as the connector

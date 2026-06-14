@@ -1,5 +1,9 @@
 # Workspace repo to pull all my code in one place
 
+> **Structure & conventions:** see [`CONVENTIONS.md`](./CONVENTIONS.md) for the closed domain
+> taxonomy, placement rules, and knowledge layout. Agents follow [`CLAUDE.md`](./CLAUDE.md) /
+> [`AGENTS.md`](./AGENTS.md) and the `workspace-conventions` skill.
+
 Add new submodule: 
 
 `git submodule add https://github.com/username/repo-name.git path/to/submodule`

@@ -1,0 +1,6 @@
+https://www.suzukipartshouse.com/oemparts/c/suzuki_motorcycle/parts
+
+Please use the scraper development skill located at /home/daniel/documents/workspace/web_scrapers/scraper-development-skill to develop a scraper to persist and categorize all suzuki parts. the site is laid out as year -> model -> part diagram -> all parts in diagram. Please note, sometimes the site can take a while to respond, let's build in a safety of 30s minimum.
+
+
+output data considerations: I plan to integrate this with another project i have called parts_interchange, the end goal is a reverse lookup for parts so users can find out if a part from a 2012 chevy will work on a 2018 buick for example. that project has the data structured such that there's a car table (year make model trim) and car has car_diagrams as well as car_parts, diagrams has an index to part mapping table as well so i can maintain the full structure while also having a quick global part lookup at the vehicle level. i'd like to keep that same structure here if possible, but the priority is getting the data from this site, we can massage it later if needed. please use the imgcache to store a copy of each image pulled

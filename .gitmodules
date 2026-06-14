@@ -1,129 +1,156 @@
 [submodule "scripts"]
-	path = scripts
+	path = tools/scripts
 	url = git@github.com:dwilson2547/scripts.git
 [submodule "chrome_extensions"]
-	path = chrome_extensions
+	path = tools/chrome-extensions
 	url = git@github.com:dwilson2547/chrome_extensions.git
 [submodule "potree"]
-	path = potree
+	path = tools/potree
 	url = git@github.com:dwilson2547/potree.git
 [submodule "photo_dump"]
-	path = photo_dump
+	path = media/photo-dump
 	url = git@github.com:dwilson2547/photo_dump.git
-[submodule "dockers"]
-	path = dockers
-	url = git@github.com:dwilson2547/dockers.git
 [submodule "parts_interchange"]
-	path = parts_interchange
+	path = archive/parts-interchange
 	url = git@github.com:dwilson2547/parts_interchange.git
 [submodule "legacy"]
-	path = legacy
+	path = archive/legacy
 	url = git@github.com:dwilson2547/legacy.git
 [submodule "wiki_demo"]
-	path = wiki_demo
+	path = archive/wiki-demo
 	url = git@github.com:dwilson2547/wiki_demo.git
-[submodule "ai_projects"]
-	path = ai_projects
-	url = git@github.com:dwilson2547/ai_projects.git
 [submodule "pocs"]
-	path = pocs
+	path = experiments/pocs
 	url = git@github.com:dwilson2547/pocs.git
 [submodule "auto_dbms_from_sql"]
-	path = auto_dbms_from_sql
+	path = tools/auto-dbms-from-sql
 	url = git@github.com:dwilson2547/auto_dbms_from_sql.git
-[submodule "web_scrapers"]
-	path = web_scrapers
-	url = git@github.com:dwilson2547/web_scrapers.git
 [submodule "helm"]
-	path = helm
+	path = infra/helm
 	url = git@github.com:dwilson2547/helm.git
 [submodule "DanWiki"]
-	path = DanWiki
+	path = ai/dan-wiki
 	url = git@github.com:dwilson2547/DanWiki.git
 [submodule "tool_wikis"]
-	path = tool_wikis
+	path = archive/tool-wikis
 	url = git@github.com:dwilson2547/tool_wikis.git
 [submodule "media-apps/media-library-manager"]
-	path = media-apps/media-library-manager
+	path = media/media-library-manager
 	url = git@github.com:dwilson2547/media-library-manager.git
 [submodule "obsidian_plugins/obsidian-image-resizer"]
-	path = obsidian_plugins/obsidian-image-resizer
+	path = tools/obsidian-plugins/obsidian-image-resizer
 	url = git@github.com:dwilson2547/obsidian-image-resizer.git
 [submodule "obsidian_plugins/obsidian-shell-runner"]
-	path = obsidian_plugins/obsidian-shell-runner
+	path = tools/obsidian-plugins/obsidian-shell-runner
 	url = git@github.com:dwilson2547/obsidian-shell-runner.git
 [submodule "obsidian_plugins/obsidian_html_apps"]
-	path = obsidian_plugins/obsidian_html_apps
+	path = tools/obsidian-plugins/obsidian-html-apps
 	url = git@github.com:dwilson2547/obsidian_html_apps.git
 [submodule "testing/python-gherkin-testcontainers"]
-	path = testing/python-gherkin-testcontainers
+	path = experiments/testing/python-gherkin-testcontainers
 	url = git@github.com:dwilson2547/python-gherkin-testcontainers.git
 [submodule "pub_sub/pub-sub-tools"]
-	path = pub_sub/pub-sub-tools
+	path = messaging/pub-sub-tools
 	url = git@github.com:dwilson2547/pub-sub-tools.git
 [submodule "pub_sub/sub-pub"]
-	path = pub_sub/sub-pub
+	path = messaging/sub-pub
 	url = git@github.com:dwilson2547/sub-pub.git
 [submodule "pub_sub/pub-sub-perf-tool"]
-	path = pub_sub/pub-sub-perf-tool
+	path = messaging/pub-sub-perf-tool
 	url = git@github.com:dwilson2547/pub-sub-perf-tool.git
 [submodule "pub_sub/iggy-poc"]
-	path = pub_sub/iggy-poc
+	path = messaging/iggy-poc
 	url = git@github.com:dwilson2547/iggy-poc.git
 [submodule "sensor_transposition"]
-	path = sensor_transposition
+	path = embedded/sensor-transposition
 	url = git@github.com:dwilson2547/sensor_transposition.git
 [submodule "testing/k8s_sandbox"]
-	path = testing/k8s_sandbox
+	path = experiments/testing/k8s-sandbox
 	url = git@github.com:dwilson2547/k8s_sandbox.git
 [submodule "obsidian_plugins/obsidian-doc-puller"]
-	path = obsidian_plugins/obsidian-doc-puller
+	path = tools/obsidian-plugins/obsidian-doc-puller
 	url = git@github.com:dwilson2547/obsidian-doc-puller.git
-[submodule "Command-builder-interactive"]
-	path = Command-builder-interactive
-	url = git@github.com:dwilson2547/Command-builder-interactive.git
 [submodule "obsidian_plugins/obsidian-monaco"]
-	path = obsidian_plugins/obsidian-monaco
+	path = tools/obsidian-plugins/obsidian-monaco
 	url = git@github.com:dwilson2547/obsidian-monaco.git
-[submodule "ai_notes_server"]
-	path = ai_notes_server
-	url = git@github.com:dwilson2547/ai_notes_server.git
 [submodule "gyopart"]
-	path = gyopart
+	path = automotive/gyopart
 	url = git@github.com:dwilson2547/gyopart.git
 [submodule "cluster_config"]
-	path = cluster_config
+	path = infra/cluster-config
 	url = git@github.com:dwilson2547/cluster_config.git
 [submodule "SKILLS"]
-	path = SKILLS
+	path = meta/SKILLS
 	url = git@github.com:dwilson2547/SKILLS.git
 [submodule "robo-services"]
-	path = robo-services
+	path = robotics/robo-services
 	url = git@github.com:dwilson2547/robo-services.git
 [submodule "microcontroller-projects/ESP32RET"]
-	path = microcontroller-projects/ESP32RET
+	path = embedded/ESP32RET
 	url = git@github.com:dwilson2547/ESP32RET.git
 [submodule "microcontroller-projects/rtk-base-station"]
-	path = microcontroller-projects/rtk-base-station
+	path = embedded/rtk-base-station
 	url = git@github.com:dwilson2547/rtk-base-station.git
 [submodule "microcontroller-projects/dbc-forge"]
-	path = microcontroller-projects/dbc-forge
+	path = embedded/dbc-forge
 	url = git@github.com:dwilson2547/dbc-forge.git
 [submodule "microcontroller-projects/can-simulator"]
-	path = microcontroller-projects/can-simulator
+	path = embedded/can-simulator
 	url = git@github.com:dwilson2547/can-simulator.git
 [submodule "microcontroller-projects/media-remote"]
-	path = microcontroller-projects/media-remote
+	path = embedded/media-remote
 	url = git@github.com:dwilson2547/media-remote.git
 [submodule "microcontroller-projects/phone-dbc-repo"]
-	path = microcontroller-projects/phone-dbc-repo
+	path = embedded/phone-dbc-repo
 	url = git@github.com:dwilson2547/dbc_companion.git
 [submodule "microcontroller-projects/rpi_camera"]
-	path = microcontroller-projects/rpi_camera
+	path = embedded/rpi-camera
 	url = git@github.com:dwilson2547/rpi_camera.git
 [submodule "microcontroller-projects/terrestrial-scanner"]
-	path = microcontroller-projects/terrestrial-scanner
+	path = robotics/terrestrial-scanner
 	url = git@github.com:dwilson2547/terrestrial-scanner.git
 [submodule "face_app"]
-	path = face_app
+	path = ai/face-app
 	url = git@github.com:dwilson2547/face_app.git
+[submodule "ai/image-tagger"]
+	path = ai/image-tagger
+	url = git@github.com:dwilson2547/image_tagger.git
+[submodule "ai/model-test-scripts"]
+	path = ai/model-test-scripts
+	url = git@github.com:dwilson2547/model_test_scripts.git
+[submodule "ai/image-analyzer"]
+	path = ai/image-analyzer
+	url = git@github.com:dwilson2547/image_analyzer.git
+[submodule "archive/junkyard-inventory-scrapers"]
+	path = archive/junkyard-inventory-scrapers
+	url = git@github.com:dwilson2547/junkyard_inventory_scrapers.git
+[submodule "archive/parts-direct"]
+	path = archive/parts-direct
+	url = git@github.com:dwilson2547/parts_direct.git
+[submodule "web-scrapers/scrape-stack"]
+	path = web-scrapers/scrape-stack
+	url = git@github.com:dwilson2547/scrape_stack.git
+[submodule "web-scrapers/scrape-job-manager"]
+	path = web-scrapers/scrape-job-manager
+	url = git@github.com:dwilson2547/scrape_job_manager.git
+[submodule "automotive/autoevolution-scraper"]
+	path = automotive/autoevolution-scraper
+	url = git@github.com:dwilson2547/autoevolution_scraper.git
+[submodule "automotive/rockauto"]
+	path = automotive/rockauto
+	url = git@github.com:dwilson2547/rockauto.git
+[submodule "automotive/partsgeek-scraper"]
+	path = automotive/partsgeek-scraper
+	url = git@github.com:dwilson2547/partsgeek_scraper.git
+[submodule "tools/nordvpn-proxy"]
+	path = tools/nordvpn-proxy
+	url = git@github.com:dwilson2547/nordvpn-proxy.git
+[submodule "meta/context-store"]
+	path = archive/context-store
+	url = git@github.com:dwilson2547/context-store.git
+[submodule "meta/ai-tool-docs"]
+	path = archive/ai-tool-docs
+	url = git@github.com:dwilson2547/ai_tool_docs.git
+[submodule "meta/ai-notes-server"]
+	path = archive/ai-notes-server
+	url = git@github.com:dwilson2547/ai_notes_server.git

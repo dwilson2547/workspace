@@ -1,0 +1,4 @@
+playwright
+httpx
+sqlalchemy
+lz4

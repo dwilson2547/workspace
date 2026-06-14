@@ -1,0 +1,5 @@
+playwright>=1.40.0
+sqlalchemy>=2.0.0
+dwilson-bot-scraper-lib>=0.1.0
+dwilson-webcache-client>=0.2.0
+dwilson-imgcache-client>=0.2.0
