@@ -1,0 +1,25 @@
+# bashrc.example — snippet to append to ~/.bashrc on a new machine.
+#
+# This is the prompt entry added for this workspace: it shows which git repo
+# the shell is in (and whether it's a submodule), so you don't accidentally
+# run git commands against the wrong repo in this submodule-heavy layout.
+#
+# Append the block below to the END of your ~/.bashrc, then open a new shell
+# (or `source ~/.bashrc`). Your prompt will end with e.g. (workspace@main) or
+# (submodule:gyopart@main).
+#
+# This only covers the prompt. The commit-target hook is a separate file
+# (~/.git-hooks/prepare-commit-msg) — see SUBMODULES.md for that and the rest.
+
+# --- submodule-aware git context in prompt ---
+__git_ctx() {
+  local top br super name
+  top=$(git rev-parse --show-toplevel 2>/dev/null) || return
+  name=$(basename "$top")
+  br=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+  super=$(git rev-parse --show-superproject-working-tree 2>/dev/null)
+  if [ -n "$super" ]; then printf ' (submodule:%s@%s)' "$name" "$br"
+  else printf ' (%s@%s)' "$name" "$br"; fi
+}
+PROMPT_COMMAND="__gc=\$(__git_ctx)${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+PS1="${PS1/'\$ '/'${__gc}\$ '}"
