@@ -1,0 +1,5 @@
+# Never commit tool binaries or arduino-cli's data/cache.
+arduino-cli
+*.tar.gz
+*.tar.bz2
+.arduino-data/

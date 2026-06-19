@@ -1,0 +1,24 @@
+# Shared Arduino toolchain for embedded/ projects — pinned for reproducible builds.
+# Edit a version here, re-run ./setup.sh, commit. Format: one directive per line.
+#
+#   url   <board-manager index URL>
+#   core  <packager:arch@version>
+#   lib   <Library Name@version>
+
+url   https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+url   https://espressif.github.io/arduino-esp32/package_esp32_index.json
+
+# SAMD51 (Matrix Portal M4, etc.)
+core  adafruit:samd@1.7.17
+
+# ESP32 family — classic ESP32-D0WD-V3 (WROOM-32 dev boards, FQBN esp32:esp32:esp32),
+# ESP32-S3 MatrixPortal, etc. Both the Inland and Chinese dev boards use this core.
+core  esp32:esp32@3.3.8
+
+# Matrix + graphics stack
+lib   Adafruit Protomatter@1.7.1
+lib   Adafruit GFX Library@1.12.6
+lib   Adafruit BusIO@1.17.4
+
+# DSP
+lib   arduinoFFT@2.0.4
