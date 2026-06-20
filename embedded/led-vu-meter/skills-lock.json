@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "skills": {
+    "bom": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/bom/SKILL.md",
+      "computedHash": "95e5447206e3ced9e159c4a5537b3a85431c115dd3815bc283856f638c839e53"
+    },
+    "datasheets": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/datasheets/SKILL.md",
+      "computedHash": "e0ffd730b17fa1d7fe39fa403e20f855a1dd45c497fd160620a0a38b34363531"
+    },
+    "digikey": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/digikey/SKILL.md",
+      "computedHash": "fc07d0be21d0622d7b51ece0e79d0a34bb5023cb0f4069faa7ed0a950919c266"
+    },
+    "element14": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/element14/SKILL.md",
+      "computedHash": "3d0ea6a136fcfdbfbb913a3c3ecf3eea6edbb80fd2dabf82fb6d897b97eb6dd3"
+    },
+    "emc": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/emc/SKILL.md",
+      "computedHash": "5763f91d716b93c07702735b016d73722f9bebb18a3d6c4c4531dc5d572cdd5f"
+    },
+    "jlcpcb": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/jlcpcb/SKILL.md",
+      "computedHash": "b7f68e212ee2e336b58251885b7f8eef64ce29d4ab04561d15cc405ed44bc67a"
+    },
+    "kicad": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/kicad/SKILL.md",
+      "computedHash": "98418efb9cc3a7a723d2653924eaa4aadaef99212fcdc947be25bcaec438ed22"
+    },
+    "kidoc": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/kidoc/SKILL.md",
+      "computedHash": "83f7ea49a190b9ba299fd7e22b721a4002b689c172828eb38225bc79e1489dca"
+    },
+    "lcsc": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/lcsc/SKILL.md",
+      "computedHash": "4d810dc8958ab265803b4eca2fb840041d247503c9e54c61ec7f3804d058a050"
+    },
+    "mouser": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/mouser/SKILL.md",
+      "computedHash": "f4e35d0711deb7ce5059333e092229d7888168e7bd4dbb2b7874cd37b58fb2e4"
+    },
+    "pcbway": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/pcbway/SKILL.md",
+      "computedHash": "3a62deb954a2cad046656910c484e9403288966c3b167373f8856201c1e3f447"
+    },
+    "spice": {
+      "source": "aklofas/kicad-happy",
+      "sourceType": "github",
+      "skillPath": "skills/spice/SKILL.md",
+      "computedHash": "c5518b7bc9b42299bbe9944bccb5b8c79c313839373f96e977be7e34f90955d0"
+    }
+  }
+}

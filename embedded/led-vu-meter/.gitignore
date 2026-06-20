@@ -1,0 +1,30 @@
+# Build artifacts (Arduino / SAMD51)
+build/
+*.elf
+*.bin
+*.hex
+*.uf2
+*.map
+
+# CircuitPython
+*.mpy
+.fseventsd/
+.metadata_never_index
+.Trashes
+
+# Editor / OS
+.DS_Store
+.vscode/
+*.swp
+
+# Secrets — distributor API credentials (kicad-happy / sourcing skills). NEVER commit.
+.digikey
+.mouser
+.env
+.env.*
+*.secret
+
+# kicad-happy skill install — bulky third-party code. Restore with:
+#   npx -y skills experimental_install   (reads skills-lock.json, which IS tracked)
+.agents/
+.claude/skills/
