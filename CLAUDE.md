@@ -3,6 +3,17 @@
 Superrepo holding the bulk of my code, grouped by domain. This file is read up the directory tree,
 so it applies even when you're working deep inside a submodule.
 
+## Wrong-chat check
+
+Before acting on a request that's sharply discontinuous with what this channel has been about — a
+different project/domain than the working directory, or one that assumes prior state this session
+has no trace of ("the bug we discussed", "continue where we left off") — pause, say
+"⚠️ wrong chat? this looks like <X>" in one line, and wait for confirmation before doing anything.
+Don't absorb a hard left-field drop and pivot seamlessly; let me redirect it first.
+
+Do NOT flag: meta/workflow requests (commit, status, push), legitimate cross-cutting work, or a new
+task I've clearly started on purpose.
+
 ## Operating rules
 
 This workspace has a **closed structure and knowledge convention**. Follow the
