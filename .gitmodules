@@ -1,115 +1,115 @@
-[submodule "scripts"]
+[submodule "tools/scripts"]
 	path = tools/scripts
 	url = git@github.com:dwilson2547/scripts.git
-[submodule "chrome_extensions"]
+[submodule "tools/chrome-extensions"]
 	path = tools/chrome-extensions
 	url = git@github.com:dwilson2547/chrome_extensions.git
-[submodule "potree"]
+[submodule "tools/potree"]
 	path = tools/potree
 	url = git@github.com:dwilson2547/potree.git
-[submodule "photo_dump"]
+[submodule "media/photo-dump"]
 	path = media/photo-dump
 	url = git@github.com:dwilson2547/photo_dump.git
-[submodule "parts_interchange"]
+[submodule "archive/parts-interchange"]
 	path = archive/parts-interchange
 	url = git@github.com:dwilson2547/parts_interchange.git
-[submodule "legacy"]
+[submodule "archive/legacy"]
 	path = archive/legacy
 	url = git@github.com:dwilson2547/legacy.git
-[submodule "wiki_demo"]
+[submodule "archive/wiki-demo"]
 	path = archive/wiki-demo
 	url = git@github.com:dwilson2547/wiki_demo.git
-[submodule "pocs"]
+[submodule "experiments/pocs"]
 	path = experiments/pocs
 	url = git@github.com:dwilson2547/pocs.git
-[submodule "auto_dbms_from_sql"]
+[submodule "tools/auto-dbms-from-sql"]
 	path = tools/auto-dbms-from-sql
 	url = git@github.com:dwilson2547/auto_dbms_from_sql.git
-[submodule "helm"]
+[submodule "infra/helm"]
 	path = infra/helm
 	url = git@github.com:dwilson2547/helm.git
-[submodule "DanWiki"]
+[submodule "ai/dan-wiki"]
 	path = ai/dan-wiki
 	url = git@github.com:dwilson2547/DanWiki.git
-[submodule "tool_wikis"]
+[submodule "archive/tool-wikis"]
 	path = archive/tool-wikis
 	url = git@github.com:dwilson2547/tool_wikis.git
-[submodule "media-apps/media-library-manager"]
+[submodule "media/media-library-manager"]
 	path = media/media-library-manager
 	url = git@github.com:dwilson2547/media-library-manager.git
-[submodule "obsidian_plugins/obsidian-image-resizer"]
+[submodule "tools/obsidian-plugins/obsidian-image-resizer"]
 	path = tools/obsidian-plugins/obsidian-image-resizer
 	url = git@github.com:dwilson2547/obsidian-image-resizer.git
-[submodule "obsidian_plugins/obsidian-shell-runner"]
+[submodule "tools/obsidian-plugins/obsidian-shell-runner"]
 	path = tools/obsidian-plugins/obsidian-shell-runner
 	url = git@github.com:dwilson2547/obsidian-shell-runner.git
-[submodule "obsidian_plugins/obsidian_html_apps"]
+[submodule "tools/obsidian-plugins/obsidian-html-apps"]
 	path = tools/obsidian-plugins/obsidian-html-apps
 	url = git@github.com:dwilson2547/obsidian_html_apps.git
-[submodule "testing/python-gherkin-testcontainers"]
+[submodule "experiments/testing/python-gherkin-testcontainers"]
 	path = experiments/testing/python-gherkin-testcontainers
 	url = git@github.com:dwilson2547/python-gherkin-testcontainers.git
-[submodule "pub_sub/pub-sub-tools"]
+[submodule "messaging/pub-sub-tools"]
 	path = messaging/pub-sub-tools
 	url = git@github.com:dwilson2547/pub-sub-tools.git
-[submodule "pub_sub/sub-pub"]
+[submodule "messaging/sub-pub"]
 	path = messaging/sub-pub
 	url = git@github.com:dwilson2547/sub-pub.git
-[submodule "pub_sub/pub-sub-perf-tool"]
+[submodule "messaging/pub-sub-perf-tool"]
 	path = messaging/pub-sub-perf-tool
 	url = git@github.com:dwilson2547/pub-sub-perf-tool.git
-[submodule "pub_sub/iggy-poc"]
+[submodule "messaging/iggy-poc"]
 	path = messaging/iggy-poc
 	url = git@github.com:dwilson2547/iggy-poc.git
-[submodule "sensor_transposition"]
+[submodule "embedded/sensor-transposition"]
 	path = embedded/sensor-transposition
 	url = git@github.com:dwilson2547/sensor_transposition.git
-[submodule "testing/k8s_sandbox"]
+[submodule "experiments/testing/k8s-sandbox"]
 	path = experiments/testing/k8s-sandbox
 	url = git@github.com:dwilson2547/k8s_sandbox.git
-[submodule "obsidian_plugins/obsidian-doc-puller"]
+[submodule "tools/obsidian-plugins/obsidian-doc-puller"]
 	path = tools/obsidian-plugins/obsidian-doc-puller
 	url = git@github.com:dwilson2547/obsidian-doc-puller.git
-[submodule "obsidian_plugins/obsidian-monaco"]
+[submodule "tools/obsidian-plugins/obsidian-monaco"]
 	path = tools/obsidian-plugins/obsidian-monaco
 	url = git@github.com:dwilson2547/obsidian-monaco.git
-[submodule "gyopart"]
+[submodule "automotive/gyopart"]
 	path = automotive/gyopart
 	url = git@github.com:dwilson2547/gyopart.git
-[submodule "cluster_config"]
+[submodule "infra/cluster-config"]
 	path = infra/cluster-config
 	url = git@github.com:dwilson2547/cluster_config.git
-[submodule "SKILLS"]
+[submodule "meta/SKILLS"]
 	path = meta/SKILLS
 	url = git@github.com:dwilson2547/SKILLS.git
-[submodule "robo-services"]
+[submodule "robotics/robo-services"]
 	path = robotics/robo-services
 	url = git@github.com:dwilson2547/robo-services.git
-[submodule "microcontroller-projects/ESP32RET"]
+[submodule "embedded/ESP32RET"]
 	path = embedded/ESP32RET
 	url = git@github.com:dwilson2547/ESP32RET.git
-[submodule "microcontroller-projects/rtk-base-station"]
+[submodule "embedded/rtk-base-station"]
 	path = embedded/rtk-base-station
 	url = git@github.com:dwilson2547/rtk-base-station.git
-[submodule "microcontroller-projects/dbc-forge"]
+[submodule "embedded/dbc-forge"]
 	path = embedded/dbc-forge
 	url = git@github.com:dwilson2547/dbc-forge.git
-[submodule "microcontroller-projects/can-simulator"]
+[submodule "embedded/can-simulator"]
 	path = embedded/can-simulator
 	url = git@github.com:dwilson2547/can-simulator.git
-[submodule "microcontroller-projects/media-remote"]
+[submodule "embedded/media-remote"]
 	path = embedded/media-remote
 	url = git@github.com:dwilson2547/media-remote.git
-[submodule "microcontroller-projects/phone-dbc-repo"]
+[submodule "embedded/phone-dbc-repo"]
 	path = embedded/phone-dbc-repo
 	url = git@github.com:dwilson2547/dbc_companion.git
-[submodule "microcontroller-projects/rpi_camera"]
+[submodule "embedded/rpi-camera"]
 	path = embedded/rpi-camera
 	url = git@github.com:dwilson2547/rpi_camera.git
-[submodule "microcontroller-projects/terrestrial-scanner"]
+[submodule "robotics/terrestrial-scanner"]
 	path = robotics/terrestrial-scanner
 	url = git@github.com:dwilson2547/terrestrial-scanner.git
-[submodule "face_app"]
+[submodule "ai/face-app"]
 	path = ai/face-app
 	url = git@github.com:dwilson2547/face_app.git
 [submodule "ai/image-tagger"]
@@ -145,12 +145,12 @@
 [submodule "tools/nordvpn-proxy"]
 	path = tools/nordvpn-proxy
 	url = git@github.com:dwilson2547/nordvpn-proxy.git
-[submodule "meta/context-store"]
+[submodule "archive/context-store"]
 	path = archive/context-store
 	url = git@github.com:dwilson2547/context-store.git
-[submodule "meta/ai-tool-docs"]
+[submodule "archive/ai-tool-docs"]
 	path = archive/ai-tool-docs
 	url = git@github.com:dwilson2547/ai_tool_docs.git
-[submodule "meta/ai-notes-server"]
+[submodule "archive/ai-notes-server"]
 	path = archive/ai-notes-server
 	url = git@github.com:dwilson2547/ai_notes_server.git
