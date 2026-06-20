@@ -27,10 +27,11 @@ The essentials (full detail in `CONVENTIONS.md`):
   submodules; nest submodules only for a composite system you run (§1/§1a); no `projects/` folder —
   scale is a `tier:` README marker (§4a); cross-cutting projects get one home + secondary-domain
   tags (§4b).
-- **Knowledge** — per-project notes in `<project>/docs/`; human prose in Obsidian; cross-cutting
-  reusable knowledge in the AI notes server, **namespaced by domain**. Recall before non-trivial
-  domain work; save at most one note per task, gated on "would this change how a future similar
-  task is approached?" (§5). Mechanics: `ai-notes-server` skill.
+- **Knowledge** — domain-level docs in `<domain>/docs/` for cross-project guidance (e.g., general
+  ESP32 docs) and per-project notes in `<project>/docs/` for project-specific decisions/workarounds;
+  human prose in Obsidian; cross-cutting reusable knowledge in the AI notes server, **namespaced by
+  domain**. Recall before non-trivial domain work; save at most one note per task, gated on "would
+  this change how a future similar task is approached?" (§5). Mechanics: `ai-notes-server` skill.
 - **Helm/Argo** — self-deploying project → `<project>/helm/<project>/`; shared/cluster-wide →
   `infra/cluster-config/` (§6).
 
