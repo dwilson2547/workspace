@@ -1,19 +1,45 @@
 # embedded/toolchain
 
-Shared, version-pinned Arduino build toolchain for every project under `embedded/`.
+Shared, version-pinned build toolchains for every project under `embedded/` — the
+**firmware** side (`arduino-cli` + cores/libraries) and the **hardware/PCB** side (KiCad EDA).
 
-**What's tracked:** `setup.sh` + `manifest.txt` (the recipe). **What's not:** the
-`arduino-cli` binary and `~/.arduino15` cores/libraries — those are installed by the
-script, never committed (keeps the repo small and portable across machines/OSes).
+**What's tracked:** the recipes (`setup.sh` + `manifest.txt` for firmware, `setup-kicad.sh`
+for KiCad). **What's not:** the binaries — `arduino-cli`, `~/.arduino15` cores/libraries,
+and the ~478 MB KiCad AppImage. Those are installed by the scripts, never committed (keeps
+the repo small and portable across machines/OSes).
 
 ## Bootstrap
 
 ```bash
-embedded/toolchain/setup.sh
+embedded/toolchain/setup.sh         # firmware: arduino-cli + pinned cores/libs
+embedded/toolchain/setup-kicad.sh   # hardware: pinned KiCad (kicad-cli + GUI)
 ```
 
-Installs `arduino-cli` to `~/.local/bin` if missing, adds the board-manager URLs, and
-installs the **pinned** cores + libraries from `manifest.txt`. Idempotent — re-run any time.
+`setup.sh` installs `arduino-cli` to `~/.local/bin` if missing, adds the board-manager
+URLs, and installs the **pinned** cores + libraries from `manifest.txt`. Idempotent — re-run
+any time.
+
+## KiCad (hardware / PCB)
+
+`setup-kicad.sh` pins **KiCad 10.0.3** and reproduces the install: it places the AppImage in
+`~/.local/opt` and drops thin `kicad` / `kicad-cli` wrappers in `~/.local/bin` (the AppImage
+is a multicall binary keyed on its first argument, so name-based symlinks misdispatch — hence
+wrappers). The AppImage isn't committed; download `kicad-10.0.3-x86_64.AppImage` (or its
+`.tar`) from <https://www.kicad.org/download/linux/> into `~/Downloads` and run the script,
+or point it at a file with `KICAD_SRC=/path/to/file`. Bump `KICAD_VERSION` in the script to
+upgrade.
+
+Headless usage (CI, exports, design rule checks) goes through `kicad-cli`:
+
+```bash
+kicad-cli version
+kicad-cli sch export pdf  embedded/<project>/hardware/<board>.kicad_sch -o board.pdf
+kicad-cli pcb export gerbers embedded/<project>/hardware/<board>.kicad_pcb -o gerbers/
+kicad-cli pcb export svg     embedded/<project>/hardware/<board>.kicad_pcb -o board.svg
+kicad-cli pcb drc            embedded/<project>/hardware/<board>.kicad_pcb   # design rule check
+```
+
+`kicad` (no `-cli`) launches the GUI or any other bundled tool (`kicad pcbnew`, etc.).
 
 ## Changing a pinned version
 
