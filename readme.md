@@ -6,6 +6,10 @@
 >
 > **Working here:** [`SUBMODULES.md`](./SUBMODULES.md) — per-machine setup (prompt + commit-target
 > hook) to avoid committing to the wrong repo in this submodule-heavy layout.
+>
+> **Skills location:** skills are managed under [`meta/SKILLS`](./meta/SKILLS). To (re)install
+> local symlinks for agent runtimes, run:
+> `./meta/SKILLS/install_skill_symlinks.sh`
 
 Add new submodule: 
 

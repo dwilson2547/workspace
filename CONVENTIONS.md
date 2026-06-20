@@ -126,7 +126,18 @@ This is what the AI notes layer binds to. Each tier has one home; nothing else i
 The historical sprawl — `instructions/`, `tool_wikis/`, `wiki_demo/`, `dan-wiki`, ad-hoc READMEs —
 collapses into these.
 
-**Tier 1 — Per-project (`<project>/docs/`).** Knowledge specific to one project.
+**Tier 1 — Repo-local docs (domain and project).** Docs that live with the code in this workspace.
+
+Use domain docs for cross-project guidance in a domain, and project docs for project-specific work.
+Examples: general ESP32 notes belong in `embedded/docs/`; project-specific code workarounds belong in
+that project's `docs/`.
+
+```
+<domain>/docs/
+  topics/      ← domain-wide references and guidance used by multiple projects
+  patterns/    ← reusable domain patterns
+```
+
 ```
 <project>/docs/
   issues/      ← YYYY_MM_DD_<slug>.md   (issue-documentation skill writes here)
