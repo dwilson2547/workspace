@@ -4,3 +4,4 @@
 
 # Claude Code local settings — may contain credentials in allow-list entries
 .claude/settings.local.json
+.claude/settings.json
