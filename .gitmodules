@@ -154,3 +154,6 @@
 [submodule "archive/ai-notes-server"]
 	path = archive/ai-notes-server
 	url = git@github.com:dwilson2547/ai_notes_server.git
+[submodule "robotics/livox_handheld_scanner"]
+	path = robotics/livox_handheld_scanner
+	url = git@github.com:dwilson2547/livox_handheld_scanner.git
