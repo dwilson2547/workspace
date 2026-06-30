@@ -157,3 +157,84 @@
 [submodule "robotics/livox_handheld_scanner"]
 	path = robotics/livox_handheld_scanner
 	url = git@github.com:dwilson2547/livox_handheld_scanner.git
+[submodule "messaging/iggy-flink-poc"]
+	path = messaging/iggy-flink-poc
+	url = git@github.com:dwilson2547/Iggy-flink-poc.git
+[submodule "messaging/pub-sub-kiss-icp"]
+	path = messaging/pub-sub-kiss-icp
+	url = git@github.com:dwilson2547/pub-sub-kiss-icp.git
+[submodule "robotics/gis-speed-limit"]
+	path = robotics/gis-speed-limit
+	url = git@github.com:dwilson2547/gis-speed-limit.git
+[submodule "robotics/3d-mapping"]
+	path = robotics/3d-mapping
+	url = git@github.com:dwilson2547/3d_mapping.git
+[submodule "archive/cache-browser"]
+	path = archive/cache-browser
+	url = git@github.com:dwilson2547/cache_browser.git
+[submodule "archive/filecache"]
+	path = archive/filecache
+	url = git@github.com:dwilson2547/filecache.git
+[submodule "archive/imgcache"]
+	path = archive/imgcache
+	url = git@github.com:dwilson2547/imgcache.git
+[submodule "archive/vidcache"]
+	path = archive/vidcache
+	url = git@github.com:dwilson2547/vidcache.git
+[submodule "archive/webcache"]
+	path = archive/webcache
+	url = git@github.com:dwilson2547/webcache.git
+[submodule "archive/cache-client"]
+	path = archive/cache-client
+	url = git@github.com:dwilson2547/cache_client.git
+[submodule "archive/request-authorization"]
+	path = archive/request-authorization
+	url = git@github.com:dwilson2547/request_authorization.git
+[submodule "archive/http-test-service"]
+	path = archive/http-test-service
+	url = git@github.com:dwilson2547/http-test-service.git
+[submodule "archive/rockauto-selenium-scraper"]
+	path = archive/rockauto-selenium-scraper
+	url = git@github.com:dwilson2547/rockauto_selenium_scraper.git
+[submodule "archive/rockauto-requests-scraper"]
+	path = archive/rockauto-requests-scraper
+	url = git@github.com:dwilson2547/rockauto_requests_scraper.git
+[submodule "archive/rockauto-api-scraper"]
+	path = archive/rockauto-api-scraper
+	url = git@github.com:dwilson2547/rockauto_api_scraper.git
+[submodule "tools/gitignore-cli"]
+	path = tools/gitignore-cli
+	url = git@github.com:dwilson2547/gitignore-cli.git
+[submodule "tools/command-builder-interactive"]
+	path = tools/command-builder-interactive
+	url = git@github.com:dwilson2547/Command-builder-interactive.git
+[submodule "experiments/hom-tx-perf-test"]
+	path = experiments/hom-tx-perf-test
+	url = git@github.com:dwilson2547/Hom-tx-perf-test.git
+[submodule "archive/web-scrapers"]
+	path = archive/web-scrapers
+	url = git@github.com:dwilson2547/web_scrapers.git
+[submodule "archive/arduino-pi-projects"]
+	path = archive/arduino-pi-projects
+	url = git@github.com:dwilson2547/arduino_pi_projects.git
+[submodule "docs/wiki"]
+	path = docs/wiki
+	url = git@github.com:dwilson2547/wiki.git
+[submodule "docs/markdown-api"]
+	path = docs/markdown-api
+	url = git@github.com:dwilson2547/markdown_api.git
+[submodule "docs/markdown-renderer"]
+	path = docs/markdown-renderer
+	url = git@github.com:dwilson2547/markdown_renderer.git
+[submodule "docs/sidebar-generator"]
+	path = docs/sidebar-generator
+	url = git@github.com:dwilson2547/sidebar_generator.git
+[submodule "docs/auto-doc"]
+	path = docs/auto-doc
+	url = git@github.com:dwilson2547/auto-doc.git
+[submodule "ai/ai-projects"]
+	path = ai/ai-projects
+	url = git@github.com:dwilson2547/ai_projects.git
+[submodule "infra/dwilson2547.github.io"]
+	path = infra/dwilson2547.github.io
+	url = git@github.com:dwilson2547/dwilson2547.github.io.git
