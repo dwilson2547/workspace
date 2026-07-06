@@ -114,19 +114,23 @@ Android app too). The rule:
 - **Folder = single home, chosen by primary purpose.** Ask "what was I trying to accomplish?" —
   delivery surfaces (an Android app, an ESP32 board) are *implementation*, not purpose. CAN/DBC's
   home is `embedded`.
-- **Secondary domains are tags in the notes layer (§5, Tier 3),** which is multi-valued. A DBC
-  project filed under `embedded` carries an `automotive` tag, so retrieval finds it from either
-  angle. The tree stays single-home; the *knowledge* is multi-domain.
+- **Secondary domains are `domains:` frontmatter on notes (§5),** which is multi-valued. A note
+  about a DBC project filed under `embedded` carries `domains: automotive`, so `wsnote` retrieval
+  finds it from either angle. The tree stays single-home; the *knowledge* is multi-domain.
 
 ---
 
-## 5. Knowledge layout (three tiers)
+## 5. Knowledge layout (two tiers)
 
-This is what the AI notes layer binds to. Each tier has one home; nothing else is a knowledge home.
-The historical sprawl — `instructions/`, `tool_wikis/`, `wiki_demo/`, `dan-wiki`, ad-hoc READMEs —
-collapses into these.
+Each tier has one home; nothing else is a knowledge home. The historical sprawl —
+`instructions/`, `tool_wikis/`, `wiki_demo/`, `dan-wiki`, ad-hoc READMEs, and the retired
+service stack (ai-notes-server → context-store → workman notes/playbooks/todos) — collapses
+into these.
 
 **Tier 1 — Repo-local docs (domain and project).** Docs that live with the code in this workspace.
+This is the agent knowledge layer: it travels with every clone, needs no running service, and is
+scoped *structurally* — an agent working under `robotics/` reads `robotics/docs/`, and cannot be
+polluted by another domain's knowledge.
 
 Use domain docs for cross-project guidance in a domain, and project docs for project-specific work.
 Examples: general ESP32 notes belong in `embedded/docs/`; project-specific code workarounds belong in
@@ -134,8 +138,9 @@ that project's `docs/`.
 
 ```
 <domain>/docs/
-  topics/      ← domain-wide references and guidance used by multiple projects
+  topics/      ← domain-wide references and guidance used by multiple projects (long-form)
   patterns/    ← reusable domain patterns
+  notes/       ← atomic agent notes (frontmattered facts; managed by `wsnote`)
 ```
 
 ```
@@ -143,18 +148,21 @@ that project's `docs/`.
   issues/      ← YYYY_MM_DD_<slug>.md   (issue-documentation skill writes here)
   decisions/   ← architectural decisions, why-not records
   patterns/    ← reusable shapes discovered in this project
+  notes/       ← atomic agent notes scoped to this project
 ```
+
+Backlogs are `TODO.md` at the project root (checkboxes, priority sections) — not a service.
+
+**Notes** are one fact per file with frontmatter (`title:`, `date:`, `tags:` comma-separated,
+optional `domains:` for secondary domains per §4b), body of 2–5 sentences. Every `docs/notes/`
+folder keeps a one-line-per-note `README.md` index so agents can survey cheaply before opening
+files. The **`meta/bin/wsnote`** CLI handles `add` / `search` / `ls` / `reindex` — pure stdlib,
+lexical search, no daemon. Save gate is unchanged: at most one note per task, only if it would
+change how a future similar task is approached.
 
 **Tier 2 — Human cross-cutting (Obsidian vault).** Prose docs, design notes, anything you read as a
 human. Single source of truth; synced across devices by Obsidian, not by this repo. `wiki_demo`,
 `instructions`, and `tool_wikis` migrate here and are then archived.
-
-**Tier 3 — Agent cross-cutting (AI notes server).** Machine-queried reusable knowledge, **namespaced
-by the domain taxonomy above** (`automotive/...`, `infra/...`). This namespace is what makes scoped
-save/read possible: an agent working in `web-scrapers` reads `web-scrapers` notes and saves only
-domain-tagged patterns — not "a note for everything it did." Cross-cutting projects (§4b) carry
-their secondary domains as additional tags here, so a CAN/DBC note surfaces under both `embedded`
-and `automotive`.
 
 ---
 
@@ -183,6 +191,12 @@ A future `meta/` checker will flag drift. Until then, a project conforms when:
 - [ ] `kebab-case` name.
 - [ ] Has a `README` (with a `tier:` marker, §4a) and a `docs/` directory (Tier 1).
 - [ ] If it self-deploys: chart at `helm/<project>/`.
+- [ ] If it's a runnable app/service/game (not a library or one-off script): ships a start script
+      and a kill/stop script at the project root (e.g. `start.sh`/`stop.sh` or
+      `startup.sh`/`kill.sh`), so it can be launched and torn down directly for manual testing
+      without re-deriving the exact incantation each time or depending on an IDE's embedded run
+      panel (which can silently fail to forward input in some environments — e.g. Godot's
+      embedded Game panel under WSL2).
 - [ ] No stray cruft (`:Zone.Identifier` files, abandoned duplicate variants).
 
 ---

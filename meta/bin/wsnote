@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""wsnote — repo-native agent notes for the workspace superrepo.
+
+Notes are atomic markdown files with frontmatter, living in `docs/notes/`
+folders at domain level (`<domain>/docs/notes/`) or project level
+(`<project>/docs/notes/`). Each notes folder has a README.md index with one
+line per note. No server, no daemon: scope is structural (the directory tree),
+search is lexical. See CONVENTIONS.md §5.
+
+Usage:
+  wsnote add <target> <title> <body> [--tags a,b] [--domains x,y]
+      target: a domain (e.g. robotics) or a project path (e.g. automotive/gyopart)
+  wsnote search <query...> [--domain <d>] [-n N]
+  wsnote ls [<domain>] [--tags a,b]
+  wsnote reindex
+"""
+import argparse
+import datetime
+import os
+import re
+import sys
+
+WS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PRUNE = {".git", "node_modules", "data", ".venv", "venv", "dist", "build",
+         "__pycache__", ".tools", "target"}
+MAX_DEPTH = 7
+
+
+def find_note_dirs():
+    """Yield every docs/notes directory under the workspace."""
+    for root, dirs, _files in os.walk(WS):
+        depth = root[len(WS):].count(os.sep)
+        if depth >= MAX_DEPTH:
+            dirs[:] = []
+            continue
+        dirs[:] = [d for d in dirs if d not in PRUNE]
+        if os.path.basename(root) == "notes" and os.path.basename(os.path.dirname(root)) == "docs":
+            yield root
+            dirs[:] = []
+
+
+def parse_note(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return None
+    m = re.match(r"\A---\n(.*?)\n---\n(.*)\Z", text, re.DOTALL)
+    if not m:
+        return None
+    meta = {}
+    for line in m.group(1).splitlines():
+        if ":" in line:
+            k, _, v = line.partition(":")
+            meta[k.strip()] = v.strip()
+    body = m.group(2).strip()
+    return {
+        "path": path,
+        "rel": os.path.relpath(path, WS),
+        "title": meta.get("title", os.path.basename(path)),
+        "date": meta.get("date", ""),
+        "tags": [t.strip() for t in meta.get("tags", "").split(",") if t.strip()],
+        "domains": [d.strip() for d in meta.get("domains", "").split(",") if d.strip()],
+        "body": body,
+    }
+
+
+def all_notes(domain=None):
+    for nd in find_note_dirs():
+        rel = os.path.relpath(nd, WS)
+        if domain and not (rel.startswith(domain + os.sep) or rel == domain):
+            # secondary domains still match via frontmatter below
+            pass
+        for fn in sorted(os.listdir(nd)):
+            if not fn.endswith(".md") or fn == "README.md":
+                continue
+            note = parse_note(os.path.join(nd, fn))
+            if not note:
+                continue
+            if domain:
+                primary = note["rel"].split(os.sep)[0]
+                if primary != domain and domain not in note["domains"]:
+                    continue
+            yield note
+
+
+def slugify(title):
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    return slug[:60] or "note"
+
+
+def first_sentence(body, limit=110):
+    s = re.split(r"(?<=[.!?])\s", body.replace("\n", " "), maxsplit=1)[0]
+    return (s[: limit - 1] + "…") if len(s) > limit else s
+
+
+def reindex_dir(nd):
+    notes = [n for n in (parse_note(os.path.join(nd, f)) for f in sorted(os.listdir(nd))
+                         if f.endswith(".md") and f != "README.md") if n]
+    lines = ["# Notes index", ""]
+    for n in notes:
+        fn = os.path.basename(n["path"])
+        tagstr = f" `{','.join(n['tags'])}`" if n["tags"] else ""
+        lines.append(f"- [{n['title']}]({fn}) — {first_sentence(n['body'])}{tagstr}")
+    lines.append("")
+    with open(os.path.join(nd, "README.md"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    return len(notes)
+
+
+def cmd_add(args):
+    target = os.path.join(WS, args.target)
+    if not os.path.isdir(target):
+        sys.exit(f"error: target {args.target} is not a directory under the workspace")
+    nd = os.path.join(target, "docs", "notes")
+    os.makedirs(nd, exist_ok=True)
+    path = os.path.join(nd, slugify(args.title) + ".md")
+    if os.path.exists(path):
+        sys.exit(f"error: {os.path.relpath(path, WS)} already exists — update it instead")
+    fm = [
+        "---",
+        f"title: {args.title}",
+        f"date: {datetime.date.today().isoformat()}",
+    ]
+    if args.tags:
+        fm.append(f"tags: {args.tags}")
+    if args.domains:
+        fm.append(f"domains: {args.domains}")
+    fm.append("---")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(fm) + "\n\n" + args.body.strip() + "\n")
+    reindex_dir(nd)
+    print(f"created {os.path.relpath(path, WS)}")
+
+
+def cmd_search(args):
+    terms = [t.lower() for t in args.query]
+    scored = []
+    for n in all_notes(args.domain):
+        title, body = n["title"].lower(), n["body"].lower()
+        tags = " ".join(n["tags"] + n["domains"]).lower()
+        score = sum(3 * title.count(t) + 2 * tags.count(t) + min(body.count(t), 3)
+                    for t in terms)
+        if score and all(t in title or t in tags or t in body for t in terms):
+            score += 5  # all-terms bonus
+        if score:
+            scored.append((score, n))
+    scored.sort(key=lambda x: -x[0])
+    if not scored:
+        print("no matches")
+        return
+    for score, n in scored[: args.n]:
+        print(f"[{score:>3}] {n['rel']}")
+        print(f"      {n['title']} — {first_sentence(n['body'])}")
+
+
+def cmd_ls(args):
+    want = {t.strip() for t in (args.tags or "").split(",") if t.strip()}
+    count = 0
+    for n in all_notes(args.domain):
+        if want and not want.issubset(set(n["tags"])):
+            continue
+        tagstr = f"  [{','.join(n['tags'])}]" if n["tags"] else ""
+        print(f"{n['rel']}{tagstr}\n      {n['title']}")
+        count += 1
+    if not count:
+        print("no notes")
+
+
+def cmd_reindex(_args):
+    total = 0
+    for nd in find_note_dirs():
+        c = reindex_dir(nd)
+        total += c
+        print(f"{os.path.relpath(nd, WS)}: {c} notes")
+    if not total:
+        print("no docs/notes directories found")
+
+
+def main():
+    p = argparse.ArgumentParser(prog="wsnote", description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    a = sub.add_parser("add", help="create a note")
+    a.add_argument("target", help="domain or project path relative to workspace root")
+    a.add_argument("title")
+    a.add_argument("body")
+    a.add_argument("--tags", default="", help="comma-separated tags")
+    a.add_argument("--domains", default="", help="comma-separated secondary domains")
+    a.set_defaults(fn=cmd_add)
+
+    s = sub.add_parser("search", help="search notes")
+    s.add_argument("query", nargs="+")
+    s.add_argument("--domain", help="restrict to a domain (primary or secondary)")
+    s.add_argument("-n", type=int, default=10, help="max results")
+    s.set_defaults(fn=cmd_search)
+
+    l = sub.add_parser("ls", help="list notes")
+    l.add_argument("domain", nargs="?", help="restrict to a domain")
+    l.add_argument("--tags", help="comma-separated tag filter (AND)")
+    l.set_defaults(fn=cmd_ls)
+
+    r = sub.add_parser("reindex", help="rebuild all docs/notes README indexes")
+    r.set_defaults(fn=cmd_reindex)
+
+    args = p.parse_args()
+    args.fn(args)
+
+
+if __name__ == "__main__":
+    main()
