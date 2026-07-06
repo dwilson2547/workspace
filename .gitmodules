@@ -166,9 +166,6 @@
 [submodule "robotics/gis-speed-limit"]
 	path = robotics/gis-speed-limit
 	url = git@github.com:dwilson2547/gis-speed-limit.git
-[submodule "robotics/3d-mapping"]
-	path = robotics/3d-mapping
-	url = git@github.com:dwilson2547/3d_mapping.git
 [submodule "archive/cache-browser"]
 	path = archive/cache-browser
 	url = git@github.com:dwilson2547/cache_browser.git
