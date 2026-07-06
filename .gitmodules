@@ -241,3 +241,6 @@
 [submodule "games/Cascade"]
 	path = games/Cascade
 	url = git@github.com:dwilson2547/Cascade.git
+[submodule "robotics/structured-light-scanner"]
+	path = robotics/structured-light-scanner
+	url = git@github.com:dwilson2547/structured_light_scanner.git
