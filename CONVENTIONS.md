@@ -84,6 +84,7 @@ a `projects/` bucket. There is deliberately no `projects/` domain.
 | `tools/` | Standalone utilities, CLIs, browser/editor extensions, one-off scripts | `scripts`, `auto-dbms-from-sql`, `cronjob-manager`, `chrome-extensions`, `obsidian-plugins/*`, `potree` |
 | `apps/` | End-user GUI/desktop/web apps | `task-queue-manager` |
 | `meta/` | Agent skills, workspace conventions, knowledge tooling | `SKILLS` |
+| `private/` | Personal projects kept out of public view. Deliberate §2 exception: the domain folder holds a single **private container submodule** (one private remote) and projects live as plain folders inside it, so nothing about them appears in this public repo. Contents are documented only inside that private submodule | *(private)* |
 | `experiments/` | POCs and sandboxes kept for reference | `pocs/*`, `testing/*` |
 | `archive/` | Superseded / dead, kept for history only | `legacy`, `wiki_demo`, dead `task-queue-app{,-electron}`, `instructions` & `tool_wikis` (after fold-in) |
 
