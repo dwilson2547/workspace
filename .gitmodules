@@ -247,3 +247,6 @@
 [submodule "private/private"]
 	path = private/private
 	url = git@github.com:dwilson2547/private.git
+[submodule "ai/room-acoustics-sim"]
+	path = ai/room-acoustics-sim
+	url = git@github.com:dwilson2547/room-acoustic-sim.git
