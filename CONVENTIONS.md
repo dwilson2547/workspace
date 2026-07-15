@@ -76,6 +76,7 @@ a `projects/` bucket. There is deliberately no `projects/` domain.
 | `ai/` | Agents, ML services, embeddings, image analysis | `ai_projects/*`, `ai-notes-server`, `dan-wiki` (embedding sandbox) |
 | `embedded/` | Firmware, microcontrollers, CAN/DBC, RTK, sensors | `microcontroller-projects/*`, `sensor-transposition`. CAN/DBC projects (`dbc-forge`, `can-simulator`, `phone-dbc-repo`, `ESP32RET`) live here, tagged `automotive` (§4b) |
 | `robotics/` | Robot services, SLAM, scanners, data capture | `robo-services`, `terrestrial-scanner`, future SLAM rig |
+| `drones/` | UAV/multirotor craft, parts inventory, build & flight logs | `x500` (PX4 dev quad), `pavo20-pro-2` (FPV cinewhoop), `inventory` (parts) |
 | `automotive/` | Vehicle parts data, interchange, part scrapers | `gyopart` (monorepo: api, ui, junkyard-inventory-scrapers, junkyard-platform, parts-interchange), standalone rockauto/partsgeek/autoevolution/parts-direct scrapers |
 | `web-scrapers/` | General scraping framework + non-automotive scrapers | `scrape-stack`, `scrape-job-manager`, `imdb-web-scrape` |
 | `media/` | Media library & photo management apps | `media-apps/*`, `photo-dump` |
