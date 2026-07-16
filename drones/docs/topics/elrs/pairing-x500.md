@@ -1,9 +1,13 @@
 # ELRS Pairing — X500
 
-_Pending — airframe not yet built; RP3 not installed._
+_Pending — RP3 wired to Pixhawk 6C TELEM1; **wiring not yet verified** (possible TX/RX swap)._
 
 Receiver setup: [rx-x500-rp3.md](rx-x500-rp3.md). Generic procedure + test ladder:
 [ELRS index](README.md).
+
+> ⚠ **Prerequisite:** verify the RP3 → TELEM1 TX/RX wiring before the link test — see the wiring
+> callout in [rx-x500-rp3.md](rx-x500-rp3.md). No link with a correct bind phrase almost always
+> means TX/RX are swapped.
 
 - **Date paired:** —
 - **TX:** RadioMaster TX16S Mark II, internal ELRS 3.3
