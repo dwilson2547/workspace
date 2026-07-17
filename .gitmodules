@@ -250,3 +250,6 @@
 [submodule "ai/room-acoustics-sim"]
 	path = ai/room-acoustics-sim
 	url = git@github.com:dwilson2547/room-acoustic-sim.git
+[submodule "tools/point-cloud-visualizer"]
+	path = tools/point-cloud-visualizer
+	url = git@github.com:dwilson2547/point-cloud-visualizer.git
