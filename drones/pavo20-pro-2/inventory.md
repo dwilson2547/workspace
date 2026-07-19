@@ -26,5 +26,6 @@ system, and spares specific to this craft. Reorder links in [`../inventory/bom.m
 
 | Item | Qty | Notes |
 |------|-----|-------|
+| BetaFPV Pavo20 Pro II frame | 1 | spare airframe (Amazon `B0G6KW59K4`) |
 | Gemfan 2218 3-blade props | 4 (2 pairs) | spare sets |
 | LAVA 1104 7200KV motor | 0 | plug-in |

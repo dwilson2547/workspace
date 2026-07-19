@@ -11,7 +11,13 @@ Related: [ELRS index & test ladder](README.md) · [Pavo20 receiver](rx-pavo20-pr
 1. **MDL** button → Model Select → long-press ENT on an empty slot → **New model**.
 2. Name it (e.g. `Pavo20`).
 3. Model Setup → **Internal RF → Mode: CRSF**. External RF off.
-4. **Mixes** page: CH1–CH4 = AETR (sticks). Switch channels:
+4. **Mixes** page: CH1–CH4 must be **AETR** = CH1 Ail (roll), CH2 Ele (pitch), CH3 Thr,
+   CH4 Rud (yaw). **Verify each channel's source individually — don't assume.** EdgeTX auto-fills
+   these from *Radio Setup → Default channel order*, which often ships as **RETA**; a model created
+   under that default comes out CH1 Rud / CH4 Ail, which reads as **roll↔yaw swapped** against
+   Betaflight's stock `AETR1234` (pitch/throttle unaffected, so it's easy to miss). If swapped, fix
+   the CH1/CH4 sources here and set Default channel order to AETR for future models. _(Hit exactly
+   this on the Pavo20, 2026-07-17.)_ Switch channels:
    - CH5 → AUX1 = **arm switch** (source: _____ )
    - CH6 → AUX2 = **angle mode** (source: SD)
    - CH7 → AUX3 = **turtle mode** (source: _____ )

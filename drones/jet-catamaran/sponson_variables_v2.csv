@@ -1,0 +1,93 @@
+Name,Variable type,Value,Description
+overall_width,Length,250,MASTER - boat beam
+length_multiplier,Number,2.2,MASTER - length as multiple of beam
+tunnel_width_ratio,Number,0.4,MASTER - tunnel fraction of beam
+shell_thickness,Length,1.5,MASTER - printed wall thickness
+deck_clearance,Length,8.5,MASTER - air gap above pump for tubes and wires
+intake_boss_margin,Length,6,MASTER - flat pad margin around intake flange
+waterline_offset,Length,36,MASTER - draft for float-check split
+wing_length_ratio,Number,0.69,MASTER - platform length fraction of overall length
+wing_height,Length,10,MASTER - platform plate thickness
+platform_angle_offset,Angle,3,MASTER - tunnel ceiling angle of attack
+platform_height_offset,Length,10,MASTER - existing platform datum tweak
+platform_front_back_offset,Length,0,MASTER - existing platform position tweak
+jet_drive_intake_width,Length,42.1,PUMP - intake flange width per TFL drawing
+jet_drive_intake_length,Length,89.2,PUMP - intake flange length per TFL drawing
+jet_drive_intake_to_back_wall_offset,Length,41,PUMP - flange edge to transom mounting face
+jet_drive_floor_to_outlet_center_height,Length,32.2,PUMP - grate face to nozzle centerline
+jet_drive_outlet_diam,Length,35,PUMP - nozzle opening OD per drawing
+jet_drive_outlet_hole_diam,Length,36,PUMP - modeled transom hole - was 34 but must clear the 35 nozzle - verify on real unit
+jet_drive_outlet_screw_placement_diam,Length,37.75,PUMP - transom bolt circle
+jet_drive_outlet_screw_diam,Length,2.5,PUMP - M2.5 transom screws
+jet_drive_unit_height,Length,55,PUMP - grate face to tallest fitting
+overall_length,Length,#overall_width*#length_multiplier,DERIVED
+sponson_width_multiplier,Number,(1-#tunnel_width_ratio)/2,DERIVED
+sponson_width,Length,#overall_width*#sponson_width_multiplier,DERIVED
+hull_scale,Number,#sponson_width/75mm,DERIVED - scales all section heights and widths - equals 1 at 250mm beam
+sponson_height,Length,#jet_drive_unit_height+#shell_thickness+#deck_clearance,DERIVED - deck datum height driven by pump
+plane_offset,Length,#overall_length/11,DERIVED - station spacing
+sponson_profile_offset_plane_1,Length,#plane_offset,DERIVED
+sponson_profile_offset_plane_2,Length,2*#plane_offset,DERIVED
+sponson_profile_offset_plane_3,Length,3*#plane_offset,DERIVED
+sponson_profile_offset_plane_4,Length,4*#plane_offset,DERIVED
+sponson_profile_offset_plane_5,Length,5*#plane_offset,DERIVED
+pad_flat_length,Length,#shell_thickness+#jet_drive_intake_to_back_wall_offset+#jet_drive_intake_length+#intake_boss_margin,DERIVED - required flat pad from transom - pump driven
+pad_plane_offset_from_front,Length,#overall_length/2-#pad_flat_length,DERIVED - loft-start plane offset AFT of Front plane
+intake_center_from_transom,Length,#shell_thickness+#jet_drive_intake_to_back_wall_offset+#jet_drive_intake_length/2,DERIVED - intake cutout center position
+wing_length,Length,#overall_length*#wing_length_ratio,DERIVED
+sp10_wid,Length,75*#hull_scale,Transom-most plane - flat pad
+sp10_deadrise,Angle,0,Flat pad - keep 0
+sp10_keelz,Length,0*#hull_scale,Pad plane datum
+sp10_sheerz,Length,55*#hull_scale,
+sp9_wid,Length,75*#hull_scale,Pad region - identical to sp10 on purpose
+sp9_deadrise,Angle,0,Flat pad - keep 0
+sp9_keelz,Length,0*#hull_scale,
+sp9_sheerz,Length,55*#hull_scale,
+sp8_wid,Length,75*#hull_scale,VESTIGIAL - plane sits inside pump-driven pad extrude - not lofted
+sp8_deadrise,Angle,0,VESTIGIAL - flattened so loft still works if pad ever shrinks
+sp8_keelz,Length,0*#hull_scale,VESTIGIAL
+sp8_sheerz,Length,55*#hull_scale,VESTIGIAL
+sp7_wid,Length,75*#hull_scale,First lofted section - V begins here
+sp7_deadrise,Angle,8,
+sp7_keelz,Length,0*#hull_scale,
+sp7_sheerz,Length,57*#hull_scale,
+sp6_wid,Length,75*#hull_scale,
+sp6_deadrise,Angle,12,Rocker starts here
+sp6_keelz,Length,3*#hull_scale,
+sp6_sheerz,Length,60*#hull_scale,
+spmid_wid,Length,75*#hull_scale,Section on the Front plane itself - midship
+spmid_deadrise,Angle,16,
+spmid_keelz,Length,8*#hull_scale,
+spmid_sheerz,Length,63*#hull_scale,
+sp5_wid,Length,75*#hull_scale,First plane forward of Front
+sp5_deadrise,Angle,20,
+sp5_keelz,Length,15*#hull_scale,
+sp5_sheerz,Length,67*#hull_scale,
+sp4_wid,Length,72*#hull_scale,Plan-view taper begins
+sp4_deadrise,Angle,25,
+sp4_keelz,Length,25*#hull_scale,
+sp4_sheerz,Length,72*#hull_scale,
+sp3_wid,Length,62*#hull_scale,
+sp3_deadrise,Angle,32,
+sp3_keelz,Length,40*#hull_scale,
+sp3_sheerz,Length,78*#hull_scale,
+sp2_wid,Length,45*#hull_scale,
+sp2_deadrise,Angle,42,
+sp2_keelz,Length,60*#hull_scale,
+sp2_sheerz,Length,85*#hull_scale,
+sp1_wid,Length,22*#hull_scale,Bow-most plane - chine approaches sheer here
+sp1_deadrise,Angle,45,Keep at 45 or below so chine stays under sheer
+sp1_keelz,Length,76*#hull_scale,
+sp1_sheerz,Length,89*#hull_scale,
+sp10_chinez,Length,#sp10_keelz+(#sp10_wid/2)*tan(#sp10_deadrise),Derived - chine corner height
+sp9_chinez,Length,#sp9_keelz+(#sp9_wid/2)*tan(#sp9_deadrise),Derived - chine corner height
+sp8_chinez,Length,#sp8_keelz+(#sp8_wid/2)*tan(#sp8_deadrise),Derived - chine corner height
+sp7_chinez,Length,#sp7_keelz+(#sp7_wid/2)*tan(#sp7_deadrise),Derived - chine corner height
+sp6_chinez,Length,#sp6_keelz+(#sp6_wid/2)*tan(#sp6_deadrise),Derived - chine corner height
+spmid_chinez,Length,#spmid_keelz+(#spmid_wid/2)*tan(#spmid_deadrise),Derived - chine corner height
+sp5_chinez,Length,#sp5_keelz+(#sp5_wid/2)*tan(#sp5_deadrise),Derived - chine corner height
+sp4_chinez,Length,#sp4_keelz+(#sp4_wid/2)*tan(#sp4_deadrise),Derived - chine corner height
+sp3_chinez,Length,#sp3_keelz+(#sp3_wid/2)*tan(#sp3_deadrise),Derived - chine corner height
+sp2_chinez,Length,#sp2_keelz+(#sp2_wid/2)*tan(#sp2_deadrise),Derived - chine corner height
+sp1_chinez,Length,#sp1_keelz+(#sp1_wid/2)*tan(#sp1_deadrise),Derived - chine corner height
+sp1_side_check,Length,#sp1_sheerz-#sp1_chinez,SANITY - must stay positive or bow section degenerates

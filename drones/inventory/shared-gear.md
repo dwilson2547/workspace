@@ -17,9 +17,8 @@ links in [`bom.md`](bom.md).
 
 ## Unassigned spares
 
-| Item | Qty | Notes |
-|------|-----|-------|
-| BetaFPV Pavo Femto frame (75mm, O4 bracket) | 1 | future micro cinewhoop build |
+_None currently — the Pavo Femto frame is now assigned to the [Pavo Femto](../pavo-femto/README.md)
+craft; the Pavo20 spare frame is tracked in the [Pavo20 inventory](../pavo20-pro-2/inventory.md)._
 
 ## Consumables & bench
 
