@@ -1,0 +1,90 @@
+Goal: light-weight large platform drone with basically just a big battery and a camera for longer flights and cinematic missions 
+
+
+
+
+pdu: https://www.aliexpress.com/item/3256805647596698.html?spm=a2g0o.cart.0.0.bdc538da6iu8QT&mp=1&pdp_npi=6%40dis%21USD%21USD%2027.87%21USD%2027.87%21%21USD%2027.87%21%21%21%402101dedf17851003979807559e2200%2112000034514528674%21ct%21US%216342653700%21%211%210%21&_gl=1*1jbbpw*_gcl_au*MTA4OTU0NTQzMy4xNzgxMDY3MjI4*_ga*MjE0MDUzNDAxNy4xNzg1MDM0OTM3*_ga_VED1YSGNC7*czE3ODUxMDAzOTckbzQkZzEkdDE3ODUxMDAzOTgkajU5JGwwJGgw
+
+motors: sunnysky x4110s 400kv: https://www.aliexpress.us/item/3256811369672356.html?spm=a2g0o.cart.0.0.22f238darilFtD&mp=1&pdp_npi=6%40dis%21USD%21USD+86.67%21USD+53.74%21%21USD+53.74%21%21%21%402101dedf17851006239817747e2200%2112000055912937715%21ct%21US%216342653700%21%214%210%21&gatewayAdapt=glo2usa
+
+props: cf 1515 https://www.aliexpress.com/item/2251832769901052.html?spm=a2g0o.cart.0.0.bdc538da6iu8QT&mp=1&pdp_npi=6%40dis%21USD%21USD%2019.99%21USD%2019.99%21%21USD%2019.99%21%21%21%402101dedf17851003979807559e2200%2166351334900%21ct%21US%216342653700%21%214%210%21&_gl=1*7tajcv*_gcl_au*MTA4OTU0NTQzMy4xNzgxMDY3MjI4*_ga*MjE0MDUzNDAxNy4xNzg1MDM0OTM3*_ga_VED1YSGNC7*czE3ODUxMDAzOTckbzQkZzEkdDE3ODUxMDAzOTgkajU5JGwwJGgw
+
+fc silicone bushings: https://www.aliexpress.us/item/3256811997806516.html?spm=a2g0o.cart.0.0.bdc538da6iu8QT&mp=1&pdp_npi=6%40dis%21USD%21USD+5.54%21USD+2.66%21%21USD+2.66%21%21%21%402101dedf17851003979807559e2200%2112000057725254709%21ct%21US%216342653700%21%211%210%21&gatewayAdapt=glo2usa
+
+esc: hobbywing xrotor 40a 3-6s: https://www.aliexpress.us/item/3256810401625172.html?spm=a2g0o.cart.0.0.5fcf38daYMCPqn&mp=1&pdp_npi=6%40dis%21USD%21USD+21.02%21USD+19.34%21%21USD+19.15%21%21%21%402101dedf17851005137784180e2200%2112000052907686634%21ct%21US%216342653700%21%214%210%21&gatewayAdapt=glo2usa
+
+fc: pixhawk 6c mini model b: https://www.aliexpress.us/item/3256812360792507.html?spm=a2g0o.cart.0.0.123b38daiwnZRF&mp=1&pdp_npi=6%40dis%21USD%21USD+310.57%21USD+310.57%21%21USD+310.57%21%21%21%402101dedf17851005535975589e2200%2112000058663377789%21ct%21US%216342653700%21%211%210%21&gatewayAdapt=glo2usa
+*kit includes M10 gps and power sense module
+
+cam receiver: siyi hm30: https://www.aliexpress.us/item/3256810236165659.html?spm=a2g0o.cart.0.0.123b38daiwnZRF&mp=1&pdp_npi=6%40dis%21USD%21USD+476.61%21USD+314.56%21%21USD+314.56%21%21%21%402101dedf17851005535975589e2200%2112000052363302375%21ct%21US%216342653700%21%211%210%21&gatewayAdapt=glo2usa
+
+cam: siyi a8 mini: https://www.aliexpress.us/item/3256806472533602.html?spm=a2g0o.cart.0.0.22f238daWY1HOD&mp=1&pdp_npi=6%40dis%21USD%21USD+449.77%21USD+274.36%21%21USD+274.36%21%21%21%402101dedf17851006703801510e2200%2112000037947258644%21ct%21US%216342653700%21%211%210%21&gatewayAdapt=glo2usa
+
+receiver: rp3 (may swap to gemeni): https://www.aliexpress.us/item/3256811780581682.html?spm=a2g0o.cart.0.0.22f238daWY1HOD&mp=1&pdp_npi=6%40dis%21USD%21USD+56.01%21USD+18.48%21%21USD+18.48%21%21%21%402101dedf17851006703801510e2200%2112000057143141793%21ct%21US%216342653700%21%211%210%21&gatewayAdapt=glo2usa
+
+frame: DH600 cf fold up: https://www.aliexpress.us/item/2251832645328393.html?spm=a2g0o.order_list.order_list_main.5.29141802wYbPPv&gatewayAdapt=glo2usa
+
+
+Frame desc: 
+```
+Description
+Report this item or seller
+DH600 carbon fiber folding four-axis frame kit folding UAV frame kit portable and lightweight 
+
+Features:
+Ultra-light: tThe frame full weight of only 398 grams, including tripod, folding GPS bracket, motor base, rack cover.
+
+Portable: The frame installed after folding up the size of only 235mm X185mmX65 (long X wide X high), a computer bag easily installed.
+
+Efficient: The frame full weight limit of 2600 grams to 3600 grams, time 35 to 45 minutes, depending on the configuration of different time.
+
+Full folding: native GPS flat folding bracket; original electric manual one folding tripod, the tripod loaded into electric, you can electric control retractable, you can also manually folded up and down, do not need to power. Do not have electric retractable when fully manual retractable. GPS, arm, tripod can be folded as a full fold.
+
+High strength: The frame through the strength test;
+
+Second generation T card design more secure and reliable;
+
+With lights, flat folding GPS stent, chassis, metal Logo.
+
+ 
+Parameters:
+The frame to start wheelbase: 600mm;
+
+The frame height: the bottom of the frame from the bottom of the tripod 135mm;
+
+The frame sandwich height: 20mm;
+
+The frame height of the upper warehouse: 30mm;
+
+The frame warehouse length: 160mm;
+
+The frame center size: 213mmX78mm (waist length X waist width;
+
+Adapter motor: 3510 / 380KV; 4110 / 400KV;
+
+Suitable paddle: 1447 or 1555;
+
+Frame weight: 398 grams;
+
+Adapter battery: 6S / 10000mah / 15C (10C), 6S12000mah / 15C (10C), 6S16000mah / 15C (10C)
+
+Full load time 35-45 points.
+
+ 
+The package included:  * 1 set frame kit 
+ 
+ 
+Recommended configuration:
+ 
+1, 3510 / 360KV (380KV) motor, 1447 paddle or 1555 paddle, good profit day 40A electric (or DJI E800 suit); 6S10000mah15C battery, 3-axis PTZ plus goupro camera, weighing 2700 grams or less. About 35 to 40 minutes.
+2,4110 / 400KV motor, 1555 paddle, good profit days 40A ESC, 6S12000mah15C battery or (6S12000mah15C), 3-axis PTZ plus goupro camera, weighs 3600 grams or less. About 40 to 45 minutes.
+ 
+use:
+1, folk songs; 2, inspection line; 3, survey; 4, plant protection plan; 5, emergency rescue;
+ 
+Applicable control system:
+1, PIXlite; 2, PIXHACK; 3, zero; 4, top attack; 5, DJI series
+
+```
+
+

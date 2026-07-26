@@ -40,6 +40,41 @@ Parts for the [`cinelog35-tof/`](../cinelog35-tof/README.md) build (mostly AliEx
 - **ToF ring** — TOF400C (VL53L1X), 11×: <https://www.aliexpress.us/item/3256806637257364.html>
 - _Still to buy:_ 4S pack (~850–1100 mAh), Raspberry Pi / SBC companion, I2C mux (TCA9548A) or XSHUT wiring.
 
+## Custom build — DH600 (long-endurance cinematic platform)
+
+Parts for the [`dh600/`](../dh600/README.md) build (all AliExpress). **Frame ordered 2026-07-26**;
+nothing else purchased. Prices quoted 2026-07-26.
+
+- **Frame** — DH600 CF folding quad kit, 600 mm, 398 g — **ordered**: <https://www.aliexpress.us/item/2251832645328393.html>
+- **Motors** — SunnySky X4110S 400 KV, ×4 ($53.74): <https://www.aliexpress.us/item/3256811369672356.html>
+- **ESC** — Hobbywing XRotor 40 A 3–6S, ×4 ($19.15): <https://www.aliexpress.us/item/3256810401625172.html>
+- **Props** — CF 1555 (15×5.5), ×4 ($19.99): <https://www.aliexpress.com/item/2251832769901052.html>
+- ~~**PDB** — Holybro 60 A ($27.87)~~ — dropped, XT60 input only 30 A continuous; keep as X500 spare:
+  <https://www.aliexpress.com/item/3256805647596698.html>
+- **No separate PDB.** The power module distributes to the ESCs off its B+ pads / PWM header.
+  Re-pigtail its input to **8 AWG + AS150** (XT120 minimum — XT90 is only 45 A/90 A on Holybro's
+  table). Module comparison: <https://docs.holybro.com/power-module-and-pdb/power-module-comparison>
+- ~~**Power module upgrade — PM08-CAN**~~ — **rejected.** ~$100, and it forces a separate ~$50 300 A
+  PDB back in (PM08 is an inline sensor, no distribution). The bundled PM07 runs at 17 % of continuous
+  at hover and 41 % at the top of the motor's published thrust table; the 160 A figure it would have
+  covered is a fault bound, not a flight bound.
+- _More margin if wanted:_ **Holybro PM08-CAN**, 200 A cont / 400 A burst, DroneCAN (price unchecked).
+- **FC** — **Pixhawk 6C (full size) + M10 GPS + PM07 bundle, ~$300** — confirm PM07 with the seller.
+  Chosen over the 6C Mini + PM02/PM06 kit ($310.57,
+  <https://www.aliexpress.us/item/3256812360792507.html>): cheaper, PM07 is 90 A/140 A with 2 BECs,
+  and the full board adds a 5th UART + dedicated S.Bus out.
+- **FC bushings** — silicone vibration isolators ($2.66): <https://www.aliexpress.us/item/3256811997806516.html>
+- **Video + datalink** — SIYI HM30 ($314.56): <https://www.aliexpress.us/item/3256810236165659.html>
+- **Camera** — SIYI A8 mini 3-axis gimbal ($274.36): <https://www.aliexpress.us/item/3256806472533602.html>
+- **RX** — RadioMaster RP3 ELRS ($18.48), ground-station side, may swap to Gemini:
+  <https://www.aliexpress.us/item/3256811780581682.html>
+- _Still to buy:_ **Tattu 6S 12000 mAh 15C** with AS150 fitted (**$270**, 1619 g — 16 Ah buys only
+  ~3 min for 540 g and exceeds the frame envelope); **2× 6S 5–6 Ah** shakedown packs (~$60–90 ea) for
+  maiden flight and tuning; a **12 V BEC** for the HM30 air unit (needs 11–16.8 V); plus 8 AWG wire and
+  an AS150 pair (~$15) for the power-module re-pigtail.
+- Original list ≈ **$1041**; ~**$1300** all-in after the FC swap, PDB deletion, pack and BEC.
+- _Also consider:_ a DC supply for the HOTA D6 Pro — 200 W on AC means ~1.5 h for a 266 Wh pack.
+
 ## Custom build — Jet Catamaran (surface, twin water-jet)
 
 Propulsion for the [`jet-catamaran/`](../jet-catamaran/README.md) build (TFL 30 mm water-jet ×2).
