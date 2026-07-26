@@ -1,0 +1,4 @@
+receiver elrs version 3.3.1, rc3, already setup, connected to telem1
+sik radio connected to telem2
+m10 gps connected to GPS1
+pwm io module connected to I/O instead of FMU, additional config might allow FMU to work
