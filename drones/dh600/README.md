@@ -181,6 +181,30 @@ Rules for this airframe:
 - **Fixed brackets, not tape** — printed mounts or tube clamps on the arms/gear. Antennas flapping in
   15" prop wash change the pattern in flight and fatigue the coax.
 
+**Don't copy the 5" cluster pattern.** Clustering antennas at the rear is correct on a 5" build, where
+the dominant failure mode is crashes and prop strikes and link margin is enormous at 300 m. It costs
+three things that start mattering at range:
+
+- **Mutual coupling** — at 2.4 GHz, λ = 125 mm, so antennas closer than ~λ/2 (62 mm) couple and distort
+  each other's patterns. A 5" build is entirely inside that radius; a 600 mm airframe has no excuse.
+- **Spatial diversity** — diversity has a polarization component *and* a spatial one. Clustered
+  antennas see near-identical fading, keeping only half the benefit.
+- **Body blocking** — a 5" cluster hides behind a small plate; here it would hide behind a large CF
+  canopy and body bay.
+
+**⚠ Mounting constraint: this airframe folds.** Both the arms and the landing gear articulate, and the
+gear is electrically retractable. That rules out the two obvious spots:
+
+- **Not on the retractable gear** — pattern changes between gear up/down, and the coax flexes every
+  cycle.
+- **Arm tips mean coax across a folding hinge** — U.FL plus repeated folding is a fatigue problem, and
+  the arms fold every time the craft is packed, which is the whole point of the frame.
+
+Preferred: short **downward booms off the centre body**, below the canopy line — less separation than
+arm tips would give, but nothing crosses a moving joint. If routing along an arm anyway, leave a
+service loop at the hinge and run along the hinge axis so folding twists rather than bends the cable.
+Plan this alongside the canopy layout, since the booms need an anchor.
+
 **Where the gain actually is: the ground station.** The aircraft must stay omnidirectional because it
 banks and turns, so gain can't live there. The ground station roughly knows where the aircraft is, so
 a **directional patch / helical / moxon** on the ground buys gain on both uplink and downlink. For
@@ -479,6 +503,7 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] ELRS packet rate set to **50 Hz** for range (latency irrelevant on this platform)
 - [ ] **Antenna placement planned** — 5 antennas, all outside the carbon, RP3 pair orthogonal, TX/RX
       separated (see [antenna installation](#antenna-installation))
+- [ ] Antenna booms designed off the **centre body** (no coax across the folding arms or retract gear)
 - [ ] Antenna brackets printed/fitted (no tape, no dangling)
 - [ ] Consider a directional ground-station antenna for long-range sorties
 - [ ] **12 V/3 A BEC** sourced (feeds HM30 air unit + A8 mini); confirm air unit's current draw
