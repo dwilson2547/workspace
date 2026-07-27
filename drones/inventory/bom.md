@@ -66,7 +66,7 @@ nothing else purchased. Prices quoted 2026-07-26.
 - **FC bushings** — silicone vibration isolators ($2.66): <https://www.aliexpress.us/item/3256811997806516.html>
 - **Video + datalink** — SIYI HM30 ($314.56): <https://www.aliexpress.us/item/3256810236165659.html>
 - **Camera** — SIYI A8 mini 3-axis gimbal ($274.36): <https://www.aliexpress.us/item/3256806472533602.html>
-- **RX** — RadioMaster RP3 ELRS ($18.48), ground-station side, may swap to Gemini:
+- **RX** — RadioMaster RP3 ELRS ($18.48), **on the aircraft**, CRSF into GPS2; may swap to Gemini:
   <https://www.aliexpress.us/item/3256811780581682.html>
 - _Still to buy:_ **Tattu 6S 12000 mAh 15C** with AS150 fitted (**$270**, 1619 g — 16 Ah buys only
   ~3 min for 540 g and exceeds the frame envelope); **2× 6S 5–6 Ah** shakedown packs (~$60–90 ea) for

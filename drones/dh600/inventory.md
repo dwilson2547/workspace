@@ -36,17 +36,17 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 | Holybro PM07 power module | 1 | in FC kit | — | 90 A cont / 140 A burst; hover 15.5 A = 17 %, vigorous 37 A = 41 %; B+ pads + PWM header = ESC distribution; 2× 5.2 V/3 A BEC |
 | ~~Holybro PM08-CAN + 300 A PDB~~ | — | rejected | ~$150 | margin never reached in flight — see README |
 | FC silicone bushings | 1 set | **to buy** | $2.66 | vibration isolation |
-| RadioMaster RP3 ELRS RX (S.Bus out) | 1 | **to buy** | $18.48 | **ground-station side**, feeds HM30 ground unit; may swap to Gemini |
+| RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into GPS2; bind phrase `dwdrones`; may swap to Gemini |
 | SiK 915 MHz telemetry radio | 1 | check X500 spare | — | on TELEM2; may need a second set if the X500's stays put |
 
 ## Video & payload
 
 | Item | Qty | Status | Price | Notes |
 |------|-----|--------|-------|-------|
-| SIYI HM30 (HD video + datalink + RC) | 1 | **to buy** | $314.56 | 5.8 GHz; air unit 74 g, 70×55×16 mm, **11–16.8 V in**, 16ch S.Bus out |
+| SIYI HM30 (HD video + telemetry) | 1 | **to buy** | $314.56 | 5.8 GHz; air unit 74 g, 70×55×16 mm, **11–16.8 V in**; S.Bus out unused |
 | SIYI A8 mini gimbal camera | 1 | **to buy** | $274.36 | 95 g, 55×55×70 mm; 11–25.2 V, 12 W peak; native ArduPilot driver |
 | SIYI Gimbal-to-Link Ethernet cable | 1 | **to buy** | ? | A8 mini → HM30 air unit, video |
-| SIYI S.Bus Y cable (air unit) | 1 | **to buy** | ? | splits air-unit S.Bus to gimbal + FC RC IN |
+| ~~SIYI S.Bus Y cable~~ | — | not needed | — | gimbal driven by MAVLink over TELEM3, not air-unit S.Bus |
 
 ⚠ Confirm which of these cables ship with the HM30 / A8 mini bundles before ordering separately.
 

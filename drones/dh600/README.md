@@ -27,8 +27,8 @@ Lift-and-loiter, not freestyle:
 - **One large 6S pack** carries most of the AUW budget; the frame is rated to 3600 g all-up and the
   listing claims 35–45 min on a 6S 12000 mAh.
 - **SIYI HM30 + A8 mini** gives long-range HD downlink and a stabilized, controllable camera — the
-  actual mission payload. The HM30 also carries RC, which reshapes where the ELRS receiver lives
-  (see [RC architecture](#rc-architecture)).
+  actual mission payload. RC stays off that link: **ELRS direct to the aircraft**, HM30 for video and
+  telemetry only (see [RC architecture](#rc-architecture)).
 
 ## Frame spec (DH600 folding kit)
 
@@ -63,10 +63,10 @@ This build **matches the listing's recommended config #2 exactly** — *4110/400
 | Flight controller | **Pixhawk 6C** (full size), 59.3 g, 84.8×44×12.4 mm | kit includes **M10 GPS** + **PM07**; ~$300, cheaper than the 6C Mini bundle |
 | FC mounting | Silicone bushings | vibration isolation for the 6C Mini |
 | GPS / compass | **M10** (in FC kit) | on the frame's folding GPS mast |
-| Video + datalink + RC | **SIYI HM30** | 5.1–5.825 GHz proprietary link; air unit outputs 16ch S.Bus + 5ch PWM |
+| Video + telemetry | **SIYI HM30** | 5.1–5.825 GHz proprietary link; **not** used for RC on this build |
 | Camera / gimbal | **SIYI A8 mini** | 3-axis, 95 g, 55×55×70 mm; 11–25.2 V, 12 W peak / 5 W avg; native ArduPilot driver |
 | Telemetry | SiK 915 MHz radio | on **TELEM2**; independent of the 5.8 GHz HM30 link |
-| RC receiver | RadioMaster RP3 ELRS (CRSF/S.Bus) — *may swap to Gemini* | **lives at the ground station**, feeding the HM30 ground unit — see below |
+| RC link | RadioMaster RP3 ELRS (CRSF) — *may swap to Gemini* | **on the aircraft**, CRSF into GPS2; 16 ch, ~5 ms, telemetry back to the TX16S |
 | Battery | **6S LiPo**, 12000–16000 mAh, 10–15C | capacity TBD; its connector sets the power-module input pigtail |
 | Autopilot stack | **ArduPilot** | settled; native SIYI gimbal driver (`MNT1_TYPE=8`) |
 
@@ -74,49 +74,51 @@ Parts on hand vs. still-to-buy: [`inventory.md`](inventory.md).
 
 ## RC architecture
 
-**The HM30 air unit is not an ELRS receiver** — it will not talk to the TX16S directly. HM30 is
-SIYI's own proprietary link on **5.1–5.825 GHz**, and the two halves only speak to each other. What it
-*does* do is carry RC alongside video and telemetry: the air unit outputs **16 channels of S.Bus plus
-5 channels of PWM** to the flight controller.
+**ELRS direct to the aircraft. The HM30 carries video and telemetry only.**
 
-The catch is on the ground side. The HM30 ground unit has no sticks — it needs an RC signal fed into
-its RC port, which accepts **S.Bus, PPM, or UART**. SIYI's compatibility note is the useful part: *any
-transmitter that outputs S.Bus or PPM, **or whose receiver outputs S.Bus**, works.* So there are two
-sane paths:
+```
+TX16S ──ELRS 2.4GHz──> RP3 (on aircraft) ──CRSF──> Pixhawk 6C ──MAVLink──> A8 mini gimbal
+A8 mini ──Ethernet──> HM30 air unit ──5.8GHz──> ground unit (video + telemetry)
+                      HM30 air unit ──MAVLink──> TELEM1
+```
 
-| | Path | Channels | Notes |
-|---|------|----------|-------|
-| **A** _(recommended)_ | TX16S →(ELRS 2.4)→ **RP3 at the ground station** →S.Bus→ HM30 ground unit →(HM30 5.8)→ air unit →S.Bus→ Pixhawk | 16 | RP3 rides in the backpack, not the aircraft. Full 16ch for gimbal/mode switches. This is SIYI's "RC relay" pattern. |
-| **B** | TX16S trainer jack →PPM→ HM30 ground unit → … | ~8 | No receiver needed at all, but PPM caps you at ~8 channels and lower resolution. |
+Rationale: routing flight control through the video link is the wrong trade. SIYI publishes 150 ms for
+HM30 video and **no RC latency figure at all**, and serialising an ELRS hop, S.Bus frame quantisation
+and HM30 air time on top of each other adds delay for no benefit. Direct ELRS gives:
 
-**Path A is the better fit** — the gimbal, camera triggers, flight modes, and gear retract will eat
-channels fast, and 8 is tight. It also means the RP3 you already listed is *not* wasted; it just
-moves off the airframe, saving weight and one antenna install.
+- **16 channels at ~5 ms**, with telemetry back to the radio (RSSI, battery, GPS on the TX screen)
+- **RC on 2.4 GHz**, which propagates better than 5.8 GHz — and matters more at range than video does
+- **Independent failure modes** — losing video no longer costs control
+- No dual-RC-source problem: the HM30's S.Bus is simply not wired to the FC
 
-Note the RP3 is **not** needed on the aircraft, and range is set by the HM30 link, not by ELRS. **The
-HM30 air unit is the only receiver on the airframe** — Ethernet in from the A8 mini, S.Bus out to the
-FC.
+Cost is ~20 g for the RP3 on the airframe and one antenna mount. There is **no RF conflict** — ELRS at
+2.4 GHz and HM30 at 5.8 GHz coexist cleanly.
 
-If you want a genuinely redundant air-side RC link later, the good news is there's **no RF conflict**:
-HM30 sits at 5.8 GHz and ELRS RP3 at 2.4 GHz, so a second ELRS receiver on the airframe would
-coexist cleanly. That's a later addition, not needed for first flight.
+**The gimbal does not depend on the HM30 S.Bus.** On ArduPilot with the native SIYI driver over TELEM3,
+gimbal pitch/yaw are RC6/RC7 arriving via ELRS and passed through as MAVLink mount commands. The SIYI
+**S.Bus Y cable is therefore not needed** — one fewer cable than routing RC through the HM30.
 
-#### Considered: SIYI FM30 (rejected)
+### Rejected: RC through the HM30 ("RC relay")
+
+The HM30 ground unit has no sticks; its RC port accepts **S.Bus, PPM, or UART**, and SIYI's pattern is
+to feed it from your own transmitter or a receiver bound to it. Both variants were considered and
+rejected:
+
+| Variant | Channels | Why not |
+|---------|----------|---------|
+| TX16S **S.Bus out of the JR module bay** → HM30 | 16 | Viable — EdgeTX 2.10 merged module-bay S.Bus output, so the 8-channel limit is *not* real. But still puts RC on the 5.8 GHz link. Note open EdgeTX issues with module-bay PPM/S.Bus on 2.10.x. |
+| TX16S **trainer jack PPM** → HM30 | ~8 | Lowest effort, but 8 channels and ~22 ms PPM framing. |
+| **RP3 at the ground station** → S.Bus → HM30 | 16 | Chains two radio links in series to fly the aircraft. Rejected on latency and shared failure mode. |
+
+Keep the first row in mind as a **fallback**: if ELRS ever proves problematic, the TX16S can drive the
+HM30 directly at 16 channels without extra hardware.
+
+### Rejected: SIYI FM30
 
 The **FM30** is a complete parallel radio system, not a bridge into the HM30: a 2.4 GHz JR-bay TX module
 for the TX16S (30 km, 16 ch, 10 ms, Bluetooth FC config) paired with its own **FR / FR Mini receiver**
-that mounts *on the aircraft*. Its partner is that receiver, not the HM30 ground unit — so buying it
-would **add** an air-side receiver rather than remove one. Using an FR receiver on the ground to feed
-the HM30 is just Path A with pricier hardware than the $18 RP3.
-
-#### Known weakness of Path A
-
-Path A puts **RC on 5.8 GHz**, which propagates worse than 2.4 GHz around obstructions and off-axis,
-and makes a link drop cost video *and* control at once — a single point of failure. An air-side ELRS
-receiver (or FM30) would split RC onto 2.4 GHz with independent failure modes. Counterweight: SIYI
-rates HM30 at 30 km as a control link, and ArduPilot triggers RTL on RC loss, so this is a robustness
-preference rather than a defect. **Decision: fly Path A, review logged RC link quality, revisit with
-data if dropouts appear at range.**
+that mounts on the aircraft. Its partner is that receiver, not the HM30 ground unit. It would duplicate
+what the RP3 already does for more money.
 
 ## Power & endurance budget
 
@@ -134,6 +136,7 @@ Rough sizing to check the build closes inside the frame's 3600 g limit. **All fi
 | PM07 | ~30 g | est |
 | SIYI HM30 air unit + antennas | ~94 g | SIYI (74 g excl. antennas) |
 | SIYI A8 mini gimbal | ~95 g | SIYI |
+| RP3 ELRS receiver + antennas | ~20 g | est |
 | 12 V BEC for HM30 air unit | ~20 g | est |
 | Wiring (8 AWG mains), connectors, hardware | ~120 g | est |
 | **Dry subtotal** | **~1775 g** | |
@@ -320,9 +323,9 @@ extreme.
   endurance-vs-capacity curve is nearly flat (35 / 37 / 40 min for 10 / 12 / 16 Ah), so 16 Ah buys ~3
   min for 540 g and puts AUW outside the vendor envelope. 12 Ah is near the optimum. See
   [power & endurance](#current-draw-and-endurance-from-sunnyskys-thrust-table).
-- **Confirm Path A vs Path B for the RC link** (see [RC architecture](#rc-architecture)). Path A is
-  recommended; the decision determines whether the RP3 is installed at the ground station or the
-  TX16S trainer jack is wired instead.
+- ~~**RC path.**~~ **Settled — ELRS direct to the aircraft**, HM30 for video/telemetry only. Routing
+  flight control through the video link was rejected on latency and shared failure mode. See
+  [RC architecture](#rc-architecture).
 - ~~**Payload power rails.**~~ **Resolved — one 12 V rail feeds both payload devices.** The
   **HM30 air unit takes 11–16.8 V** and the **A8 mini 11–25.2 V at 12 W peak / 5 W average**, so a
   single **12 V/3 A BEC (36 W)** covers both: the A8 draws ~1 A, leaving ~2 A for the air unit. PM07's
@@ -337,31 +340,29 @@ extreme.
 
 ## Serial port wiring (Pixhawk 6C, full size)
 
-**The port budget closes with room to spare** — the SiK 915 MHz radio from the X500 can stay.
-Assumes RC Path A.
-
-Two things make it fit: the **RC input is a dedicated port**, independent of the TELEM UARTs, and
-**GPS2 is a real UART (UART8)** that can take any serial protocol. The full-size 6C gives 5 usable
-UARTs (TELEM1/2/3 + GPS1/2) against the Mini's 4, plus a dedicated S.Bus output.
+**The port budget closes with room to spare.** The full-size 6C gives 5 usable UARTs (TELEM1/2/3 +
+GPS1/2) plus a dedicated RC input and a dedicated S.Bus output.
 
 | Port | UART | Device | Notes |
 |------|------|--------|-------|
 | GPS1 | USART1 | M10 GPS / compass | from FC kit; port has the safety-switch pins |
 | TELEM1 | UART7 | HM30 air unit — MAVLink telemetry | full flow control, 1.5 A limit |
 | TELEM2 | UART5 | **SiK 915 MHz radio** | same role as on the X500 |
-| TELEM3 | USART2 | A8 mini gimbal UART | **optional** — only for ArduPilot-side mount control |
-| GPS2 | UART8 | spare | or air-side serial RC, see caveat below |
-| RC IN | — | HM30 air unit S.Bus | via SIYI S.Bus Y cable, shared with the gimbal |
-| S.Bus OUT | — | spare | dedicated output on the full-size board |
-| CAN1 / CAN2 | — | spare | CAN1 if the power module is ever upgraded to PM08-CAN |
+| TELEM3 | USART2 | A8 mini gimbal UART | SIYI driver, `MNT1_TYPE=8` |
+| GPS2 | UART8 | **RP3 ELRS (CRSF)** | `SERIALx_PROTOCOL=23` — CRSF gives telemetry back to the TX |
+| RC IN | — | unused | available if the RP3 is run as S.Bus instead of CRSF |
+| S.Bus OUT | — | spare | |
+| CAN1 / CAN2 | — | spare | |
 | I2C, 2× debug | — | spare | |
 | Power 1 / Power 2 | — | PM07 on Power 1 | second analog input available for redundant supply |
 
-**A8 mini topology (per SIYI):** video goes **A8 mini → air unit over Ethernet** (SIYI Gimbal-to-Link
-cable) — it never touches the FC. Gimbal control comes off an **S.Bus Y cable** splitting the air
-unit's S.Bus: one branch to the gimbal's quick-release control port, one to the FC's RC input. The
-separate FC UART (TELEM3 above) is only needed for MAVLink mount control / ROI from ArduPilot rather
-than driving the gimbal from the HM30 ground unit.
+> CRSF on GPS2 is preferred over S.Bus into RC IN because it is bidirectional — RSSI, battery and GPS
+> come back to the TX16S screen. ⚠ CRSF wiring is crossed (FC-TX → RX-RX, FC-RX → RX-TX), the same
+> gotcha flagged on the X500.
+
+**A8 mini topology:** video goes **A8 mini → air unit over Ethernet** (SIYI Gimbal-to-Link cable) — it
+never touches the FC. Gimbal control is **MAVLink over TELEM3**, driven by RC6/RC7 arriving via ELRS.
+The SIYI **S.Bus Y cable is not needed** on this build.
 
 ### ArduPilot gimbal config (A8 mini on TELEM3)
 
@@ -385,14 +386,8 @@ triggering from Mission Planner.
 > classic symptom of firmware too old for the SIYI option. Flash current stable before debugging wiring.
 > Docs: <https://ardupilot.org/copter/docs/common-siyi-zr10-gimbal.html>
 
-> The ELRS receiver consumes **no FC ports** on Path A — it lives at the ground station feeding the
-> HM30 ground unit, so the crossed-TX/RX CRSF gotcha from the X500 doesn't apply here.
-
-> ⚠ **If you later want ELRS on the aircraft as a redundant link**, the constraint is not ports — the
-> dedicated RC IN is already taken by HM30 S.Bus. ELRS can go on GPS2 as a serial RC input
-> (ArduPilot `SERIALn_PROTOCOL=23`), but that leaves **two RC sources with no clean automatic
-> failover** in either ArduPilot or PX4. Verify current firmware behaviour before planning a dual-link
-> setup.
+> There is **only one RC source** on this build — the RP3 on GPS2. The HM30's S.Bus output is left
+> unconnected, so the dual-RC-source failover problem never arises.
 
 Why keep the SiK alongside HM30 telemetry: HM30 is 5.8 GHz and much more line-of-sight sensitive than
 915 MHz, so the SiK link holds telemetry through obstructions and orientations where video drops — and
@@ -407,12 +402,12 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] 6S 12 Ah pack ordered (Tattu-class, AS150, $270)
 - [ ] 2× 6S 5–6 Ah shakedown packs for maiden / ESC cal / PID tuning
 - [ ] Charger capability confirmed for 6S 12 Ah (D6 Pro is 200 W AC ≈ 1.5 h; DC supply for faster)
-- [ ] RC path decided (A: RP3 at ground station, vs B: TX16S trainer PPM)
+- [ ] RP3 bound to TX16S (phrase `dwdrones`), CRSF on GPS2, crossed TX/RX verified
 - [ ] **12 V/3 A BEC** sourced (feeds HM30 air unit + A8 mini); confirm air unit's current draw
 - [ ] All parts ordered
 - [ ] Airframe assembled + FC flashed with **current-stable ArduPilot** (needed for `MNT1_TYPE=8`)
 - [ ] Motor/ESC direction + calibration
-- [ ] HM30 link bound, RC relay working, A8 mini gimbal live on the bench
+- [ ] HM30 link bound (video + telemetry), A8 mini gimbal live on the bench via MAVLink
 - [ ] GPS lock + compass calibrated
 - [ ] Hover test + **measured** hover current / endurance
 - [ ] First cinematic mission flight
@@ -490,6 +485,15 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   already the only receiver on the airframe. Recorded the one real weakness it would have addressed —
   Path A carries RC on 5.8 GHz, so a link drop takes video and control together — as a
   review-after-flight item rather than a change.
+- **2026-07-26** — **RC architecture reversed: ELRS goes direct to the aircraft; the HM30 carries video
+  and telemetry only.** Routing flight control through the 5.8 GHz video link was the wrong trade — SIYI
+  publishes no RC latency figure for HM30, and stacking an ELRS hop, S.Bus quantisation and HM30 air
+  time adds delay for no gain. Direct ELRS gives 16 ch at ~5 ms with telemetry back to the TX, puts RC
+  on 2.4 GHz (better propagation), and decouples video loss from control loss. Costs ~20 g for the RP3
+  on the airframe. Also established the 8-channel limit was never real: **EdgeTX 2.10 supports S.Bus
+  out of the TX16S module bay**, so TX16S → HM30 direct at 16 ch is a viable fallback if ELRS ever
+  disappoints. Gimbal is unaffected — ArduPilot's SIYI driver over TELEM3 takes RC6/RC7 from ELRS, so
+  the **S.Bus Y cable is dropped**. RP3 moves to GPS2 as CRSF; RC IN now unused.
 
 ## Links
 
