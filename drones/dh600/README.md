@@ -178,17 +178,36 @@ against connectors shorts things, and traps heat. (Foil *does* earn its place sh
 receivers from nearby noise sources — classically under a GPS module — but the M10 is mast-mounted,
 which buys that separation by distance already.)
 
-**The real problem on this build is magnetic interference on the compass.** At 100 A peaks through
-8 AWG mains the field near those conductors is substantial, and foil does nothing for magnetic fields.
-Fixes are geometric and procedural:
+**Magnetic coupling into the compass is the interference that matters here**, and foil does nothing for
+magnetic fields. But the airframe geometry — electronics sandwiched between CF plates, compass on a
+mast — already handles the steady state. Field from a conductor is B = μ₀I/2πr, and a twisted pair
+cancels most of it:
 
-- **Mast height** for the GPS/compass — already provided by the frame's folding mast.
-- **Twist the battery leads.** Equal and opposite currents cancel their external field when twisted.
-  Free, and the largest single reduction available.
+| Configuration | Field at 200 mm | vs Earth's ~50 µT |
+|---------------|-----------------|-------------------|
+| Single conductor, 100 A | ~100 µT | 200 % |
+| Untwisted pair, 30 mm apart, 100 A | ~15 µT | 30 % |
+| Twisted pair ~5 mm, 100 A | ~2.5 µT | 5 % |
+| Twisted pair ~5 mm, **15.5 A hover** | ~0.4 µT | <1 % |
+
+At hover — essentially the whole flight — this is a non-issue with twisted leads. The concern is the
+**transient** during a hard climb pulling ~100 A, which is exactly when a heading error is least
+welcome. The X500 at 4S with 20 A ESCs never spikes hard enough to notice.
+
+- **Twist the battery leads.** Largest single reduction available, and free — note the table above is
+  driven far more by twisting than by mast length.
+- **Mast height** helps (it's in the denominator) — provided by the frame's folding mast.
 - **Route mains away from the mast base**; don't run them parallel to the GPS cable.
-- **Run CompassMot** during setup — ArduPilot measures compass deflection against throttle/current and
-  compensates. Matters far more here than on the X500; it's the difference between clean heading hold
-  and toilet-bowling under load.
+- **Run CompassMot** during setup — ArduPilot measures compass deflection against current and
+  compensates the transient. Five-minute calibration.
+
+The CF sandwich is magnetically transparent (carbon isn't ferromagnetic); it attenuates RF slightly and
+does nothing either way for this.
+
+⚠ **The GPS mast folds — the X500's doesn't.** Compass calibration assumes fixed orientation relative
+to the airframe, so a mast that doesn't return to exactly the same angle shifts offsets between
+sessions. On arrival, check it has a **positive repeatable lock** rather than a friction hinge, and
+re-check compass health after some fold cycles rather than assuming one calibration holds.
 
 Diagnose before treating: ArduPilot logs compass health, `MAG` magnitude vs. current, and SiK
 RSSI/noise.
@@ -633,6 +652,7 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] Motor/ESC direction + calibration
 - [ ] HM30 link bound (video + telemetry), A8 mini gimbal live on the bench via MAVLink
 - [ ] Battery leads twisted; mains routed clear of the GPS mast base
+- [ ] GPS mast checked for a **positive repeatable lock** (folding mast vs. fixed calibration)
 - [ ] GPS lock + compass calibrated, **CompassMot run** (high-current build — see interference note)
 - [ ] Hover test + **measured** hover current / endurance
 - [ ] First cinematic mission flight
@@ -764,6 +784,15 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   interference that actually matters on a 100 A 6S platform — **magnetic coupling into the compass**,
   against which foil is useless. Recorded the real mitigations: mast height (already provided), **twisted
   battery leads**, mains routed clear of the mast base, and **CompassMot** during setup.
+- **2026-07-26** — Walked back the compass-EMI framing after a fair challenge: both craft sandwich the
+  electronics between CF plates with the compass on a mast, and the DH600's mast looks *longer* than the
+  X500's. Ran the numbers — at 200 mm a twisted pair carrying 100 A gives ~2.5 µT (5 % of Earth's
+  field), and at 15.5 A hover it's ~0.4 µT, i.e. **a non-issue in steady state**. Twisting dominates
+  the result far more than mast length does (untwisted at 30 mm spacing would be ~15 µT, 30 %). Real
+  residual is the **transient** during a ~100 A climb, which is what CompassMot compensates. Noted the
+  CF sandwich is magnetically transparent. New airframe-specific catch: **the GPS mast folds** where
+  the X500's is fixed, so a non-repeatable hinge would shift compass offsets between sessions — check
+  for a positive lock on arrival.
 - **2026-07-26** — Correction: the base frame kit's landing gear is **manual, not electric** — the
   listing's machine-translated text presents electric retract as an add-on ("the tripod loaded into
   electric… do not have electric retractable when fully manual retractable") and I had over-read it.
