@@ -21,7 +21,8 @@ integration all have sourced numbers behind them. Remaining unknowns are vendor 
 Lift-and-loiter, not freestyle:
 
 - **600 mm folding airframe, 398 g** — packs to 235×185×65 mm, so the whole platform travels in a
-  bag. Folding GPS mast and retractable landing gear keep the gimbal's view clear.
+  bag. Folding GPS mast and folding landing gear — note the gear is **manual** on the base kit, so it
+  stays down in flight and will appear in wide/low shots (electric retract is an add-on option).
 - **Low-KV 4110 motors on 15" props** — high thrust per watt at low disc loading, so hover sits at
   a small fraction of throttle and endurance comes from efficiency rather than raw pack size.
 - **One large 6S pack** carries most of the AUW budget; the frame is rated to 3600 g all-up and the
@@ -192,18 +193,26 @@ three things that start mattering at range:
 - **Body blocking** — a 5" cluster hides behind a small plate; here it would hide behind a large CF
   canopy and body bay.
 
-**⚠ Mounting constraint: this airframe folds.** Both the arms and the landing gear articulate, and the
-gear is electrically retractable. That rules out the two obvious spots:
+**⚠ Mounting constraint: this airframe folds.** Arms and landing gear both articulate for transport.
+The gear on the base kit is **manual** — electric retract is an add-on option, not included (the
+listing's machine-translated text is ambiguous here; it reads as "electric *or* manual", with manual
+being the default). Consequences:
 
-- **Not on the retractable gear** — pattern changes between gear up/down, and the coax flexes every
-  cycle.
 - **Arm tips mean coax across a folding hinge** — U.FL plus repeated folding is a fatigue problem, and
   the arms fold every time the craft is packed, which is the whole point of the frame.
+- **Gear legs are viable.** Because the gear is manual it cannot be cycled in flight, so its position
+  is fixed while airborne and the antenna pattern is stable. Legs hang below the carbon, vertical,
+  clear of the 15" props and the electronics bay. Only the transport fold flexes the coax — handle it
+  with a service loop at the pivot.
+- **Preferred anyway: short downward booms off the centre body**, below the canopy line. Less
+  separation than arm tips, but nothing crosses a moving joint. Plan alongside the canopy layout since
+  the booms need an anchor.
 
-Preferred: short **downward booms off the centre body**, below the canopy line — less separation than
-arm tips would give, but nothing crosses a moving joint. If routing along an arm anyway, leave a
-service loop at the hinge and run along the hinge axis so folding twists rather than bends the cable.
-Plan this alongside the canopy layout, since the booms need an anchor.
+**⚠ Gimbal field of view constrains placement too.** On a camera platform, antennas must stay out of
+shot. Note that manual gear stays **down for the whole flight** — clearing the shot is precisely why
+camera aircraft have retracts — so wide panning and low-angle shots will show the legs, and anything
+mounted on them. Check the A8 mini's yaw range against the planned mounting positions. Adding the
+electric retract option later is worth considering for the footage, independent of the antennas.
 
 **Where the gain actually is: the ground station.** The aircraft must stay omnidirectional because it
 banks and turns, so gain can't live there. The ground station roughly knows where the aircraft is, so
@@ -503,7 +512,9 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] ELRS packet rate set to **50 Hz** for range (latency irrelevant on this platform)
 - [ ] **Antenna placement planned** — 5 antennas, all outside the carbon, RP3 pair orthogonal, TX/RX
       separated (see [antenna installation](#antenna-installation))
-- [ ] Antenna booms designed off the **centre body** (no coax across the folding arms or retract gear)
+- [ ] Antenna booms designed off the **centre body** (no coax across the folding arms); check nothing
+      sits in the gimbal's field of view
+- [ ] Decide whether to add the **electric retract** option — manual gear stays in shot
 - [ ] Antenna brackets printed/fitted (no tape, no dangling)
 - [ ] Consider a directional ground-station antenna for long-range sorties
 - [ ] **12 V/3 A BEC** sourced (feeds HM30 air unit + A8 mini); confirm air unit's current draw
@@ -612,6 +623,15 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   two antennas must be mounted **orthogonally** or the diversity is wasted. Also noted that
   long-range gain belongs on the **ground station** (directional patch/helical), since the aircraft has
   to stay omnidirectional.
+- **2026-07-26** — Correction: the base frame kit's landing gear is **manual, not electric** — the
+  listing's machine-translated text presents electric retract as an add-on ("the tripod loaded into
+  electric… do not have electric retractable when fully manual retractable") and I had over-read it.
+  Consequence for antennas is mildly favourable: manual gear can't be cycled in flight, so its position
+  is fixed while airborne and **gear legs are a viable mounting spot** (only the transport fold flexes
+  the coax, fixable with a service loop). The arm-hinge constraint is unchanged. New consequence for
+  the mission: **gear stays down for the whole flight**, so it will be in frame on wide and low shots —
+  worth evaluating the electric retract add-on for footage reasons, and worth checking the A8 mini's
+  yaw range against any antenna placement.
 
 ## Links
 
