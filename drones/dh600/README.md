@@ -31,6 +31,22 @@ Lift-and-loiter, not freestyle:
   actual mission payload. RC stays off that link: **ELRS direct to the aircraft**, HM30 for video and
   telemetry only (see [RC architecture](#rc-architecture)).
 
+### Why this airframe over a 7–9" long-range build
+
+A 7–9" quad is cheaper and much cheaper to crash, but it's the wrong shape for a gimballed camera:
+
+- **Prop-in-view** — a panning 3-axis gimbal needs props out of frame. 600 mm of wheelbase with the
+  camera slung below the body keeps 15" props outside the shot; on a 7" they're in every wide frame.
+- **Vibration** — ~4000 RPM on 15" props versus 15,000+ RPM on a 7". Gimbals and rolling-shutter
+  sensors hate high-frequency vibration and soft-mounting only partly fixes it.
+- **Clearance and mounting** — the A8 mini is 55×55×70 mm and must hang and pan freely. This frame has
+  a purpose-built bay and 135 mm ground clearance; a freestyle frame has neither.
+- **Payload fraction** — A8 mini + HM30 is ~190 g: 6 % of AUW here, ~13 % on a 1.5 kg 7".
+- **Transport** — folded to 235×185×65 mm this is *smaller* than a rigid 9", which doesn't fold at all.
+
+Accepted trade: at ~3.4 kg this is a camera platform, not a chase ship. It will not do anything
+dynamic, which is consistent with the stated goal of long flights and cinematic missions.
+
 ## Frame spec (DH600 folding kit)
 
 Taken from the seller listing (see [Links](#links)); worth re-verifying on arrival.
