@@ -39,9 +39,9 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 | RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into GPS2; bind phrase `dwdrones`; run at **50 Hz** for range |
 | SiK 915 MHz telemetry radio | 1 | check X500 spare | — | on TELEM2; may need a second set if the X500's stays put |
 | Antenna booms/brackets (printed) | 5 | **to make** | ~$0 | centre-body downward booms — must not cross the folding arms or retract gear; RP3 pair orthogonal and widely separated |
-| muzi works 17 cm 915 MHz whip (SiK) | 1 | **to buy** | ~$10 | SWR 1.3 vs stock 3.5; ~3–6 dB better. **184 mm — mount pointing up**, won't clear the 135 mm gear |
-| _Optional:_ directional ground-station antenna | 1 | consider | ? | patch/helical/moxon — where the real long-range gain is |
-| _Have:_ 5.8 dBi 915 MHz collinear (roof) | 1 | on hand | — | good for long range/low elevation; weak overhead; **roof-fixed, not portable** |
+| muzi works 17 cm 915 MHz whip | **2** | **to buy** | ~$10 ea | one per SiK end (aircraft + laptop). SWR 1.3 vs stock 3.5, ~3–6 dB. Airframe one is **184 mm — mount pointing up**, won't clear the 135 mm gear |
+| _Later, if logs justify:_ tripod/mast ground setup | 1 | wait and see | ? | decide from logged SiK RSSI, not speculation |
+| _Have:_ 5.8 dBi 915 MHz collinear (roof) | 1 | on hand | — | suits long range/low elevation; weak overhead; roof-fixed. Check feedline loss before assuming it beats a laptop whip |
 
 ## Video & payload
 

@@ -251,12 +251,29 @@ definition; this is ~2–3 dBi. The SWR measurement is the trustworthy number, n
   case form a ground plane. At ~0.56λ it's less ground-plane-dependent than a quarter-wave, but a
   **sleeve dipole** would be more predictable on a carbon boom.
 
-**Ground side:** a 5.8 dBi 915 MHz collinear (already roof-mounted) is *not* excessive — collinears
-gain by flattening the pattern to the horizon, and at 5 km / 120 m altitude the aircraft sits at a 1.4°
-elevation angle, right in the strong lobe. Two caveats: it is weak **close and overhead** (200 m out,
-100 m up = 27° elevation, well down the pattern), and it is fixed to the roof, so it only helps when
-flying from home. **For field use, height and clear line of sight beat dBi** — get the antenna up on a
-tripod and away from your body and vehicle; a human body is a significant 915 MHz absorber.
+**Ground side — plan: SiK dual-locked to the laptop lid, Muzi whip on both ends.** Improving either
+end of a link helps the whole path, so two cheap good antennas beats one good and one stubby. Local
+empirical support: Heltec V3 Meshtastic nodes are reportedly unusable in this area on stock antennas
+but fine with the Muzi — the stock-stubby SWR figure is not theoretical here.
+
+- ⚠ **The lid is a reflector.** A laptop screen's metal backing shadows whatever sits behind it, making
+  the pattern roughly half-space aimed wherever the lid faces — and it rotates when the laptop is
+  repositioned. Get the antenna **above the lid line** if possible. Laptops are also electrically
+  noisy; watch whether link quality varies with USB port and what else is plugged in.
+- ⚠ **915 MHz coexistence.** A SiK streaming MAVLink shares ISM with the local Meshtastic nodes,
+  including an actively-relaying roof node. Should be fine (Meshtastic is duty-cycle limited and
+  bursty, SiK hops), but it's the first candidate if odd telemetry dropouts appear when flying
+  from home.
+- **Decide with data, not speculation.** ArduPilot logs SiK RSSI and link quality — review after a few
+  flights and only invest in a tripod/mast setup if the logs show it's needed.
+- **If the roof collinear is ever fed to the laptop, check feedline loss first.** At 915 MHz a 50 ft
+  RG-58 run is ~3.3 dB — more than half the 5.8 dBi gone before it reaches the radio. LMR-400 over the
+  same run is ~2 dB. A decent whip on the laptop may beat a distant antenna through poor coax.
+
+**For field use generally, height and clear line of sight beat dBi** — get the antenna up and away
+from your body and vehicle; a human body is a significant 915 MHz absorber. Note the roof collinear is
+well matched to long range (flattened pattern suits a 1.4° elevation angle at 5 km) but weak close and
+overhead (200 m out, 100 m up = 27° elevation), and is fixed to the house regardless.
 
 **Where the gain actually is: the ground station.** The aircraft must stay omnidirectional because it
 banks and turns, so gain can't live there. The ground station roughly knows where the aircraft is, so
@@ -676,6 +693,14 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   collinear judged well-suited to long range** — the flattened pattern matches a 1.4° elevation angle
   at 5 km — but weak overhead and roof-fixed, so field work needs a portable mast where height and
   clear line of sight matter more than dBi.
+- **2026-07-26** — Ground station settled: **SiK dual-locked to the laptop lid, Muzi whip on both
+  ends** (2 units — improving either end helps the whole path). Local evidence supports it: Heltec V3
+  Meshtastic nodes are unusable here on stock antennas but fine with the Muzi. Noted three cautions —
+  the **laptop lid is a metal reflector** so the pattern is half-space and rotates with the laptop;
+  **915 MHz coexistence** with the local Meshtastic mesh (incl. an actively relaying roof node) is the
+  first suspect for telemetry dropouts when flying from home; and **feedline loss** would likely eat
+  the roof collinear's 5.8 dBi (50 ft RG-58 ≈ 3.3 dB) if it were ever cabled to the laptop. Tripod/mast
+  upgrade deferred — decide from logged SiK RSSI after a few flights.
 - **2026-07-26** — Correction: the base frame kit's landing gear is **manual, not electric** — the
   listing's machine-translated text presents electric retract as an add-on ("the tripod loaded into
   electric… do not have electric retractable when fully manual retractable") and I had over-read it.
