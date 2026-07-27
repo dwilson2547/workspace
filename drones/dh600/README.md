@@ -168,6 +168,31 @@ canopy has nothing to exchange heat with, so **plan canopy venting around it**. 
 of the electronics-bay layout before parts arrive. (Passive sealed boxes are fine for low-power gear —
 proven on the roof Meshtastic node over a year — but this is not that.)
 
+### Interference — magnetic, not RF
+
+**Don't bother foil-wrapping the SiK radios.** An ungrounded shield is not a shield — floating foil can
+couple and re-radiate, sometimes worse than bare. Beyond that: the antenna, not the PCB, is the
+coupling path for anything reaching the receiver; a SiK is ~100 mW of narrowband 915 MHz emitted
+deliberately, not broadband hash needing containment; and foil near the feed detunes the antenna,
+against connectors shorts things, and traps heat. (Foil *does* earn its place shielding susceptible
+receivers from nearby noise sources — classically under a GPS module — but the M10 is mast-mounted,
+which buys that separation by distance already.)
+
+**The real problem on this build is magnetic interference on the compass.** At 100 A peaks through
+8 AWG mains the field near those conductors is substantial, and foil does nothing for magnetic fields.
+Fixes are geometric and procedural:
+
+- **Mast height** for the GPS/compass — already provided by the frame's folding mast.
+- **Twist the battery leads.** Equal and opposite currents cancel their external field when twisted.
+  Free, and the largest single reduction available.
+- **Route mains away from the mast base**; don't run them parallel to the GPS cable.
+- **Run CompassMot** during setup — ArduPilot measures compass deflection against throttle/current and
+  compensates. Matters far more here than on the X500; it's the difference between clean heading hold
+  and toilet-bowling under load.
+
+Diagnose before treating: ArduPilot logs compass health, `MAG` magnitude vs. current, and SiK
+RSSI/noise.
+
 ### Possible upgrade: RTK positioning
 
 An **RTK base station is already running on the roof**, which is normally the expensive half. For a
@@ -607,7 +632,8 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] Airframe assembled + FC flashed with **current-stable ArduPilot** (needed for `MNT1_TYPE=8`)
 - [ ] Motor/ESC direction + calibration
 - [ ] HM30 link bound (video + telemetry), A8 mini gimbal live on the bench via MAVLink
-- [ ] GPS lock + compass calibrated
+- [ ] Battery leads twisted; mains routed clear of the GPS mast base
+- [ ] GPS lock + compass calibrated, **CompassMot run** (high-current build — see interference note)
 - [ ] Hover test + **measured** hover current / endurance
 - [ ] First cinematic mission flight
 
@@ -732,6 +758,12 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   unit is fan-cooled** and rated to 50 °C, so the canopy needs venting — a sealed enclosure works for
   passive low-power gear (proven on the roof node over a year) but not for an actively cooled
   transmitter.
+- **2026-07-26** — Considered foil-wrapping the SiK radios and rejected it: an **ungrounded shield is
+  not a shield** (floating foil can re-radiate), the antenna rather than the PCB is the coupling path,
+  and a SiK is narrowband intentional emission rather than broadband hash. Redirected to the
+  interference that actually matters on a 100 A 6S platform — **magnetic coupling into the compass**,
+  against which foil is useless. Recorded the real mitigations: mast height (already provided), **twisted
+  battery leads**, mains routed clear of the mast base, and **CompassMot** during setup.
 - **2026-07-26** — Correction: the base frame kit's landing gear is **manual, not electric** — the
   listing's machine-translated text presents electric retract as an add-on ("the tripod loaded into
   electric… do not have electric retractable when fully manual retractable") and I had over-read it.
