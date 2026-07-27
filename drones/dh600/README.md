@@ -230,6 +230,34 @@ camera aircraft have retracts — so wide panning and low-angle shots will show 
 mounted on them. Check the A8 mini's yaw range against the planned mounting positions. Adding the
 electric retract option later is worth considering for the footage, independent of the antennas.
 
+#### 915 MHz (SiK) antenna
+
+Worth upgrading from the stock stubby — the SiK's whole job is being the link that survives when the
+5.8 GHz video drops, so a crippled backup is worthless. Candidate: **muzi works 17 cm 915 MHz whip**
+(Meshtastic community standard). Their measured **SWR 1.3 vs 3.5 for a stock stubby** is the honest
+figure: SWR 3.5 reflects 31 % of power back into the radio (−1.6 dB), SWR 1.3 reflects 1.7 %
+(−0.07 dB). That's ~1.5 dB from matching alone, plus efficiency gains from being a real resonant
+element (17 cm ≈ half-wave at 915 MHz, λ/2 = 164 mm). Realistically **3–6 dB total**; 6 dB doubles
+range.
+
+Ignore "10 dBi" on some listings — impossible at that length. A half-wave dipole is 2.15 dBi by
+definition; this is ~2–3 dBi. The SWR measurement is the trustworthy number, not the gain claim.
+
+- ⚠ **Won't fit hanging down.** The whip is 184 mm; the frame sits **135 mm** above ground, so a
+  downward vertical mount extends past the gear contact point and gets crushed on landing. **Mount it
+  pointing up on a mast** (the folding GPS mast is precedent) — the pattern is symmetric about the
+  antenna axis and horizon coverage is what matters at range.
+- ⚠ **Counterpoise.** It's an SMA-male whip designed to screw onto a Meshtastic node where the PCB and
+  case form a ground plane. At ~0.56λ it's less ground-plane-dependent than a quarter-wave, but a
+  **sleeve dipole** would be more predictable on a carbon boom.
+
+**Ground side:** a 5.8 dBi 915 MHz collinear (already roof-mounted) is *not* excessive — collinears
+gain by flattening the pattern to the horizon, and at 5 km / 120 m altitude the aircraft sits at a 1.4°
+elevation angle, right in the strong lobe. Two caveats: it is weak **close and overhead** (200 m out,
+100 m up = 27° elevation, well down the pattern), and it is fixed to the roof, so it only helps when
+flying from home. **For field use, height and clear line of sight beat dBi** — get the antenna up on a
+tripod and away from your body and vehicle; a human body is a significant 915 MHz absorber.
+
 **Where the gain actually is: the ground station.** The aircraft must stay omnidirectional because it
 banks and turns, so gain can't live there. The ground station roughly knows where the aircraft is, so
 a **directional patch / helical / moxon** on the ground buys gain on both uplink and downlink. For
@@ -639,6 +667,15 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   two antennas must be mounted **orthogonally** or the diversity is wasted. Also noted that
   long-range gain belongs on the **ground station** (directional patch/helical), since the aircraft has
   to stay omnidirectional.
+- **2026-07-26** — Evaluated the **muzi works 17 cm 915 MHz whip** for the SiK. Worth it: their
+  measured **SWR 1.3 vs 3.5** for a stock stubby is ~1.5 dB from matching alone, plus efficiency from
+  being a real half-wave-ish radiator — call it 3–6 dB. ("10 dBi" listing claims are fiction at that
+  length; a half-wave dipole is 2.15 dBi.) Two airframe catches recorded: at **184 mm it is longer than
+  the 135 mm ground clearance**, so it must point *up* on a mast rather than hang down, and its
+  counterpoise assumption (screwed to a node PCB) differs on a carbon boom. Existing **5.8 dBi roof
+  collinear judged well-suited to long range** — the flattened pattern matches a 1.4° elevation angle
+  at 5 km — but weak overhead and roof-fixed, so field work needs a portable mast where height and
+  clear line of sight matter more than dBi.
 - **2026-07-26** — Correction: the base frame kit's landing gear is **manual, not electric** — the
   listing's machine-translated text presents electric retract as an add-on ("the tripod loaded into
   electric… do not have electric retractable when fully manual retractable") and I had over-read it.
