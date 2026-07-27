@@ -76,7 +76,7 @@ Parts on hand vs. still-to-buy: [`inventory.md`](inventory.md).
 
 **ELRS direct to the aircraft. The HM30 carries video and telemetry only.**
 
-```
+```text
 TX16S ──ELRS 2.4GHz──> RP3 (on aircraft) ──CRSF──> Pixhawk 6C ──MAVLink──> A8 mini gimbal
 A8 mini ──Ethernet──> HM30 air unit ──5.8GHz──> ground unit (video + telemetry)
                       HM30 air unit ──MAVLink──> TELEM1
@@ -112,6 +112,37 @@ rejected:
 
 Keep the first row in mind as a **fallback**: if ELRS ever proves problematic, the TX16S can drive the
 HM30 directly at 16 channels without extra hardware.
+
+### Range budget — video fails before control
+
+Deliberate, and the safe ordering. **Set the ELRS packet rate to 50 Hz**: halving packet rate roughly
+doubles range, 50 Hz reaches ~30 km, and 20 ms latency is irrelevant on a platform flying smooth
+mission profiles. Free, and it buys more range than any hardware.
+
+Two reasons RC outlasts video:
+
+- **Path loss** — 2.4 GHz sees ~7.7 dB less free-space loss than 5.8 GHz at the same distance, plus
+  better diffraction around obstacles.
+- **Bitrate** — HM30 pushes 1080p60 (megabits); RC is a few hundred bytes/sec. High-bitrate links need
+  far more SNR, so video degrades first.
+
+Failure ordering is therefore: **video drops → control retained → ArduPilot RTL brings it home.** The
+reverse would be the dangerous case, and keeping RC off the HM30 is what prevents it.
+
+#### If more control-link margin is ever wanted
+
+⚠ **Gemini is not a receiver swap.** It is a TX+RX scheme; the TX16S internal module is single-band
+2.4 GHz, so a Gemini receiver alone does nothing. The real pairing is **RadioMaster Nomad** (dual 1 W
+Gemini Xrossband JR-bay module) + **RadioMaster DBR4** (dual-band receiver) — two purchases, prices
+unchecked. Gemini mode gives frequency diversity within a band; Xrossband runs 2.4 GHz and 868/915 MHz
+simultaneously for genuinely independent paths.
+
+⚠ **Xrossband collides with the SiK radio.** The 900 MHz half would sit inches from the 915 MHz SiK
+telemetry link on TELEM2. One has to go — and since the HM30 already carries MAVLink telemetry, the
+SiK is the natural casualty. Decide before buying.
+
+Cheaper middle option: a **true-diversity receiver** (two antennas) protects against orientation nulls
+rather than raw range, and works with the existing TX16S unchanged.
 
 ### Rejected: SIYI FM30
 
@@ -403,6 +434,7 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] 2× 6S 5–6 Ah shakedown packs for maiden / ESC cal / PID tuning
 - [ ] Charger capability confirmed for 6S 12 Ah (D6 Pro is 200 W AC ≈ 1.5 h; DC supply for faster)
 - [ ] RP3 bound to TX16S (phrase `dwdrones`), CRSF on GPS2, crossed TX/RX verified
+- [ ] ELRS packet rate set to **50 Hz** for range (latency irrelevant on this platform)
 - [ ] **12 V/3 A BEC** sourced (feeds HM30 air unit + A8 mini); confirm air unit's current draw
 - [ ] All parts ordered
 - [ ] Airframe assembled + FC flashed with **current-stable ArduPilot** (needed for `MNT1_TYPE=8`)
@@ -494,6 +526,13 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   out of the TX16S module bay**, so TX16S → HM30 direct at 16 ch is a viable fallback if ELRS ever
   disappoints. Gimbal is unaffected — ArduPilot's SIYI driver over TELEM3 takes RC6/RC7 from ELRS, so
   the **S.Bus Y cable is dropped**. RP3 moves to GPS2 as CRSF; RC IN now unused.
+- **2026-07-26** — Checked the range budget after asking whether the control link would out-range the
+  camera. It's the other way round and that's the safe ordering: 2.4 GHz sees ~7.7 dB less path loss
+  than 5.8 GHz, and the HM30's 1080p60 bitrate needs far more SNR than RC does, so **video fails first
+  and RTL brings it home**. Action is free — run **ELRS at 50 Hz** (~30 km; halving packet rate roughly
+  doubles range, and 20 ms latency is irrelevant here). Recorded that **Gemini is a TX+RX scheme, not a
+  receiver swap** (needs Nomad module + DBR4), and that its Xrossband 900 MHz half would **collide with
+  the 915 MHz SiK** on TELEM2.
 
 ## Links
 

@@ -36,7 +36,7 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 | Holybro PM07 power module | 1 | in FC kit | — | 90 A cont / 140 A burst; hover 15.5 A = 17 %, vigorous 37 A = 41 %; B+ pads + PWM header = ESC distribution; 2× 5.2 V/3 A BEC |
 | ~~Holybro PM08-CAN + 300 A PDB~~ | — | rejected | ~$150 | margin never reached in flight — see README |
 | FC silicone bushings | 1 set | **to buy** | $2.66 | vibration isolation |
-| RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into GPS2; bind phrase `dwdrones`; may swap to Gemini |
+| RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into GPS2; bind phrase `dwdrones`; run at **50 Hz** for range |
 | SiK 915 MHz telemetry radio | 1 | check X500 spare | — | on TELEM2; may need a second set if the X500's stays put |
 
 ## Video & payload
