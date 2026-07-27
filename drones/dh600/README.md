@@ -93,11 +93,30 @@ sane paths:
 channels fast, and 8 is tight. It also means the RP3 you already listed is *not* wasted; it just
 moves off the airframe, saving weight and one antenna install.
 
-Note the RP3 is **not** needed on the aircraft, and range is set by the HM30 link, not by ELRS.
+Note the RP3 is **not** needed on the aircraft, and range is set by the HM30 link, not by ELRS. **The
+HM30 air unit is the only receiver on the airframe** — Ethernet in from the A8 mini, S.Bus out to the
+FC.
 
 If you want a genuinely redundant air-side RC link later, the good news is there's **no RF conflict**:
 HM30 sits at 5.8 GHz and ELRS RP3 at 2.4 GHz, so a second ELRS receiver on the airframe would
 coexist cleanly. That's a later addition, not needed for first flight.
+
+#### Considered: SIYI FM30 (rejected)
+
+The **FM30** is a complete parallel radio system, not a bridge into the HM30: a 2.4 GHz JR-bay TX module
+for the TX16S (30 km, 16 ch, 10 ms, Bluetooth FC config) paired with its own **FR / FR Mini receiver**
+that mounts *on the aircraft*. Its partner is that receiver, not the HM30 ground unit — so buying it
+would **add** an air-side receiver rather than remove one. Using an FR receiver on the ground to feed
+the HM30 is just Path A with pricier hardware than the $18 RP3.
+
+#### Known weakness of Path A
+
+Path A puts **RC on 5.8 GHz**, which propagates worse than 2.4 GHz around obstructions and off-axis,
+and makes a link drop cost video *and* control at once — a single point of failure. An air-side ELRS
+receiver (or FM30) would split RC onto 2.4 GHz with independent failure modes. Counterweight: SIYI
+rates HM30 at 30 km as a control link, and ArduPilot triggers RTL on RC loss, so this is a robustness
+preference rather than a defect. **Decision: fly Path A, review logged RC link quality, revisit with
+data if dropouts appear at range.**
 
 ## Power & endurance budget
 
@@ -465,6 +484,12 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   new charger — the D6 Pro is 6S max. Recorded in [Why 6S](#why-6s-and-not-higher).
 - **2026-07-26** — **Frame ordered.** Nothing else purchased yet; design continues to be refined
   against vendor data before committing to the electronics.
+- **2026-07-26** — Looked at the **SIYI FM30** TX16S module and rejected it: it's a parallel 2.4 GHz
+  radio system (JR-bay TX module + its own FR air-side receiver), not a bridge into the HM30 ground
+  unit, so it would add an airborne receiver rather than remove one. Confirmed the HM30 air unit is
+  already the only receiver on the airframe. Recorded the one real weakness it would have addressed —
+  Path A carries RC on 5.8 GHz, so a link drop takes video and control together — as a
+  review-after-flight item rather than a change.
 
 ## Links
 
