@@ -41,6 +41,7 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 | Antenna booms/brackets (printed) | 5 | **to make** | ~$0 | centre-body downward booms — must not cross the folding arms or retract gear; RP3 pair orthogonal and widely separated |
 | muzi works 17 cm 915 MHz whip | **2** | **to buy** | ~$10 ea | one per SiK end (aircraft + laptop). SWR 1.3 vs stock 3.5, ~3–6 dB. Airframe one is **184 mm — mount pointing up**, won't clear the 135 mm gear |
 | _Later, if logs justify:_ tripod/mast ground setup | 1 | wait and see | ? | decide from logged SiK RSSI, not speculation |
+| _Possible upgrade:_ F9P-class RTK rover GPS | 1 | future | ~$200–300 | RTK base already on the roof; **M10 cannot do RTK**. Send RTCM over the HM30 link, not the SiK |
 | _Have:_ 5.8 dBi 915 MHz collinear (roof) | 1 | on hand | — | suits long range/low elevation; weak overhead; roof-fixed. Check feedline loss before assuming it beats a laptop whip |
 
 ## Video & payload

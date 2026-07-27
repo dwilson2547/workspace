@@ -161,6 +161,29 @@ SiK is the natural casualty. Decide before buying.
 Cheaper middle option: a **true-diversity receiver** (two antennas) protects against orientation nulls
 rather than raw range, and works with the existing TX16S unchanged.
 
+### Thermal — the HM30 air unit is actively cooled
+
+The air unit **ships with a cooling fan** and is rated −10 to 50 °C. A fan inside a sealed carbon
+canopy has nothing to exchange heat with, so **plan canopy venting around it**. Worth resolving as part
+of the electronics-bay layout before parts arrive. (Passive sealed boxes are fine for low-power gear —
+proven on the roof Meshtastic node over a year — but this is not that.)
+
+### Possible upgrade: RTK positioning
+
+An **RTK base station is already running on the roof**, which is normally the expensive half. For a
+survey/cinematic platform RTK is a real capability jump — centimetre positioning instead of the M10's
+metre-class, which matters for photogrammetry and repeatable camera moves.
+
+- ⚠ **The M10 cannot do RTK** — single-band GNSS, no RTK capability. Needs an **F9P-class rover**
+  (e.g. Holybro H-RTK F9P, ~$200–300).
+- ArduPilot handles injection natively: Mission Planner takes **RTCM3** from the base and forwards it
+  over the telemetry link. Confirm the existing base outputs RTCM3.
+- **Send RTCM over the HM30 MAVLink path**, not the SiK — RTCM alongside normal telemetry on a
+  57600-baud SiK gets tight and usually forces stream-rate trimming. The dual-link setup suits this:
+  HM30 for corrections, SiK as backup telemetry.
+
+Not needed for first flight; recorded because the upgrade is one part rather than a redesign.
+
 ### Antenna installation
 
 **Highest-leverage item on this build, and free.** A bad install costs 10–20 dB — more than the
@@ -573,6 +596,7 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] ELRS packet rate set to **50 Hz** for range (latency irrelevant on this platform)
 - [ ] **Antenna placement planned** — 5 antennas, all outside the carbon, RP3 pair orthogonal, TX/RX
       separated (see [antenna installation](#antenna-installation))
+- [ ] Canopy venting planned for the **fan-cooled HM30 air unit** (rated to 50 °C)
 - [ ] Antenna booms designed off the **centre body** (no coax across the folding arms); check nothing
       sits in the gimbal's field of view
 - [ ] Decide whether to add the **electric retract** option — manual gear stays in shot
@@ -701,6 +725,13 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   first suspect for telemetry dropouts when flying from home; and **feedline loss** would likely eat
   the roof collinear's 5.8 dBi (50 ft RG-58 ≈ 3.3 dB) if it were ever cabled to the laptop. Tripod/mast
   upgrade deferred — decide from logged SiK RSSI after a few flights.
+- **2026-07-26** — Two items from the roof-node setup. **An RTK base station is already running on the
+  roof**, so RTK is a one-part upgrade rather than a redesign — but the **M10 cannot do RTK** and would
+  need an F9P-class rover (~$200–300); RTCM should go over the HM30 MAVLink path rather than the
+  57600-baud SiK. Recorded as a future option, not needed for first flight. Separately: the **HM30 air
+  unit is fan-cooled** and rated to 50 °C, so the canopy needs venting — a sealed enclosure works for
+  passive low-power gear (proven on the roof node over a year) but not for an actively cooled
+  transmitter.
 - **2026-07-26** — Correction: the base frame kit's landing gear is **manual, not electric** — the
   listing's machine-translated text presents electric retract as an add-on ("the tripod loaded into
   electric… do not have electric retractable when fully manual retractable") and I had over-read it.
