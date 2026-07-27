@@ -144,6 +144,48 @@ SiK is the natural casualty. Decide before buying.
 Cheaper middle option: a **true-diversity receiver** (two antennas) protects against orientation nulls
 rather than raw range, and works with the existing TX16S unchanged.
 
+### Antenna installation
+
+**Highest-leverage item on this build, and free.** A bad install costs 10–20 dB — more than the
+difference between 50 Hz and 500 Hz packet rates. The casual approach used on the X500 (receiver
+taped to the frame, antennas dangling) is fine there because short range leaves huge link margin; it
+is not fine here.
+
+**Carbon fiber is the dominant factor.** The DH600 is a full CF frame with a CF canopy, and carbon is
+conductive — it blocks and reflects RF. **Every antenna must sit outside the carbon**, never inside
+the body bay or under a plate.
+
+**Five antennas, three transmitters.** Needs a placement plan, not opportunistic mounting:
+
+| System | Antennas | Band | Role |
+|--------|----------|------|------|
+| RP3 ELRS | 2 (diversity, antenna switching) | 2.4 GHz | RX |
+| HM30 air unit | 2 (5 dBi omni) | 5.8 GHz | TX |
+| SiK radio | 1 | 915 MHz | TX |
+
+Rules for this airframe:
+
+- **Mount the RP3's two antennas orthogonally** — one vertical, one horizontal, or a 90° V. Parallel
+  antennas hit the same null simultaneously and waste the diversity entirely. Cheapest available range
+  improvement. (The RP3 is already a diversity receiver — no need to buy one.)
+- **Respect the dipole null.** A dipole radiates in a toroid with near-zero output off its ends.
+  Vertical antennas (hanging down off arms or gear legs) put the toroid on the horizon, where the
+  ground station is at distance. An antenna pointed *at* the ground station is the failure case.
+- **Separate the transmitters from the ELRS receiver.** HM30 and SiK both transmit inches away; a
+  strong nearby transmitter desenses a receiver front-end via near-field coupling regardless of band
+  separation. Use the 600 mm span.
+- **Keep antennas and coax away from ESCs, motor phase wires and the 8 AWG mains** — all PWM switching
+  noise sources.
+- **U.FL is fragile.** No kinks or tight bends, strain-relieve the coax, don't coil excess near the
+  antenna.
+- **Fixed brackets, not tape** — printed mounts or tube clamps on the arms/gear. Antennas flapping in
+  15" prop wash change the pattern in flight and fatigue the coax.
+
+**Where the gain actually is: the ground station.** The aircraft must stay omnidirectional because it
+banks and turns, so gain can't live there. The ground station roughly knows where the aircraft is, so
+a **directional patch / helical / moxon** on the ground buys gain on both uplink and downlink. For
+30 km work this is the standard move and is worth more than anything done on the airframe.
+
 ### Rejected: SIYI FM30
 
 The **FM30** is a complete parallel radio system, not a bridge into the HM30: a 2.4 GHz JR-bay TX module
@@ -435,6 +477,10 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] Charger capability confirmed for 6S 12 Ah (D6 Pro is 200 W AC ≈ 1.5 h; DC supply for faster)
 - [ ] RP3 bound to TX16S (phrase `dwdrones`), CRSF on GPS2, crossed TX/RX verified
 - [ ] ELRS packet rate set to **50 Hz** for range (latency irrelevant on this platform)
+- [ ] **Antenna placement planned** — 5 antennas, all outside the carbon, RP3 pair orthogonal, TX/RX
+      separated (see [antenna installation](#antenna-installation))
+- [ ] Antenna brackets printed/fitted (no tape, no dangling)
+- [ ] Consider a directional ground-station antenna for long-range sorties
 - [ ] **12 V/3 A BEC** sourced (feeds HM30 air unit + A8 mini); confirm air unit's current draw
 - [ ] All parts ordered
 - [ ] Airframe assembled + FC flashed with **current-stable ArduPilot** (needed for `MNT1_TYPE=8`)
@@ -533,6 +579,14 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   doubles range, and 20 ms latency is irrelevant here). Recorded that **Gemini is a TX+RX scheme, not a
   receiver swap** (needs Nomad module + DBR4), and that its Xrossband 900 MHz half would **collide with
   the 915 MHz SiK** on TELEM2.
+- **2026-07-26** — Added an **antenna installation** section; it was missing and is the
+  highest-leverage remaining item. A poor install costs 10–20 dB, more than any packet-rate change.
+  Key points for this airframe: the frame is **full carbon and conductive**, so every antenna must sit
+  outside it; there are **5 antennas and 3 transmitters** on one 600 mm craft, so TX/RX separation
+  matters; and the **RP3 is already a diversity receiver** (dual T antennas, antenna switching), so its
+  two antennas must be mounted **orthogonally** or the diversity is wasted. Also noted that
+  long-range gain belongs on the **ground station** (directional patch/helical), since the aircraft has
+  to stay omnidirectional.
 
 ## Links
 

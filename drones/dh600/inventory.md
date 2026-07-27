@@ -38,6 +38,8 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 | FC silicone bushings | 1 set | **to buy** | $2.66 | vibration isolation |
 | RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into GPS2; bind phrase `dwdrones`; run at **50 Hz** for range |
 | SiK 915 MHz telemetry radio | 1 | check X500 spare | — | on TELEM2; may need a second set if the X500's stays put |
+| Antenna brackets (printed or tube clamp) | 5 | **to make/buy** | ~$0 | fixed mounts for 5 antennas, clear of carbon; RP3 pair orthogonal |
+| _Optional:_ directional ground-station antenna | 1 | consider | ? | patch/helical/moxon — where the real long-range gain is |
 
 ## Video & payload
 
