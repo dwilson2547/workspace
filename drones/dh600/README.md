@@ -78,13 +78,13 @@ This build **matches the listing's recommended config #2 exactly** — *4110/400
 | Power module + distribution | **Holybro PM07** (90 A cont / 140 A burst, 2–14S), from the FC kit | B+ pads + PWM header feed the ESCs — **replaces the separate PDB**; 2× 5.2 V/3 A BEC |
 | Battery connector | **AS150 + 8 AWG** (XT120 minimum) | replaces the shipped XT60 + 12 AWG — see below |
 | Flight controller | **Pixhawk 6C** (full size), 59.3 g, 84.8×44×12.4 mm | kit includes **M10 GPS** + **PM07**; ~$300, cheaper than the 6C Mini bundle |
-| FC mounting | Silicone bushings | vibration isolation for the 6C Mini |
+| FC mounting | Silicone bushings | vibration isolation for the 6C |
 | GPS / compass | **M10** (in FC kit) | on the frame's folding GPS mast |
 | Video + telemetry | **SIYI HM30** | 5.1–5.825 GHz proprietary link; **not** used for RC on this build |
 | Camera / gimbal | **SIYI A8 mini** | 3-axis, 95 g, 55×55×70 mm; 11–25.2 V, 12 W peak / 5 W avg; native ArduPilot driver |
 | Telemetry | SiK 915 MHz radio | on **TELEM2**; independent of the 5.8 GHz HM30 link |
-| RC link | RadioMaster RP3 ELRS (CRSF) — *may swap to Gemini* | **on the aircraft**, CRSF into GPS2; 16 ch, ~5 ms, telemetry back to the TX16S |
-| Battery | **6S LiPo**, 12000–16000 mAh, 10–15C | capacity TBD; its connector sets the power-module input pigtail |
+| RC link | RadioMaster RP3 ELRS (CRSF), dual-antenna diversity | **on the aircraft**, CRSF into GPS2; 16 ch, ~5 ms at 50 Hz, telemetry back to the TX16S |
+| Battery | **6S LiPo 12000 mAh 15C** (Tattu-class, 1619 g) | settled — endurance curve is flat, 16 Ah buys ~3 min for 540 g |
 | Autopilot stack | **ArduPilot** | settled; native SIYI gimbal driver (`MNT1_TYPE=8`) |
 
 Parts on hand vs. still-to-buy: [`inventory.md`](inventory.md).
