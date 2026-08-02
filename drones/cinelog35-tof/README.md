@@ -156,15 +156,26 @@ failure. Confirm the mag check is genuinely clear on a charged pack before calli
 | Param | Value | Why |
 |-------|-------|-----|
 | `BATT_CAPACITY` | `1300` | actual pack. Was left at a `3300` default, which made every mAh-based warning meaningless |
-| `BATT_FS_LOW_ACT` | `1` (Land) | was `0` — nothing stopped a flight that ended at **2.95 V/cell** |
+| `BATT_FS_CRT_ACT` | `1` (Land) | **the armed stage** |
+| `BATT_CRT_VOLT` | `14.0` | 3.5 V/cell — where Land actually fires |
+| `BATT_FS_LOW_ACT` | `0` (None) | low stage deliberately disarmed — single-stage protection |
+| `BATT_LOW_VOLT` | `14.4` | 3.6 V/cell; set, but inert while `FS_LOW_ACT` is `0` |
 | `BATT_FS_VOLTSRC` | `1` | **sag-compensated** voltage |
-| `BATT_LOW_VOLT` | `14.4` | 3.6 V/cell |
 | `BATT_ARM_VOLT` | `14.7` | resting; blocks arming a part-used pack |
-| `BATT_CRT_VOLT` / `BATT_FS_CRT_ACT` | `14.0` / `0` | critical currently takes **no action** — _open_ |
 
-The pairing matters: this airframe pulls 45–52 A peaks against a 1300 mAh pack, and on **raw**
-voltage those peaks dip under 14.4 V during normal flight. `BATT_FS_VOLTSRC,1` is what makes a Land
-action safe at a 3.6 V/cell threshold instead of a source of surprise auto-landings.
+**Single-stage by design.** ArduPilot's two battery stages exist to escalate between *different*
+actions — LOW → RTL while there's still energy to fly home, CRT → Land when there isn't. That split
+only means something on a craft that flies away from the pilot. This one never leaves arm's reach,
+so RTL is meaningless and there's nothing to escalate to. Only the critical stage is armed.
+
+`BATT_FS_VOLTSRC,1` is what makes that safe: this airframe pulls 45–52 A peaks against a 1300 mAh
+pack, and on **raw** voltage those peaks dip below the threshold during normal flight and would
+trigger a surprise auto-land. Sag compensation judges the pack on state of charge instead.
+
+> ⚠ **The failsafe is configured but unverified.** It has never fired — no confirmed low- or
+> critical-voltage event since it was set. The threshold, the timer, and the sag compensation are
+> all untested against real behaviour. Treat pack limits as a pilot responsibility until the
+> failsafe has been observed triggering and recovering as intended.
 
 ## Sensor / autonomy architecture (planned)
 
@@ -215,7 +226,8 @@ action safe at a 3.6 V/cell threshold instead of a source of surprise auto-landi
 - [ ] AUTOTUNE — **next step**; filtering is in place, tracking is clean
 - [ ] Confirm mag prearm is clear on a charged pack (battery failure may have masked it)
 - [ ] Audible noise characterised (mic + acoustic FFT)
-- [ ] `BATT_FS_CRT_ACT` — critical battery currently takes no action
+- [ ] **Battery failsafes verified in flight** — configured, but neither low nor critical has ever
+      triggered, so thresholds and timer are untested
 - [ ] All parts acquired (companion computer still to buy)
 - [ ] MTF-01 position hold working (assisted layer)
 - [ ] VL53L1X ring addressing solved + wired
