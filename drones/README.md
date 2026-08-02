@@ -41,5 +41,7 @@ not one big shared pool.
 - [`docs/topics/elrs/`](docs/topics/elrs/README.md) — **ELRS radio link** doc set: radio config
   (TX16S), a receiver doc + a pairing/test-log doc per drone, shared test ladder, and the
   **binding phrase**
+- [`docs/topics/mission-planner-linux.md`](docs/topics/mission-planner-linux.md) — **Mission Planner
+  ground station** install/setup on Ubuntu (Mono, XWayland launcher, serial access, SITL)
 - Domain-wide notes: [`docs/notes/`](docs/notes/README.md) (atomic facts via `meta/bin/wsnote`)
 - Long-form guides: [`docs/topics/`](docs/topics/)
