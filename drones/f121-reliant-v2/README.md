@@ -101,7 +101,7 @@ the Whoop V2 has **no reverse-polarity protection**, and a capacitor is "strongl
 12 V, so pack voltage shouldn't be an issue either"* — was half right. It correctly identified that
 the two boards differ; what it missed is that **12 V was never comfortable headroom, it was 0.6 V
 short of the ceiling.** The [CL35](../cinelog35-tof/README.md) runs the same VTX on the MicoAir
-743-AIO's 12 V pin and is inside spec, but only just. The generalisable rule is that a "digital VTX"
+H743 v2 AIO's 12 V pin and is inside spec, but only just. The generalisable rule is that a "digital VTX"
 pad on an AIO is **not a standard rail** — it is whatever that board's designer chose, ranging from
 5 V to raw pack — so it has to be read off the manual per board, not carried across from the last
 build.

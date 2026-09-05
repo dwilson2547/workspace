@@ -65,7 +65,7 @@ board. The two have to be checked against each other per build:
 
 | FC | Video pad supplies |
 |---|---|
-| MicoAir 743-AIO | **regulated 12 V** |
+| MicoAir H743 v2 AIO | **regulated 12 V** |
 | **HGLRC Specter 6-in-1** | **`7.4–26.4 V` — raw pack voltage** ⚠ |
 | **SpeedyBee F405 AIO V2** | **9 V @ 1.5 A** (also 5 V @ 1.5 A, 4V5 @ 1 A) — ⚠ *current*-limited, see below |
 | **HDZero Gamma 45A AIO** | **protected 8 V / 3 A** ✅ — structurally safe for any HDZero VTX |

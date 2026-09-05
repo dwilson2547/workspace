@@ -178,21 +178,18 @@ not swap freely between craft.
 Parts for the [`cinelog35-tof/`](../cinelog35-tof/README.md) build (mostly AliExpress).
 
 - **Frame** — GEPRC GEP-CL35 V3, 3.5" ducted O4 CineLog: <https://www.aliexpress.us/item/3256810368292627.html>
-- **FC** — TAKER F722 45A 32-bit AIO: <https://www.aliexpress.us/item/3256809522031754.html>
 - **Motors** — GEPRC SPEEDX2 2105.5 2450KV (4-pack): <https://www.aliexpress.us/item/3256812397590001.html>
 - **Props** — HQProp Duct-T90MMX3 (3.5" ducted, 6 pairs): <https://www.aliexpress.us/item/3256809907108000.html>
 - **RX** — RadioMaster RP3 ELRS: <https://www.aliexpress.us/item/3256805325327886.html>
 - **GPS/compass** — HGLRC M100-5883 (M10 + QMC5883): <https://www.aliexpress.us/item/3256809025534880.html>
 - **Optical flow + ToF** — MicoAir MTF-01: <https://www.aliexpress.us/item/3256809389865494.html>
 - **ToF ring** — TOF400C (VL53L1X), 11×: <https://www.aliexpress.us/item/3256806637257364.html>
-- **FC — MicoAir 743-AIO.** ⚠ The TAKER F722 above was **superseded**; the airframe flies a
-  MicoAir 743-AIO. Purchase link not recorded.
+- **FC — MicoAir H743 v2 AIO** (built-in AM32 4-in-1 ESC). Purchase link not recorded.
 - **I²C muxes — 2× PCA9548A**, fitted. (Two, not one: 8 channels each, 11 sensors.)
 - **Companion — Waveshare ESP32-S3-Zero**, on hand. ⚠ **The Raspberry Pi is dropped** — the ring is a
   few hundred bytes/sec of scalars and never needed Linux, a dedicated BEC, or ~1 A of draw.
 - **Video — HDZero**, see the HDZero section above.
-- _Still to buy:_ 4S pack (~850–1100 mAh) — the last open purchase on this build — and a self-powered
-  buzzer for the BZ pad.
+- _Still to buy:_ a self-powered buzzer for the BZ pad. (The 4S 1300 mAh pack is in use.)
 
 ## Custom build — DH600 (long-endurance cinematic platform)
 

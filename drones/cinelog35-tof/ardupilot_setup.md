@@ -54,7 +54,7 @@ manual rather than assumed from the last build.
 
 Consequences here:
 
-- **This pairing is fine, leave it.** The MicoAir 743-AIO regulates to 12 V and the VTX is rated to
+- **This pairing is fine, leave it.** The MicoAir H743 v2 AIO regulates to 12 V and the VTX is rated to
   12.6 V.
 - **Fit a capacitor at the VTX supply.** HDZero "strongly suggests" one at 3S; 12 V is 3S territory,
   and this airframe is about to see its first power-up after significant rework.
@@ -279,7 +279,7 @@ Aux functions use separate 3-state logic — low < 1200, middle 1200–1800, hig
 2-position switch at ELRS endpoints (~988 / ~2012) hits both ends with margin.
 
 **Beeper hardware.** `NTF_BUZZ_PIN = 61` / `NTF_BUZZ_TYPES = 1` (bit 0 = built-in buzzer on a pin)
-means the 743-AIO's BZ pad, which needs a buzzer physically soldered to it. `MOT_PWM_TYPE = 0`, so
+means the H743 v2 AIO's BZ pad, which needs a buzzer physically soldered to it. `MOT_PWM_TYPE = 0`, so
 there's no DShot-beeper fallback either — when the motors move to DShot, `NTF_BUZZ_TYPES = 3` adds
 bit 1 and beeps through the ESCs with no added hardware or weight, which is attractive on a 3.5".
 
