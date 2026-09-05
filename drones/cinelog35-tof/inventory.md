@@ -27,7 +27,7 @@ with the craft." Reorder links in [`../inventory/bom.md`](../inventory/bom.md).
 | Item | Qty | Status | Notes |
 |------|-----|--------|-------|
 | RadioMaster RP3 ELRS RX (CRSF) | 1 | **fitted** | bound `dwdrones`; 250 Hz, telem 1:4; CRSF confirmed in flight logs |
-| HGLRC M100-5883 (M10 GPS + compass) | 1 | **fitted** | external compass (`COMPASS_EXTERNAL = 1`). ⚠ `COMPASS_ORIENT` **unverified** — `2` was auto-derived, `4` recorded after a remount; recheck on the bench |
+| HGLRC M100-5883 (M10 GPS + compass) | 1 | **fitted** | external compass (`COMPASS_EXTERNAL = 1`); `COMPASS_ORIENT = 2` (`YAW_90`), auto-derived and flight-verified 2026-08-02 |
 | MicoAir MTF-01 (optical flow + ToF) | 1 | **fitted** | ⚠ not yet configured in ArduPilot |
 | TOF400C (VL53L1X) rangefinder | 11 | **fitted + wired** | full obstacle ring |
 | **PCA9548A I²C mux** | 2 | **fitted + wired** | 8 ch each; resolves the shared `0x29` address |

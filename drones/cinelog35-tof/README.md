@@ -66,7 +66,7 @@ The FC had to be mounted **square** on a frame whose mounting pattern expects **
 |-------|-------|-----|
 | `AHRS_ORIENTATION` | `15` (`ROLL_180_YAW_315`) | board mounted inverted and 45° off the airframe nose |
 | `COMPASS_EXTERNAL` | `1` | M100-5883 is on a mast — `AHRS_ORIENTATION` does **not** apply to it |
-| `COMPASS_ORIENT` | `2` (`YAW_90`) | auto-derived by `COMPASS_AUTO_ROT,2` once the board frame was right. ⚠ **unverified** — see below |
+| `COMPASS_ORIENT` | `2` (`YAW_90`) | auto-derived by `COMPASS_AUTO_ROT,2` once the board frame was right |
 | `SERVO1_FUNCTION` | `34` (Motor2) | motor position remap — see below |
 | `SERVO2_FUNCTION` | `33` (Motor1) | " |
 | `MOT_PWM_TYPE` | `6` | DShot600 |
@@ -95,10 +95,6 @@ Two traps cost real time here:
   `AHRS_ORIENTATION` it converges on a weird compensating value (`13` here). Once the board was
   right it landed on a clean `2`. A simple auto-derived `COMPASS_ORIENT` is evidence the frame under
   it is correct; a strange one is evidence it isn't.
-
-> ⚠ **`COMPASS_ORIENT` is unverified.** `2` is the value auto-derived here, but a `4` was also
-> recorded against this airframe and the GPS mast has been disturbed since. Re-derive it with
-> `COMPASS_AUTO_ROT` before the next flight rather than trusting either number.
 
 ### Motor mapping and direction
 
@@ -323,7 +319,6 @@ step:
 - [ ] **Battery failsafe verified in flight** — configured, but has never triggered, so the
       threshold and timer are untested
 - [ ] Audible noise characterised (mic + acoustic FFT)
-- [ ] `COMPASS_ORIENT` re-verified — see the note in [FC configuration](#flight-controller-configuration)
 - [ ] MTF-01 position hold working (assisted layer)
 - [ ] Obstacle avoidance live off the ToF ring (autonomous layer)
 - [ ] First indoor hover
