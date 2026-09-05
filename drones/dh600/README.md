@@ -10,10 +10,12 @@ domain: drones
 agility. Largest craft in the domain and the first with a proper gimbal payload and a long-range
 HD video + control link.
 
-Status: **frame ordered; everything else still being refined.** Specs below are the intended build and
-are settled on the major decisions — motors, props, power path, RC architecture, autopilot and gimbal
-integration all have sourced numbers behind them. Remaining unknowns are vendor lookups, not choices
-(see [open decisions](#-open-decisions-to-resolve-before-ordering)). Raw source list with prices:
+Status: **airframe largely assembled; all parts on hand (2026-09-01).** Motors, ESCs, power module,
+GPS and the Dronetag are mounted; the full SIYI stack has arrived. **The build is no longer waiting
+on any supplier — it is blocked on fabrication**, specifically a
+[custom top plate and gimbal mount](#custom-fabrication--top-plate-and-gimbal-mount). Specs below
+were settled during planning — motors, props, power path, RC architecture, autopilot and gimbal
+integration all have sourced numbers behind them. Raw source list with prices:
 [`parts_list.txt`](parts_list.txt).
 
 ## Concept
@@ -67,7 +69,10 @@ Taken from the seller listing (see [Links](#links)); worth re-verifying on arriv
 This build **matches the listing's recommended config #2 exactly** — *4110/400 KV motors, 1555 props,
 40 A ESCs, 6S 12000 mAh, 3-axis gimbal, ≤3600 g, 40–45 min*. Motors, props, and ESC class all line up.
 
-## Intended spec
+## Spec
+
+_Written as the intended build during planning; most of it is now fitted hardware — see
+[`inventory.md`](inventory.md) for what is actually mounted._
 
 | Item | Part | Notes |
 |------|------|-------|
@@ -85,9 +90,79 @@ This build **matches the listing's recommended config #2 exactly** — *4110/400
 | Telemetry | SiK 915 MHz radio | on **TELEM2**; independent of the 5.8 GHz HM30 link |
 | RC link | RadioMaster RP3 ELRS (CRSF), dual-antenna diversity | **on the aircraft**, CRSF into GPS2; 16 ch, ~5 ms at 50 Hz, telemetry back to the TX16S |
 | Battery | **6S LiPo 12000 mAh 15C** (Tattu-class, 1619 g) | settled — endurance curve is flat, 16 Ah buys ~3 min for 540 g |
+| Remote ID | **Dronetag BS** (mounted 2026-08-17) | same module as the CL35; standalone GNSS + BLE, no UART to the FC |
+| Onboard tracking | **SIYI AI Tracking Module 2 (10T)** | 10 TOPS; pairs with the A8 mini for onboard object tracking |
 | Autopilot stack | **ArduPilot** | settled; native SIYI gimbal driver (`MNT1_TYPE=8`) |
 
 Parts on hand vs. still-to-buy: [`inventory.md`](inventory.md).
+
+### SIYI stack — what's actually owned
+
+The SIYI side is now a complete ecosystem rather than the two-item plan the spec table was drafted
+around:
+
+| Unit | Role | Status |
+|---|---|---|
+| **HM30 air unit** | 5.8 GHz video + MAVLink telemetry, aircraft side | on hand — **mounting deferred until the top plate is done** |
+| **HM30 ground unit** | ground side of the link | on hand |
+| **A8 mini gimbal camera** | the mission payload | on hand |
+| **AI Tracking Module 2 (10T)** | onboard object tracking alongside the gimbal | **on hand** (2026-09-01) |
+| **Ethernet → HDMI (LAN→HDMI) converter** | lets the ground unit drive a set of goggles directly | **on hand** (2026-09-01) |
+
+Two consequences worth recording now, before the parts land:
+
+- **The ground station has two output paths.** Ethernet from the ground unit into a laptop running
+  Mission Planner (the planned setup), *or* the HDMI converter into goggles for a
+  fly-it-like-FPV view. The converter is a convenience, not a replacement — goggles give video with
+  no mission/telemetry UI, so the laptop stays the primary station for anything mission-shaped.
+- **⚠ The AI tracking module is an unbudgeted airframe item.** It was not in the weight, power or
+  physical-layout planning. Before mounting it, check its mass against the
+  [budget](#power--endurance-budget) (which currently closes at ~3400 g against a 3600 g envelope),
+  its supply voltage against the shared 12 V rail, and whether it sits inline on the gimbal↔air-unit
+  Ethernet path — if it does, the "Gimbal-to-Link cable" in the parts list is the wrong cable set.
+  None of this is a problem, but none of it has been verified either.
+
+## Custom fabrication — top plate and gimbal mount
+
+**Two parts of the factory kit are being replaced with custom designs (in progress, 2026-09-01).**
+This is now the critical path: the electronics bay can't be laid out until the top plate exists.
+
+### Custom top plate — the factory one is too low
+
+⚠ **The factory top plate does not clear the flight controller once it's on its soft mount.** The
+soft mount adds height the kit didn't budget for, and there is no way to get it back — so the plate
+is being redesigned rather than the mounting compromised. This supersedes the earlier framing that
+the build was "blocked on the soft mount arriving": the mount is here, and **the plate is the
+blocker**.
+
+The replacement carries the whole upper stack — **FC on its soft mount, HM30 air unit, and the AI
+Tracking Module 2**. Three things it has to satisfy that are already recorded elsewhere on this page:
+
+- **Venting for the fan-cooled HM30 air unit** (rated to 50 °C) — see
+  [thermal](#thermal--the-hm30-air-unit-is-actively-cooled). A sealed carbon box defeats its fan.
+- **Anchors for the antenna booms** — the plan is short downward booms off the centre body, and they
+  need something to bolt to. See [antenna installation](#antenna-installation).
+- **The AI tracking module's mass and its position in the gimbal→air-unit Ethernet chain**, both
+  still unverified. Designing the plate is the natural moment to settle them.
+
+### Front gimbal mount — swing-up / detachable
+
+The A8 mini is going on a **custom front mount that lets it swing up, or be disconnected entirely for
+storage.**
+
+⚠ **Reason: with the landing gear folded, the gimbal is the lowest-hanging part of the aircraft.**
+That is a transport problem, not a flight one — a folding airframe whose whole point is packing to
+235×185×65 mm cannot have a $274 gimbal as its ground-contact point in the bag.
+
+This interacts with two existing decisions:
+
+- **It does not fix the in-shot problem.** The gear is manual and stays down for the whole flight
+  (see [antenna installation](#antenna-installation)), so legs are still in wide and low shots.
+  Swinging the gimbal up is a storage feature; the **electric retract option is still the answer for
+  footage**, and remains open.
+- **Front-mounting sets the antenna keep-out.** The A8 mini must pan freely and stay out of its own
+  shot, so the boom positions have to be checked against the gimbal's yaw range **with the mount in
+  its flight position**, not its stowed one.
 
 ## RC architecture
 
@@ -630,7 +705,20 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 ## Status
 
 - [x] **DH600 frame ordered** (2026-07-26)
-- [ ] Order the full-size **6C + M10 + PM07** bundle (confirm PM07, not PM02/PM06)
+- [x] **Motors, ESCs, power module, GPS and Dronetag mounted in the frame** (2026-08-17)
+- [x] **Full SIYI stack on hand** — HM30 air + ground, A8 mini, AI Tracking Module 2, LAN→HDMI
+      (2026-09-01)
+- [ ] ⛔ **Design and print the custom top plate** — the critical path. Factory plate doesn't clear
+      the FC on its soft mount. Must carry FC + HM30 air unit + AI module, **vent the HM30's fan**,
+      and anchor the antenna booms
+- [ ] **Design and print the front gimbal mount** — swing-up / detachable, so the A8 mini isn't the
+      lowest point with the gear folded
+- [ ] **Mount the HM30 air unit** — held until the top plate exists
+- [ ] Mount the A8 mini + AI Tracking Module 2
+- [ ] Put the **Dronetag BS** serial on the FAA registration (the module's serial, not the aircraft's)
+- [ ] Check the AI Tracking Module's mass / voltage / Ethernet position against the existing budget
+- [x] **6C + M10 + PM07 bundle received** — power module and GPS are in the frame (⚠ confirm on the
+      bench that the module that shipped really is a **PM07**, not a PM02/PM06)
 - [ ] PM07 re-pigtailed: **8 AWG + AS150** in, ESC leads to B+ pads
 - [ ] Post-maiden: check logged battery current peaks against PM07's 90 A / 140 A
 - [ ] 6S 12 Ah pack ordered (Tattu-class, AS150, $270)
@@ -659,6 +747,33 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 
 ## Build log
 
+- **2026-09-01** — **The whole SIYI stack is now on hand** — the A8 mini, the **AI Tracking Module 2
+  (10T)** and the **LAN→HDMI converter** all landed, so nothing on this build is waiting on a
+  supplier any more. **The blocker moved from parts to fabrication**, and specifically to two custom
+  printed parts:
+  **(1) A custom top plate.** ⚠ The **factory top plate doesn't clear the flight controller once
+  it's on its soft mount** — so the earlier "blocked on the soft mount arriving" framing is
+  superseded: the mount is here and the *plate* is the problem. The replacement carries the FC, the
+  HM30 air unit and the AI module together, which makes it the natural place to finally settle the
+  HM30 fan venting, the antenna-boom anchors, and the AI module's mass and Ethernet position — all
+  three already flagged on this page and all three still open.
+  **(2) A front gimbal mount that swings up or detaches.** Reason is transport, not flight: **with
+  the landing gear folded, the A8 mini is the lowest-hanging part of the aircraft**, which is
+  untenable on a frame whose purpose is packing to 235×185×65 mm. Recorded that this does *not*
+  solve the in-shot problem — the gear is manual and stays down in flight, so the electric-retract
+  question is unchanged — and that front-mounting means the antenna keep-out has to be checked
+  against the gimbal's yaw range in the **flight** position, not the stowed one.
+- **2026-08-17** — **Airframe largely assembled.** Motors, ESCs, the power module, the GPS and a
+  Dronetag are all mounted in the frame. Two deliberate holds: the **FC is not secured** until its
+  soft mount arrives, and the **HM30 air unit is waiting on that same mount** so the electronics bay
+  gets laid out once rather than twice. The **A8 mini is still in transit**.
+  The SIYI side has grown past the original two-item plan — the full stack on hand or inbound is
+  **HM30 air + ground unit, A8 mini, AI Tracking Module 2 (10T), and an Ethernet→HDMI converter**
+  for driving goggles off the ground unit. Recorded the AI tracking module as an **unbudgeted
+  airframe item**: it was not in the mass, power or Ethernet-topology planning, so its weight against
+  the ~3400 g figure, its supply voltage against the shared 12 V rail, and whether it sits inline on
+  the gimbal→air-unit link all need checking before it goes on. Also new and undocumented until now:
+  the airframe carries **Remote ID hardware**, model to be confirmed.
 - **2026-07-26** — Parts list drafted (frame, X4110S 400 KV, XRotor 40 A, 1555 props, Pixhawk 6C Mini
   kit, HM30, A8 mini, RP3, Holybro PDB). Nothing ordered. Battery still unselected.
   Resolved: props are **1555**, matching the frame's recommended config; battery is a 6S LiPo with

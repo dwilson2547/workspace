@@ -7,7 +7,8 @@ domain: drones
 
 Parts for the custom [DH600 long-endurance cinematic build](README.md). Assembled from individual
 parts (not a kit), so the airframe and electronics are tracked here rather than "shipped with the
-craft." Nothing ordered yet. Reorder links in [`../inventory/bom.md`](../inventory/bom.md).
+craft." **Most of the airframe is bought and mounted as of 2026-08-17.** Reorder links in
+[`../inventory/bom.md`](../inventory/bom.md).
 
 Prices are the quoted AliExpress totals from the source list ([`parts_list.txt`](parts_list.txt)) at
 drafting time (2026-07-26) — they drift, treat as indicative.
@@ -16,10 +17,10 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 
 | Item | Qty | Status | Price | Notes |
 |------|-----|--------|-------|-------|
-| DH600 CF folding frame kit, 600 mm | 1 | **ordered 2026-07-26** | — | 398 g; incl. gear, GPS mast, canopy |
-| SunnySky X4110S 400 KV motor | 4 | **to buy** | $53.74 | 165 g ea; 45 A/30 s, 1125 W; wants a 40–60 A ESC |
-| Hobbywing XRotor 40 A 3–6S ESC | 4 | **to buy** | $19.15 | 50 g ea; 40 A cont / 60 A burst (10 s) |
-| CF 1555 prop (15×5.5) | 4 | **to buy** | $19.99 | matches frame recommendation |
+| DH600 CF folding frame kit, 600 mm | 1 | **mounted** | — | 398 g; incl. gear, GPS mast, canopy |
+| SunnySky X4110S 400 KV motor | 4 | **mounted 2026-08-17** | $53.74 | 165 g ea; 45 A/30 s, 1125 W; wants a 40–60 A ESC |
+| Hobbywing XRotor 40 A 3–6S ESC | 4 | **mounted 2026-08-17** | $19.15 | 50 g ea; 40 A cont / 60 A burst (10 s) |
+| CF 1555 prop (15×5.5) | 4 | **to buy** | $19.99 | matches frame recommendation — confirm whether these came with the motors |
 | ~~Holybro PDB (60 A, 6S)~~ | — | dropped | $27.87 | XT60 input only 30 A cont.; keep as X500 spare |
 | ~~50 mm 8-in-1 200 A hub~~ | — | dropped | — | unnecessary — PM07's B+ pads distribute to the ESCs |
 | 8 AWG wire + **AS150** connector pair | 1 set | **to buy** | ~$15 | re-pigtail the power module input (XT120 min) |
@@ -31,11 +32,16 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 
 | Item | Qty | Status | Price | Notes |
 |------|-----|--------|-------|-------|
-| Pixhawk 6C (full size) + M10 + PM07 kit | 1 | **to buy** | ~$300 | replaces the 6C Mini bundle; ⚠ confirm PM07 |
-| M10 GPS / compass | 1 | in FC kit | — | mounts on folding GPS mast |
-| Holybro PM07 power module | 1 | in FC kit | — | 90 A cont / 140 A burst; hover 15.5 A = 17 %, vigorous 37 A = 41 %; B+ pads + PWM header = ESC distribution; 2× 5.2 V/3 A BEC |
+| Pixhawk 6C (full size) + M10 + PM07 kit | 1 | **on hand** | ~$300 | replaces the 6C Mini bundle; ⚠ still confirm the shipped module is a PM07 |
+| M10 GPS / compass | 1 | **mounted 2026-08-17** | — | on the folding GPS mast |
+| Holybro PM07 power module | 1 | **mounted 2026-08-17** | — | 90 A cont / 140 A burst; hover 15.5 A = 17 %, vigorous 37 A = 41 %; B+ pads + PWM header = ESC distribution; 2× 5.2 V/3 A BEC |
+| Pixhawk 6C (the board itself) | 1 | **on hand, not secured** | — | ⛔ **blocked on the soft mount** — nothing else in the bay gets fixed down first |
 | ~~Holybro PM08-CAN + 300 A PDB~~ | — | rejected | ~$150 | margin never reached in flight — see README |
-| FC silicone bushings | 1 set | **to buy** | $2.66 | vibration isolation |
+| FC soft mount | 1 | **on hand** | ? | ⚠ **taller than the factory top plate allows** — which is what forced the custom plate below |
+| **Custom top plate** (printed/cut) | 1 | ⛔ **to design — critical path** | ~$0 | replaces the factory plate, which doesn't clear the FC on its soft mount. Carries **FC + HM30 air unit + AI Tracking Module**; must **vent the HM30's fan** and anchor the antenna booms |
+| **Custom front gimbal mount** (printed) | 1 | **to design** | ~$0 | swing-up / detachable, so the A8 mini isn't the lowest-hanging part with the gear folded. Check antenna keep-out against gimbal yaw in the **flight** position |
+| FC silicone bushings | 1 set | **to buy** | $2.66 | vibration isolation; ⚠ may be redundant with the soft mount above — check before buying both |
+| **Dronetag BS** Remote ID module | 1 | **mounted 2026-08-17** | ? | same as the CL35. Standalone GNSS + BLE broadcast, no UART to the FC. Serial goes on the FAA registration, not the aircraft's |
 | RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into GPS2; bind phrase `dwdrones`; run at **50 Hz** for range |
 | SiK 915 MHz telemetry radio | 1 | check X500 spare | — | on TELEM2; may need a second set if the X500's stays put |
 | Antenna booms/brackets (printed) | 5 | **to make** | ~$0 | centre-body downward booms — must not cross the folding arms or retract gear; RP3 pair orthogonal and widely separated |
@@ -48,9 +54,12 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 
 | Item | Qty | Status | Price | Notes |
 |------|-----|--------|-------|-------|
-| SIYI HM30 (HD video + telemetry) | 1 | **to buy** | $314.56 | 5.8 GHz; air unit 74 g, 70×55×16 mm, **11–16.8 V in**; S.Bus out unused |
-| SIYI A8 mini gimbal camera | 1 | **to buy** | $274.36 | 95 g, 55×55×70 mm; 11–25.2 V, 12 W peak; native ArduPilot driver |
-| SIYI Gimbal-to-Link Ethernet cable | 1 | **to buy** | ? | A8 mini → HM30 air unit, video |
+| SIYI HM30 air unit | 1 | **on hand, not mounted** | $314.56 | 5.8 GHz; 74 g, 70×55×16 mm, **11–16.8 V in**; S.Bus out unused. Mounting held until the **custom top plate** exists |
+| SIYI HM30 ground unit | 1 | **on hand** | (in HM30 price) | ground side of the link |
+| SIYI A8 mini gimbal camera | 1 | **on hand** | $274.36 | 95 g, 55×55×70 mm; 11–25.2 V, 12 W peak; native ArduPilot driver. Goes on the **custom swing-up front mount** |
+| SIYI AI Tracking Module 2 (10T) | 1 | **on hand 2026-09-01** | ? | 10 TOPS onboard tracking. ⚠ **still not in the mass/power/topology budget** — weigh it, check its input voltage against the shared 12 V rail, and confirm whether it sits inline on the gimbal↔air-unit Ethernet. Now measurable rather than theoretical |
+| SIYI LAN → HDMI converter | 1 | **on hand 2026-09-01** | ? | ground unit → goggles, as an alternative to the laptop station |
+| SIYI Gimbal-to-Link Ethernet cable | 1 | **to buy** | ? | A8 mini → HM30 air unit, video. ⚠ **re-check the cable set** once the tracking module's position in the chain is known |
 | ~~SIYI S.Bus Y cable~~ | — | not needed | — | gimbal driven by MAVLink over TELEM3, not air-unit S.Bus |
 
 ⚠ Confirm which of these cables ship with the HM30 / A8 mini bundles before ordering separately.

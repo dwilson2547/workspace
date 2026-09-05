@@ -104,8 +104,18 @@ Never power a SiK radio without its antenna attached.
 |---|---|
 | Accelerometer (6-position + level) | Complete |
 | Compass | Complete — offsets within range, external mag prioritised |
-| Radio | Complete |
+| Radio | Complete — **confirmed in params 2026-08-02** (see note) |
 | ESC (all-at-once) | Complete |
+
+**Radio calibration, 2026-08-02.** The 2026-07-25 param snapshot showed `RC1`–`RC4` at
+`MIN 1100 / MAX 1900 / TRIM 1500` — untouched ArduPilot defaults — despite this table recording the
+calibration as complete. It had evidently been run but never written. Re-run and saved: sticks now
+read `988`/`2011` with `RC3_TRIM = 988`, which is what a committed calibration looks like on ELRS.
+
+Worth knowing that this would **not** have shown up as a switch problem: `RCx_OPTION` and
+`FLTMODE_CH` both evaluate raw PWM, so the arm/mode/beeper switches work correctly regardless of
+the endpoint params. Only the sticks were affected. Check `RC1_MIN`/`RC1_MAX` against `1100`/`1900`
+as a quick tell for an unsaved calibration.
 
 ---
 
@@ -129,11 +139,28 @@ The wizard scales rate PIDs and `INS_GYRO_FILTER` from prop diameter, and sets `
 
 ## 8. Outstanding before first flight
 
-- [ ] **Battery monitor.** `BATT_MONITOR = 4` for the analog PM02 (starting points: `BATT_VOLT_MULT` 18.18, `BATT_AMP_PERVLT` 36.364, then calibrate against a meter). The PM03D is I2C and needs a different monitor type — confirm which module shipped. A configured-but-miscalibrated monitor is worse than none, since 0V reads trip a failsafe.
-- [ ] **Battery failsafe thresholds.** 4S: `BATT_LOW_VOLT` 14.0, `BATT_CRT_VOLT` 13.2
-- [ ] **Throttle failsafe.** `FS_THR_ENABLE = 1` (RTL on RC loss). Bench-test by powering down the TX and confirming the mode flips.
-- [ ] **Flight modes.** `FLTMODE_CH = 5` (default). Assign `FLTMODE1`–`FLTMODE6`. Suggested: Stabilize / AltHold / Loiter, with RTL on its own switch.
-- [ ] **Arm method.** Either stick arming (throttle down + full right yaw, ~2s — works with no config) or a switch via `RCx_OPTION = 153`. **Do not use channel 5** — that's the flight mode channel in ArduPilot, unlike Betaflight.
+- [ ] **Battery monitor — configured, not yet calibrated.** `BATT_MONITOR = 4` (analog PM02) with
+  `BATT_VOLT_MULT = 18.18` / `BATT_AMP_PERVLT = 36.36` — both still the stock defaults. Calibrate
+  voltage against a meter before trusting the failsafe; a miscalibrated monitor is worse than none,
+  since a low read trips a failsafe in flight.
+  - `BATT_CAPACITY = 3300` but the packs on hand are **4500 mAh** — fix before relying on
+    consumed-mAh reporting.
+- [ ] **Battery failsafe thresholds — set, worth a second look.** `BATT_LOW_VOLT = 14.4` (3.6 V/cell,
+  → RTL) and `BATT_CRT_VOLT = 14.0` (3.5 V/cell, → Land), `BATT_LOW_TIMER = 10`. Only 0.4 V apart,
+  so under sag the low and critical actions can fire in quick succession. Widen the gap once real
+  hover current is known.
+- [ ] **Throttle failsafe — params set, test outstanding.** `FS_THR_ENABLE = 1` (RTL on RC loss),
+  `FS_THR_VALUE = 975`. Bench-test by powering down the TX and confirming the mode flips.
+- [x] **Switch channel map — done 2026-08-02.** Arm CH5 / mode CH6 / beeper CH7, shared with the
+  CL35. See §11 for the map and why mode cannot live on CH5.
+- [x] **Arm method — switch, `RC5_OPTION = 153`.** Verified on the bench: flipping the switch
+  produces a specific pre-arm rejection rather than silence, which exercises the full chain.
+  Note `ARMING_RUDDER = 2` leaves rudder arm *and* disarm live as a parallel path alongside the
+  switch; set to `1` (arm only) or `0` if that second path isn't wanted.
+- [ ] **Flight modes.** `FLTMODE1`–`FLTMODE6` are all `0`, so every position of the CH6 switch is
+  Stabilize. Deliberate for now — the airframe isn't tuned, so Stabilize is the only mode in use.
+  Suggested when that changes: `FLTMODE1 = 0` (Stabilize), `FLTMODE4 = 2` (AltHold),
+  `FLTMODE6 = 5` (Loiter), with RTL on its own switch (`RCx_OPTION = 4`).
 - [ ] `ARMING_CHECK = 1` confirmed (never disabled — pre-arm failures were fixed rather than bypassed)
 
 ---
@@ -167,9 +194,81 @@ Config tab → left sidebar → Full Parameter List. If absent: not connected, o
 5. Autotune on a calm day with space
 6. Consider the FMU/DShot migration (§1) ahead of payload integration
 
-### Payload planning note
+### Payload planning note — updated 2026-08-17
 
-The 6C has **no Ethernet** (that's the 6X). With TELEM1 on ELRS and TELEM2 on the SiK radio, the RoboSense Airy companion compute link will need TELEM3, or GPS2 repurposed as a serial. Worth reserving that port rather than filling it.
+**The payload is now a VLP-16 Lite on a single body-slung mount; the RoboSense Airy is dropped**
+(price never came down, import regulation unfavourable, and the puck is already on hand). Rationale
+and mount open-items live in the [project README](README.md#payload--vlp-16-lidar).
+
+The port consequence changes shape. The earlier note reserved TELEM3 (or GPS2 as a serial) for an
+Airy companion link. That reservation still stands and is still worth keeping free — but it is no
+longer the binding constraint, because:
+
+- The 6C has **no Ethernet** (that's the 6X), and the VLP-16 talks **RJ45 to a host NIC**. There is
+  no port on this FC that can accept the sensor at all.
+- So the topology is **sensor → interface box → companion computer**, with the FC seeing only a
+  MAVLink serial link to that companion. The lidar never touches the autopilot.
+- The interface box needs **12 V**; Ethernet does not power the sensor. That is a new rail on this
+  airframe (4S pack → 12 V BEC), not a port assignment.
+
+TELEM3/GPS2 therefore gets reserved for the **companion computer's MAVLink link**, which is a
+low-bandwidth serial connection — a much easier fit than the original Airy assumption.
+
+---
+
+## 11. Switch channel map — shared with the CL35
+
+**Decided and applied 2026-08-02 — live on both the X500 and the CL35.** Both aircraft use one
+cloned TX16S model, so the channel map is identical:
+
+| Function | Channel | Parameter |
+|---|---|---|
+| **Arm / disarm** | CH5 (AUX1) | `RC5_OPTION = 153` |
+| **Flight mode** | CH6 (AUX2) | `FLTMODE_CH = 6`, `RC6_OPTION = 0` |
+| **Beeper** (Lost Vehicle Sound) | CH7 (AUX3) | `RC7_OPTION = 30` |
+
+CL35 side of this: [`../cinelog35-tof/ardupilot_setup.md`](../cinelog35-tof/ardupilot_setup.md).
+
+### Cloning the model
+
+Model match is on, so a straight clone leaves both aircraft answering the same model — **change the
+Model ID** on the copy. Packet rate is per-model too: X500 runs 150 Hz, CL35 250 Hz, so re-set it
+after cloning rather than inheriting.
+
+The X500 has `BRD_SAFETY_DEFLT = 1` (M10 safety button must be pressed) where the CL35 has `0`.
+Same switch map, different pre-arm ritual — expect `PreArm: Hardware safety switch` here and not
+on the CL35.
+
+### Why mode is *not* on CH5
+
+ExpressLRS sends **CH5 / AUX1 with every packet** so a disarm never waits on a slow AUX slot. The
+cost of that guarantee is that AUX1 is **1-bit — two positions — in every switch mode** (Hybrid,
+Wide, and Full Resolution alike). [ELRS switch config](https://www.expresslrs.org/software/switch-config/).
+
+ArduPilot reads `FLTMODE_CH` as six PWM windows:
+
+| Position | PWM | Parameter |
+|---|---|---|
+| 1 | ≤ 1230 | `FLTMODE1` |
+| 2 | 1231–1360 | `FLTMODE2` |
+| 3 | 1361–1490 | `FLTMODE3` |
+| 4 | 1491–1620 | `FLTMODE4` |
+| 5 | 1621–1749 | `FLTMODE5` |
+| 6 | ≥ 1750 | `FLTMODE6` |
+
+A 1-bit channel only ever lands near 1000 or 2000, so mode on CH5 reaches `FLTMODE1` and `FLTMODE6`
+and nothing else. A 3-position switch mixed to CH5 **fails silently** — the middle detent is
+rounded away by ELRS and the FC never sees position 3. CH6+ is 6-position in Hybrid / 64-position
+in Wide, which is where a real mode switch belongs.
+
+Putting arm on AUX1 also aligns ArduPilot with ELRS's own armed-state detection, which keys off
+AUX1 regardless of what the FC does with it.
+
+### Aux switch thresholds
+
+`RCx_OPTION` functions use 3-state logic, independent of the 6-window mode table: **low < 1200**,
+**middle 1200–1800**, **high > 1800**. A 2-position switch at ELRS endpoints (~988 / ~2012) hits
+low and high cleanly.
 
 ---
 
