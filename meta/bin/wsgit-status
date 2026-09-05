@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Fetch the superrepo and report divergence — run at session start via a
+# SessionStart hook so remote state is known BEFORE work begins, not after.
+#
+# Reports:
+#   - superrepo behind : remote has commits we don't (pull before editing)
+#   - superrepo ahead  : commits never pushed
+#   - submodules with commits not reachable from ANY remote ref, i.e. work that
+#     exists only on this machine
+#
+# Submodules are NOT fetched — that took ~1 minute across this superrepo. The
+# unpushed-work check is purely local (`rev-list HEAD --not --remotes`) and is
+# the signal that actually matters. Detached HEAD is git's default for a
+# submodule checkout and is only reported when it also holds unpushed commits.
+#
+# Emits SessionStart hook JSON on stdout. Always exits 0 — a status report must
+# never block a session from starting.
+
+set -uo pipefail
+
+WS="${WSGIT_ROOT:-/home/daniel/documents/workspace}"
+FETCH_TIMEOUT="${WSGIT_FETCH_TIMEOUT:-15}"
+
+cd "$WS" 2>/dev/null || exit 0
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+
+lines=()
+
+# --- superrepo (the one fetch we do) ---------------------------------------
+timeout "$FETCH_TIMEOUT" git fetch --quiet origin >/dev/null 2>&1
+fetch_rc=$?
+
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if upstream=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null); then
+    read -r behind ahead < <(git rev-list --left-right --count "$upstream...HEAD" 2>/dev/null)
+    behind=${behind:-0}; ahead=${ahead:-0}
+    [ "$behind" != 0 ] && lines+=("workspace [$branch]: $behind BEHIND $upstream — pull before editing those files")
+    [ "$ahead"  != 0 ] && lines+=("workspace [$branch]: $ahead unpushed commit(s)")
+else
+    lines+=("workspace [$branch]: no upstream set")
+fi
+[ "$fetch_rc" -ne 0 ] && lines+=("workspace: fetch failed or timed out — counts may be stale")
+
+# --- submodules: local-only check for unpushed work ------------------------
+subs=$(
+    git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null |
+    awk '{print $2}' |
+    while read -r sm; do
+        [ -n "$sm" ] || continue
+        [ -e "$WS/$sm/.git" ] || continue
+        n=$(git -C "$WS/$sm" rev-list --count HEAD --not --remotes 2>/dev/null)
+        [ "${n:-0}" -gt 0 ] 2>/dev/null || continue
+        sb=$(git -C "$WS/$sm" rev-parse --abbrev-ref HEAD 2>/dev/null)
+        [ "$sb" = "HEAD" ] && sb="detached"
+        echo "  $sm [$sb]: $n commit(s) not on any remote"
+    done
+)
+
+if [ -n "$subs" ]; then
+    lines+=("submodules holding work that exists only on this machine:")
+    while IFS= read -r l; do [ -n "$l" ] && lines+=("$l"); done <<< "$subs"
+fi
+
+# --- emit ------------------------------------------------------------------
+if [ ${#lines[@]} -eq 0 ]; then
+    body="git: workspace and all submodules are in sync with their remotes."
+else
+    body="git state at session start (superrepo fetched just now):
+$(printf '%s\n' "${lines[@]}")
+
+Pull anything BEHIND before editing those files. Push anything unpushed — those
+commits are not on the user's other machines."
+fi
+
+if command -v jq >/dev/null 2>&1; then
+    jq -n --arg b "$body" \
+        '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$b},suppressOutput:true}'
+else
+    printf '%s\n' "$body"
+fi
+exit 0
