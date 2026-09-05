@@ -256,3 +256,6 @@
 [submodule "drones/build-sim"]
 	path = drones/build-sim
 	url = git@github.com:dwilson2547/drone-build-sim.git
+[submodule "tools/dxf-converter"]
+	path = tools/dxf-converter
+	url = git@github.com:dwilson2547/dxf-converter.git
