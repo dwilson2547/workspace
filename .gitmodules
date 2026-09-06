@@ -10,14 +10,11 @@
 [submodule "media/photo-dump"]
 	path = media/photo-dump
 	url = git@github.com:dwilson2547/photo_dump.git
-[submodule "archive/parts-interchange"]
-	path = archive/parts-interchange
+[submodule "archive/automotive/parts-interchange"]
+	path = archive/automotive/parts-interchange
 	url = git@github.com:dwilson2547/parts_interchange.git
-[submodule "archive/legacy"]
-	path = archive/legacy
-	url = git@github.com:dwilson2547/legacy.git
-[submodule "archive/wiki-demo"]
-	path = archive/wiki-demo
+[submodule "archive/meta/wiki-demo"]
+	path = archive/meta/wiki-demo
 	url = git@github.com:dwilson2547/wiki_demo.git
 [submodule "experiments/pocs"]
 	path = experiments/pocs
@@ -31,8 +28,8 @@
 [submodule "ai/dan-wiki"]
 	path = ai/dan-wiki
 	url = git@github.com:dwilson2547/DanWiki.git
-[submodule "archive/tool-wikis"]
-	path = archive/tool-wikis
+[submodule "archive/meta/tool-wikis"]
+	path = archive/meta/tool-wikis
 	url = git@github.com:dwilson2547/tool_wikis.git
 [submodule "media/media-library-manager"]
 	path = media/media-library-manager
@@ -121,11 +118,11 @@
 [submodule "ai/image-analyzer"]
 	path = ai/image-analyzer
 	url = git@github.com:dwilson2547/image_analyzer.git
-[submodule "archive/junkyard-inventory-scrapers"]
-	path = archive/junkyard-inventory-scrapers
+[submodule "archive/automotive/junkyard-inventory-scrapers"]
+	path = archive/automotive/junkyard-inventory-scrapers
 	url = git@github.com:dwilson2547/junkyard_inventory_scrapers.git
-[submodule "archive/parts-direct"]
-	path = archive/parts-direct
+[submodule "archive/automotive/parts-direct"]
+	path = archive/automotive/parts-direct
 	url = git@github.com:dwilson2547/parts_direct.git
 [submodule "web-scrapers/scrape-stack"]
 	path = web-scrapers/scrape-stack
@@ -145,14 +142,14 @@
 [submodule "tools/nordvpn-proxy"]
 	path = tools/nordvpn-proxy
 	url = git@github.com:dwilson2547/nordvpn-proxy.git
-[submodule "archive/context-store"]
-	path = archive/context-store
+[submodule "archive/meta/context-store"]
+	path = archive/meta/context-store
 	url = git@github.com:dwilson2547/context-store.git
-[submodule "archive/ai-tool-docs"]
-	path = archive/ai-tool-docs
+[submodule "archive/meta/ai-tool-docs"]
+	path = archive/meta/ai-tool-docs
 	url = git@github.com:dwilson2547/ai_tool_docs.git
-[submodule "archive/ai-notes-server"]
-	path = archive/ai-notes-server
+[submodule "archive/meta/ai-notes-server"]
+	path = archive/meta/ai-notes-server
 	url = git@github.com:dwilson2547/ai_notes_server.git
 [submodule "robotics/livox_handheld_scanner"]
 	path = robotics/livox_handheld_scanner
@@ -166,38 +163,38 @@
 [submodule "robotics/gis-speed-limit"]
 	path = robotics/gis-speed-limit
 	url = git@github.com:dwilson2547/gis-speed-limit.git
-[submodule "archive/cache-browser"]
-	path = archive/cache-browser
+[submodule "archive/web-scrapers/cache-browser"]
+	path = archive/web-scrapers/cache-browser
 	url = git@github.com:dwilson2547/cache_browser.git
-[submodule "archive/filecache"]
-	path = archive/filecache
+[submodule "archive/web-scrapers/filecache"]
+	path = archive/web-scrapers/filecache
 	url = git@github.com:dwilson2547/filecache.git
-[submodule "archive/imgcache"]
-	path = archive/imgcache
+[submodule "archive/web-scrapers/imgcache"]
+	path = archive/web-scrapers/imgcache
 	url = git@github.com:dwilson2547/imgcache.git
-[submodule "archive/vidcache"]
-	path = archive/vidcache
+[submodule "archive/web-scrapers/vidcache"]
+	path = archive/web-scrapers/vidcache
 	url = git@github.com:dwilson2547/vidcache.git
-[submodule "archive/webcache"]
-	path = archive/webcache
+[submodule "archive/web-scrapers/webcache"]
+	path = archive/web-scrapers/webcache
 	url = git@github.com:dwilson2547/webcache.git
-[submodule "archive/cache-client"]
-	path = archive/cache-client
+[submodule "archive/web-scrapers/cache-client"]
+	path = archive/web-scrapers/cache-client
 	url = git@github.com:dwilson2547/cache_client.git
-[submodule "archive/request-authorization"]
-	path = archive/request-authorization
+[submodule "archive/web-scrapers/request-authorization"]
+	path = archive/web-scrapers/request-authorization
 	url = git@github.com:dwilson2547/request_authorization.git
-[submodule "archive/http-test-service"]
-	path = archive/http-test-service
+[submodule "archive/web-scrapers/http-test-service"]
+	path = archive/web-scrapers/http-test-service
 	url = git@github.com:dwilson2547/http-test-service.git
-[submodule "archive/rockauto-selenium-scraper"]
-	path = archive/rockauto-selenium-scraper
+[submodule "archive/automotive/rockauto-selenium-scraper"]
+	path = archive/automotive/rockauto-selenium-scraper
 	url = git@github.com:dwilson2547/rockauto_selenium_scraper.git
-[submodule "archive/rockauto-requests-scraper"]
-	path = archive/rockauto-requests-scraper
+[submodule "archive/automotive/rockauto-requests-scraper"]
+	path = archive/automotive/rockauto-requests-scraper
 	url = git@github.com:dwilson2547/rockauto_requests_scraper.git
-[submodule "archive/rockauto-api-scraper"]
-	path = archive/rockauto-api-scraper
+[submodule "archive/automotive/rockauto-api-scraper"]
+	path = archive/automotive/rockauto-api-scraper
 	url = git@github.com:dwilson2547/rockauto_api_scraper.git
 [submodule "tools/gitignore-cli"]
 	path = tools/gitignore-cli
@@ -208,23 +205,23 @@
 [submodule "experiments/hom-tx-perf-test"]
 	path = experiments/hom-tx-perf-test
 	url = git@github.com:dwilson2547/Hom-tx-perf-test.git
-[submodule "archive/web-scrapers"]
-	path = archive/web-scrapers
+[submodule "archive/web-scrapers/web-scrapers"]
+	path = archive/web-scrapers/web-scrapers
 	url = git@github.com:dwilson2547/web_scrapers.git
-[submodule "archive/arduino-pi-projects"]
-	path = archive/arduino-pi-projects
+[submodule "archive/embedded/arduino-pi-projects"]
+	path = archive/embedded/arduino-pi-projects
 	url = git@github.com:dwilson2547/arduino_pi_projects.git
 [submodule "docs/wiki"]
 	path = docs/wiki
 	url = git@github.com:dwilson2547/wiki.git
-[submodule "docs/markdown-api"]
-	path = docs/markdown-api
+[submodule "meta/markdown-api"]
+	path = meta/markdown-api
 	url = git@github.com:dwilson2547/markdown_api.git
-[submodule "docs/markdown-renderer"]
-	path = docs/markdown-renderer
+[submodule "meta/markdown-renderer"]
+	path = meta/markdown-renderer
 	url = git@github.com:dwilson2547/markdown_renderer.git
-[submodule "docs/sidebar-generator"]
-	path = docs/sidebar-generator
+[submodule "meta/sidebar-generator"]
+	path = meta/sidebar-generator
 	url = git@github.com:dwilson2547/sidebar_generator.git
 [submodule "docs/auto-doc"]
 	path = docs/auto-doc

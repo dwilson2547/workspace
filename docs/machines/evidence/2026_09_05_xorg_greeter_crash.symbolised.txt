@@ -1,0 +1,62 @@
+Symbolised analysis of 2026_09_05_xorg_greeter_crash.crash
+Generated: 2026-09-06T00:24:28-04:00
+Crash from : xserver-xorg-core 2:21.1.12-1ubuntu1.5
+Symbols from: xserver-xorg-core-dbgsym 2:21.1.12-1ubuntu1.6  (version skew - see issue doc caveat)
+Validation : crashing 1.5 binary's own backtrace names 0x5e7913518f12 as RRTellChanged+0x2a2;
+             gdb with 1.6 symbols resolves the same address to RRTellChanged at randr/randr.c:654.
+
+=============================== BACKTRACE ===============================
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x000073999e24527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x000073999e2288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00005e79135d9fae in OsAbort () at ../../../../os/utils.c:1361
+#6  0x00005e79135dfaf7 in AbortServer () at ../../../../os/log.c:879
+#7  0x00005e79135e0b77 in FatalError (f=f@entry=0x5e79135fb8f0 "Caught signal %d (%s). Server aborting\n") at ../../../../os/log.c:1017
+#8  0x00005e79135d712b in OsSigHandler (unused=<optimized out>, sip=<optimized out>, signo=11) at ../../../../os/osinit.c:156
+#9  OsSigHandler (signo=11, sip=<optimized out>, unused=<optimized out>) at ../../../../os/osinit.c:110
+#10 <signal handler called>
+#11 0x00005e7913518f12 in RRTellChanged (pScreen=<optimized out>) at ../../../../randr/randr.c:654
+#12 0x00005e79134b7bfe in xf86platformRemoveDevice (index=index@entry=0) at ../../../../../../hw/xfree86/common/xf86platformBus.c:738
+#13 0x00005e79134bdadb in DeleteGPUDeviceRequest (attribs=0x5e7954b3b590) at ../../../../../../../hw/xfree86/os-support/linux/lnx_platform.c:214
+#14 0x00005e79134b95be in device_removed (device=device@entry=0x5e7954d14540) at ../../../../config/udev.c:336
+#15 0x00005e79134ba238 in socket_handler (fd=<optimized out>, ready=<optimized out>, data=<optimized out>) at ../../../../config/udev.c:374
+#16 0x00005e79135d7b9a in ospoll_wait (ospoll=0x5e7953582a00, timeout=<optimized out>) at ../../../../os/ospoll.c:657
+#17 0x00005e79135d04f5 in WaitForSomething (are_ready=1) at ../../../../os/WaitFor.c:208
+#18 0x00005e791345786a in Dispatch () at ../../../../dix/dispatch.c:492
+#19 0x00005e791345beda in dix_main (argc=15, argv=<optimized out>, envp=<optimized out>) at ../../../../dix/main.c:274
+#20 0x000073999e22a1ca in __libc_start_call_main (main=main@entry=0x5e7913444360 <main>, argc=argc@entry=15, argv=argv@entry=0x7ffe67713ed8) at ../sysdeps/nptl/libc_start_call_main.h:58
+#21 0x000073999e22a28b in __libc_start_main_impl (main=0x5e7913444360 <main>, argc=15, argv=0x7ffe67713ed8, init=<optimized out>, fini=<optimized out>, rtld_fini=<optimized out>, stack_end=0x7ffe67713ec8) at ../csu/libc-start.c:360
+#22 0x00005e7913444395 in _start ()
+
+===================== FRAME 11 - RRTellChanged ==========================
+#11 0x00005e7913518f12 in RRTellChanged (pScreen=<optimized out>) at ../../../../randr/randr.c:654
+primary = 0x5e79535c2ac0
+pScrPriv = 0x5e795441d380
+primarysp = <optimized out>
+i = <optimized out>
+iter = 0x5e7954426f70
+pSecondaryScrPriv = 0x5e7954417470
+$1 = 0
+$2 = 0
+$3 = {next = 0x5e7954427410, prev = 0x5e7954427410}
+$4 = 1398559344
+$5 = -1919777836
+$6 = (ScreenPtr) 0x5e79535c2ac0
+$7 = {rrSetConfig = 0x73999e403cd0 <main_arena+528>, rrGetInfo = 0x73999e403cd0 <main_arena+528>, rrScreenSetSize = 0x73999d6cc550, rrCrtcSet = 0x73999d6c8960, rrCrtcSetGamma = 0x73999d6c86f0, rrCrtcGetGamma = 0x73999d6c8690, rrOutputSetProperty = 0x73999d6c8400, rrOutputValidateMode = 0x73999d6c7ce0, rrModeDestroy = 0x0, rrOutputGetProperty = 0x73999d6c7cf0, rrGetPanning = 0x73999d6c80c0, rrSetPanning = 0x73999d6c8020, rrCrtcSetScanoutPixmap = 0x73999d6c9b80, rrStartFlippingPixmapTracking = 0x73999d6c7d90, rrEnableSharedPixmapFlipping = 0x73999d6c7fa0, rrDisableSharedPixmapFlipping = 0x73999d6c7d40, rrProviderSetOutputSource = 0x73999d6c9c50, rrProviderSetOffloadSink = 0x0, rrProviderGetProperty = 0x0, rrProviderSetProperty = 0x0, rrCreateLease = 0x0, rrTerminateLease = 0x0, lastSetTime = {months = 0, milliseconds = 9947}, lastConfigTime = {months = 0, milliseconds = 9947}, CloseScreen = 0x5e7913539ba0 <present_close_screen>, changed = 0, configChanged = 0, layoutChanged = 1, resourcesChanged = 1, leasesChanged = 0, minWidth = 8, minHeight = 8, maxWidth = 32767, maxHeight = 32767, width = 640, height = 480, mmWidth = 217, mmHeight = 163, numOutputs = 0, outputs = 0x5e7954487ea0, primaryOutput = 0x0, numCrtcs = 0, crtcs = 0x5e795438a870, pointerCrtc = 0x0, rotations = 1, reqWidth = 640, reqHeight = 480, nSizes = 0, pSizes = 0x0, rotation = 1, rate = 0, size = 0, discontiguous = 0, provider = 0x0, rrProviderDestroy = 0x0, numMonitors = 0, monitors = 0x0, leases = {next = 0x5e79544175d0, prev = 0x5e79544175d0}}
+
+===================== FRAMES 12-14 - removal path =======================
+#12 0x00005e79134b7bfe in xf86platformRemoveDevice (index=index@entry=0) at ../../../../../../hw/xfree86/common/xf86platformBus.c:738
+index = 0
+entity = <optimized out>
+ent_num = <optimized out>
+i = <optimized out>
+j = <optimized out>
+scrnum = <optimized out>
+found = 1
+#13 0x00005e79134bdadb in DeleteGPUDeviceRequest (attribs=0x5e7954b3b590) at ../../../../../../../hw/xfree86/os-support/linux/lnx_platform.c:214
+attribs = 0x5e7954b3b590
+#14 0x00005e79134b95be in device_removed (device=device@entry=0x5e7954d14540) at ../../../../config/udev.c:336
+device = 0x5e7954d14540
