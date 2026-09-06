@@ -8,8 +8,10 @@ line per note. No server, no daemon: scope is structural (the directory tree),
 search is lexical. See CONVENTIONS.md §5.
 
 Usage:
-  wsnote add <target> <title> <body> [--tags a,b] [--domains x,y]
-      target: a domain (e.g. robotics) or a project path (e.g. automotive/gyopart)
+  wsnote add <target> <title> <body> [--tags a,b] [--domains x,y] [--source path]
+      target: a domain (e.g. robotics), a project path (e.g. automotive/gyopart),
+              or '.' for workspace scope
+      source: optional workspace-relative path to the doc this note distills
   wsnote search <query...> [--domain <d>] [-n N]
   wsnote ls [<domain>] [--tags a,b]
   wsnote reindex
@@ -61,6 +63,7 @@ def parse_note(path):
         "date": meta.get("date", ""),
         "tags": [t.strip() for t in meta.get("tags", "").split(",") if t.strip()],
         "domains": [d.strip() for d in meta.get("domains", "").split(",") if d.strip()],
+        "source": meta.get("source", ""),
         "body": body,
     }
 
@@ -126,6 +129,8 @@ def cmd_add(args):
         fm.append(f"tags: {args.tags}")
     if args.domains:
         fm.append(f"domains: {args.domains}")
+    if args.source:
+        fm.append(f"source: {args.source}")
     fm.append("---")
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(fm) + "\n\n" + args.body.strip() + "\n")
@@ -152,6 +157,8 @@ def cmd_search(args):
     for score, n in scored[: args.n]:
         print(f"[{score:>3}] {n['rel']}")
         print(f"      {n['title']} — {first_sentence(n['body'])}")
+        if n["source"]:
+            print(f"      ↳ source: {n['source']}")
 
 
 def cmd_ls(args):
@@ -162,6 +169,8 @@ def cmd_ls(args):
             continue
         tagstr = f"  [{','.join(n['tags'])}]" if n["tags"] else ""
         print(f"{n['rel']}{tagstr}\n      {n['title']}")
+        if n["source"]:
+            print(f"      ↳ source: {n['source']}")
         count += 1
     if not count:
         print("no notes")
@@ -188,6 +197,8 @@ def main():
     a.add_argument("body")
     a.add_argument("--tags", default="", help="comma-separated tags")
     a.add_argument("--domains", default="", help="comma-separated secondary domains")
+    a.add_argument("--source", default="",
+                   help="optional workspace-relative path to the doc this note distills")
     a.set_defaults(fn=cmd_add)
 
     s = sub.add_parser("search", help="search notes")
