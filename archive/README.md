@@ -3,6 +3,25 @@
 Superseded or consolidated projects, kept for history only. Nothing here is active. See
 [`../CONVENTIONS.md`](../CONVENTIONS.md) §4 (the `archive/` domain) and §8.
 
+## Layout
+
+`archive/` mirrors the live domain taxonomy: `archive/<domain>/<project>`. Same reasoning as §4a —
+the tree partitions on one axis, and "dead" is already expressed by being in `archive/` at all.
+*When* and *why* something died are metadata, recorded in this file, not folders.
+
+| Domain | Contents |
+|---|---|
+| `automotive/` | gyopart predecessors, standalone rockauto scrapers |
+| `web-scrapers/` | the old `web-scrapers` monorepo, and the cache/permit services absorbed into `scrape-stack` |
+| `meta/` | retired knowledge services and their standalone skill repos |
+| `apps/` | superseded task-queue variants |
+| `embedded/` | `arduino-pi-projects` |
+
+**Removed entirely:** `legacy` (school work and unfinished projects from ~12 years ago) was
+deregistered as a submodule on 2026-09-06 — nothing of value, and the repo still exists at
+`git@github.com:dwilson2547/legacy.git` @ `aae1e7a`. It is simply no longer mapped into the
+workspace.
+
 ## Consolidated into the `gyopart` monorepo
 
 `gyopart` (under `automotive/`) became a **true monorepo** — a single repo holding its subsystems
@@ -20,21 +39,21 @@ were consolidated into it and are retired:
 Their individual repo histories were intentionally dropped during the monorepo consolidation;
 `gyopart`'s history is now the system of record.
 
-### `parts-interchange/` (this directory)
+### `automotive/parts-interchange/`
 
 The one consolidated predecessor that still existed locally as its own git submodule
 (`git@github.com:dwilson2547/parts_interchange.git`). Relocated here intact so its standalone
 history stays browsable. The **live** code is in the `gyopart` monorepo above — do not develop
 here.
 
-### `junkyard-inventory-scrapers/` (this directory)
+### `automotive/junkyard-inventory-scrapers/`
 
 Standalone predecessor of `automotive/gyopart/junkyard-inventory-scrapers`. Verified that the
 gyopart copy fully contains the standalone (no missing or differing files) before archiving.
 Relocated here intact (`git@github.com:dwilson2547/junkyard_inventory_scrapers.git`). Live code is
 in the `gyopart` monorepo — do not develop here.
 
-### `parts-direct/` (this directory)
+### `automotive/parts-direct/`
 
 Standalone predecessor of `automotive/gyopart/parts-interchange/parts-direct`. Reconciled before
 archiving: the `update-scraper/*.py` files matched gyopart's `main`, and the one file gyopart was
@@ -77,11 +96,32 @@ dropped (their canonical copies are the ones above).
 These project-backed skills were small enough not to warrant separate repos, so their content now
 lives as plain folders inside `meta/SKILLS`; the standalone repos are archived here intact.
 
-| Former standalone repo | Now lives at | Archived here |
-|---|---|---|
-| `context-store` | `meta/SKILLS/context-store` | `archive/context-store/` |
-| `ai_tool_docs` | `meta/SKILLS/ai-tool-docs` | `archive/ai-tool-docs/` |
-| `ai_notes_server` | `meta/SKILLS/ai-notes-server` | `archive/ai-notes-server/` |
+| Former standalone repo | Archived here |
+|---|---|
+| `context-store` | `archive/meta/context-store/` |
+| `ai_tool_docs` | `archive/meta/ai-tool-docs/` |
+| `ai_notes_server` | `archive/meta/ai-notes-server/` |
 
-`ai_notes_server` is also functionally superseded by Work Manager (`workman note`); the in-repo
-`ai-notes-server` skill now just redirects there.
+## Retired knowledge services (2026-09-06)
+
+The whole knowledge-service stack is retired, superseded by **`meta/SKILLS/doc-indexer`** — one
+local CLI over one SQLite index, replacing five overlapping services whose sprawl cost more than it
+returned (`CONVENTIONS.md` §5). Do not reintroduce one.
+
+The *service repos* were archived earlier, but their **skills were left installed and live**, still
+instructing agents to POST to `localhost:8001` and friends. Those skill folders now sit in
+`meta/SKILLS/archive/`, out of the installer's auto-discovery path, and their symlinks have been
+removed from `~/.claude/skills` and `~/.agents/skills`:
+
+| Retired skill | Was at | Now at |
+|---|---|---|
+| `ai-notes-server` | `meta/SKILLS/ai_notes_server` | `meta/SKILLS/archive/ai_notes_server` |
+| `ai-tool-docs` | `meta/SKILLS/ai_tool_docs` | `meta/SKILLS/archive/ai_tool_docs` |
+| `context-store` | `meta/SKILLS/context-store` | `meta/SKILLS/archive/context-store` |
+| `todo-store` | `meta/SKILLS/todo-store` | `meta/SKILLS/archive/todo-store` |
+| `work-manager` | `meta/SKILLS/work-manager` | `meta/SKILLS/archive/work-manager` |
+
+They were archived *within* the SKILLS repo rather than moved here, so their history stays with the
+repo that owns them and the move is reversible. Earlier notes in this file describing
+`ai_notes_server` as "superseded by Work Manager (`workman note`)" are obsolete — Work Manager is
+retired too.

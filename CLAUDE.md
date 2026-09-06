@@ -27,11 +27,19 @@ The essentials (full detail in `CONVENTIONS.md`):
   submodules; nest submodules only for a composite system you run (§1/§1a); no `projects/` folder —
   scale is a `tier:` README marker (§4a); cross-cutting projects get one home + secondary-domain
   tags (§4b).
-- **Knowledge** — domain-level docs in `<domain>/docs/` for cross-project guidance (e.g., general
-  ESP32 docs) and per-project notes in `<project>/docs/` for project-specific decisions/workarounds;
-  human prose in Obsidian; cross-cutting reusable knowledge in the AI notes server, **namespaced by
-  domain**. Recall before non-trivial domain work; save at most one note per task, gated on "would
-  this change how a future similar task is approached?" (§5). Mechanics: `ai-notes-server` skill.
+- **Knowledge** — three scopes, all repo-local markdown: `docs/` for the workspace and the machines
+  it runs on, `<domain>/docs/` for cross-project guidance in a domain, `<project>/docs/` for
+  project-specific work. **There is no knowledge service** — `ai-notes-server`, `context-store`,
+  `tool-docs`, `todo-store` and `workman` were tried and abandoned; do not reintroduce one. Obsidian
+  as a knowledge tier is retired. Notes are written for *agents*, not human reading: atomic, and
+  carrying `source:` when they distil a longer doc. Write with `meta/bin/wsnote` (enforces scope),
+  read with `meta/SKILLS/doc-indexer` (`search` semantic, `find` literal, across every scope). Save at most
+  one note per task, gated on "would this change how a future similar task is approached?" (§5).
+- **Commits** — commit early, often, and broken; a commit is a checkpoint, not a certificate that
+  something works. Messages record the *why*. Push freely. Committing and pushing here needs no
+  per-request approval; history rewriting and branch deletion still do. **The only gate is secrets
+  and credentials** — scan the diff, and if something is found, stop and unstage rather than
+  planning to fix it in the next commit (§9).
 - **Helm/Argo** — self-deploying project → `<project>/helm/<project>/`; shared/cluster-wide →
   `infra/cluster-config/` (§6).
 
