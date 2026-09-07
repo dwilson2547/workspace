@@ -354,6 +354,29 @@ reconstruct.
   standing authorization. It does not extend to history rewriting (`push --force`, rebase of pushed
   commits, `filter-branch`) or to deleting branches — those still require a direct request.
 
+### Commit and push as you go — never bank work
+
+**Do not end a task with a dirty working tree.** This is the rule the rest of §9 exists to make
+possible: if commits are cheap and ungated, there is no reason to accumulate.
+
+The failure it prevents is specific and has happened in every environment here. An agent does a
+day's work without committing, then another does more on top. Within a day or two the tree holds a
+pile of unattributable changes — no messages, no boundaries, no way to tell which edit belonged to
+which intent. The only options left are archaeology or discarding the lot, and in practice it gets
+discarded. Work is lost not because anything broke but because nobody could say what it was for.
+
+- **Commit at each meaningful step**, not once at the end. A task that produced five distinct
+  changes should produce roughly five commits.
+- **Push before the session ends.** Unpushed work exists on exactly one machine.
+  `meta/bin/wsgit-status` reports this at session start for that reason.
+- **Nothing is "not ready enough to commit."** §9 does not gate on working code — commit the
+  unfinished state and say in the message what is unfinished. A WIP commit is recoverable; an
+  uncommitted tree is not.
+- **If you find an orphaned change you did not make**, do not absorb it into your own commit and do
+  not leave it. Reconstruct what it was from the diff — such changes are usually more
+  self-documenting than they first appear — and commit it separately so it keeps its own history.
+  If it genuinely cannot be reconstructed, say so and ask rather than bundling it.
+
 ### The one gate: secrets and credentials
 
 This is the only check that blocks a commit. Before staging, scan the diff for:
