@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Stop hook: refuse to end a session with work banked. See CONVENTIONS.md §9.
+#
+# Purely local — no fetch, no network. Must be fast; a Stop hook runs on every turn end.
+#
+# Nudges ONCE per session, then stays quiet. A hook that blocks repeatedly is
+# worse than the problem it solves: it traps the user. After the first block it
+# degrades to a visible warning and never blocks again.
+#
+# WSGIT_NO_STOP_CHECK=1 disables entirely.
+
+[ -n "${WSGIT_NO_STOP_CHECK:-}" ] && exit 0
+
+_self="$(readlink -f "${BASH_SOURCE[0]}")"
+WS="${WSGIT_ROOT:-$(cd "$(dirname "$_self")/../.." && pwd)}"
+cd "$WS" 2>/dev/null || exit 0
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+
+sm_list=$(git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null | awk '{print $2}')
+
+report_one() {
+  local dir="$1" label="$2" extra="${3:-}" n_dirty unpushed
+  # status --porcelain, not diff: diff misses UNTRACKED files, which are the most
+  # common form of banked work (a whole new file nobody committed).
+  n_dirty=$(git -C "$dir" status --porcelain --untracked-files=normal $extra 2>/dev/null | wc -l)
+  unpushed=$(git -C "$dir" rev-list --count HEAD --not --remotes 2>/dev/null || echo 0)
+  [ "${n_dirty:-0}" -eq 0 ] && [ "${unpushed:-0}" -eq 0 ] && return
+  local bits=""
+  [ "${n_dirty:-0}" -gt 0 ] && bits="$n_dirty uncommitted file(s)"
+  [ "${unpushed:-0}" -gt 0 ] && bits="${bits:+$bits, }$unpushed unpushed commit(s)"
+  echo "  $label: $bits"
+}
+
+findings=$( report_one "$WS" "workspace" "--ignore-submodules=all"
+            printf '%s\n' "$sm_list" | while read -r sm; do
+              [ -n "$sm" ] && [ -e "$WS/$sm/.git" ] || continue
+              report_one "$WS/$sm" "$sm"
+            done )
+
+[ -z "$findings" ] && exit 0
+
+marker="/tmp/.wsgit-stop-${CLAUDE_CODE_SESSION_ID:-$PPID}"
+detail="Work is about to be left banked in this workspace:
+
+$findings
+
+CONVENTIONS.md §9: do not end a task with a dirty working tree. Commit it — a WIP
+commit that says what is unfinished beats an uncommitted tree, since §9 does not
+gate on working code. Then push; unpushed work exists on one machine only.
+If it is genuinely not yours to commit, reconstruct what it was from the diff and
+commit it separately rather than leaving it."
+
+if [ -e "$marker" ]; then
+  # Already nudged this session — warn visibly, never block again.
+  jq -n --arg m "git: work left uncommitted in this workspace ($(echo "$findings" | wc -l) repo(s)). See §9." \
+     '{systemMessage:$m, suppressOutput:true}' 2>/dev/null \
+     || printf 'git: work left uncommitted (%s repo(s)).\n' "$(echo "$findings" | wc -l)"
+  exit 0
+fi
+
+touch "$marker" 2>/dev/null
+if command -v jq >/dev/null 2>&1; then
+  jq -n --arg r "$detail" '{decision:"block", reason:$r}'
+else
+  printf '%s\n' "$detail"
+  exit 2
+fi
+exit 0

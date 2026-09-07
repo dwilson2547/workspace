@@ -11,6 +11,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel)/meta/bin/wsgit-stop-check\"",
+            "timeout": 30,
+            "statusMessage": "Checking for uncommitted work..."
+          }
+        ]
+      }
     ]
   }
 }

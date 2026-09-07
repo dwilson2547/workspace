@@ -105,10 +105,17 @@ discovered.
 
 ## What does *not* need per-machine setup
 
-The session-start git sync (`meta/bin/wsgit-status`, CONVENTIONS.md §9) is wired through
-`.claude/settings.json`, which **is** committed, and neither the hook command nor the script
-hardcodes a path — so it works in any clone at any path with no setup at all. It fetches the
-superrepo and all submodules in parallel and fast-forwards whatever is safe before the first prompt.
+Two of the three git safeguards (CONVENTIONS.md §9) are wired through `.claude/settings.json`,
+which **is** committed, and neither their hook commands nor the scripts hardcode a path — so they
+work in any clone at any path with no setup at all:
+
+- **SessionStart** → `meta/bin/wsgit-status` fetches the superrepo and all submodules in parallel
+  and fast-forwards whatever is safe, before the first prompt is answered.
+- **Stop** → `meta/bin/wsgit-stop-check` refuses to end a session with uncommitted or unpushed work.
+  Nudges once, then warns only.
+
+Only the third — the pre-commit guard — needs §2a above, because `core.hooksPath` lives in
+`.git/config` and cannot be committed.
 
 ## 3. When it must be unambiguous: `git -C`
 

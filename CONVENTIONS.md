@@ -429,6 +429,22 @@ This tool previously did none of this: it skipped submodule fetches for speed, o
 and — the actual reason nothing ever worked — **was never wired to any hook at all**, despite its
 own header claiming it ran at session start. It had never run once.
 
+### The session cannot end with work banked
+
+A **Stop hook** (`meta/bin/wsgit-stop-check`) checks the superrepo and every submodule for
+uncommitted files — including **untracked** ones, which are the most common form of banked work —
+and for commits not on any remote. Purely local, no fetch, ~1s.
+
+It **nudges once per session, then never blocks again**. The first stop with work outstanding
+returns `decision: "block"` naming exactly what is loose; every stop after that is a visible warning
+only. A hook that blocks repeatedly traps the user, which is worse than the problem it solves.
+
+`WSGIT_NO_STOP_CHECK=1` disables it.
+
+Together with the other two: SessionStart makes the repo current before work, the pre-commit guard
+refuses commits against stale state, and Stop refuses to walk away from work. None of the three
+depends on an agent remembering anything.
+
 ### The one gate: secrets and credentials
 
 This is the only check that blocks a commit. Before staging, scan the diff for:
