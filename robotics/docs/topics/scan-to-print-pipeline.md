@@ -1,5 +1,10 @@
 > **Provenance:** Desk research from the abandoned `3d-mapping` project (2025). Never validated
 > on hardware — treat tool choices and parameters as starting points, not proven procedure.
+>
+> **Sensor set never built.** This assumes a rig with a FLIR Blackfly, a RealSense D435i, stereo
+> OV9281s and an external WT901C IMU; none were bought. The built scanner is Livox Horizon +
+> its internal BMI088 — see `robotics/livox_handheld_scanner/docs/ARCHITECTURE.md` for what the
+> live pipeline actually runs.
 
 # Software Pipeline
 
@@ -15,17 +20,17 @@ All sensors publish to ROS2 topics simultaneously. Data is recorded to a rosbag 
 
 ### Key Topics
 
-| Topic | Sensor | Type |
-|---|---|---|
-| `/livox/lidar` | Livox Horizon | `livox_ros_driver2/msg/CustomMsg` |
-| `/livox/imu` | Livox Horizon (internal IMU) | `sensor_msgs/msg/Imu` |
-| `/imu/data` | RealSense D435i IMU | `sensor_msgs/msg/Imu` |
-| `/imu/witmotion` | Witmotion WT901C | `sensor_msgs/msg/Imu` |
-| `/camera/depth/points` | RealSense D435i | `sensor_msgs/msg/PointCloud2` |
-| `/camera/color/image_raw` | RealSense D435i RGB | `sensor_msgs/msg/Image` |
-| `/flir/image_raw` | FLIR BFS-U3-120S4C | `sensor_msgs/msg/Image` |
-| `/ov9281/left/image_raw` | OV9281 left | `sensor_msgs/msg/Image` |
-| `/ov9281/right/image_raw` | OV9281 right | `sensor_msgs/msg/Image` |
+| Topic | Sensor | Type | Status |
+|---|---|---|---|
+| `/livox/lidar` | Livox Horizon | `livox_ros_driver2/msg/CustomMsg` | ✅ built |
+| `/livox/imu` | Livox Horizon (internal BMI088) | `sensor_msgs/msg/Imu` | ✅ built — the odometry IMU |
+| `/imu/data` | RealSense D435i IMU | `sensor_msgs/msg/Imu` | ❌ never bought |
+| `/imu/witmotion` | Witmotion WT901C | `sensor_msgs/msg/Imu` | ❌ dropped — poor sync vs BMI088 |
+| `/camera/depth/points` | RealSense D435i | `sensor_msgs/msg/PointCloud2` | ❌ never bought |
+| `/camera/color/image_raw` | RealSense D435i RGB | `sensor_msgs/msg/Image` | ❌ never bought |
+| `/flir/image_raw` | FLIR BFS-U3-120S4C | `sensor_msgs/msg/Image` | ❌ never bought |
+| `/ov9281/left/image_raw` | OV9281 left | `sensor_msgs/msg/Image` | ❌ never bought |
+| `/ov9281/right/image_raw` | OV9281 right | `sensor_msgs/msg/Image` | ❌ never bought |
 
 ### Capture Tips
 

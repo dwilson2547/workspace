@@ -1,5 +1,11 @@
 > **Provenance:** Desk research from the abandoned `3d-mapping` project (2025). Never validated
 > on hardware — treat tool choices and parameters as starting points, not proven procedure.
+>
+> **Superseded — external IMU:** Sections 4 and 5 calibrate a Witmotion WT901C. The built rig
+> uses the Livox Horizon's built-in BMI088 instead (in the Livox time domain, no sync needed);
+> the WT901C was dropped for poor sync and no advantage over the BMI088. See
+> `robotics/livox_handheld_scanner/docs/ARCHITECTURE.md`. Those two sections are kept only as
+> generic `lidar_imu_calib` / Allan-variance procedure for some future external IMU.
 
 # Calibration Procedures
 
@@ -14,8 +20,8 @@ Calibration is one of the highest-leverage steps in the pipeline. Errors here pr
 | Camera intrinsics | OpenCV / ROS2 camera_calibration | Once per lens, re-run if lens is changed |
 | Camera-to-camera extrinsics | Kalibr | Once per rig assembly |
 | LiDAR-to-camera extrinsic | livox_camera_calib | Once per rig assembly |
-| LiDAR-to-IMU extrinsic | lidar_imu_calib | Once per rig assembly |
-| IMU intrinsics (noise model) | imu_utils or allan_variance_ros | Once per IMU unit |
+| LiDAR-to-IMU extrinsic | lidar_imu_calib | ~~Once per rig assembly~~ — n/a, Horizon BMI088 is pre-aligned |
+| IMU intrinsics (noise model) | imu_utils or allan_variance_ros | ~~Once per IMU unit~~ — n/a, external IMU dropped |
 
 ---
 
@@ -136,9 +142,12 @@ Edit `config/lidar_camera_calib.yaml` with:
 
 ---
 
-## 4. LiDAR-to-IMU Extrinsic Calibration
+## 4. LiDAR-to-IMU Extrinsic Calibration — superseded
 
-For the Witmotion WT901C mounted near the Livox. The D435i's IMU-to-RGB-camera extrinsic is factory calibrated and available via RealSense SDK.
+**Not run on the built rig.** This calibrates an external Witmotion WT901C mounted near the
+Livox; the rig uses the Horizon's built-in BMI088, which needs no LiDAR-to-IMU extrinsic. Kept
+as generic procedure only. The D435i's IMU-to-RGB-camera extrinsic is factory calibrated and
+available via RealSense SDK.
 
 ### Install lidar_imu_calib
 
@@ -165,9 +174,11 @@ Output: translation and rotation from IMU frame to LiDAR frame. Add to `config/e
 
 ---
 
-## 5. IMU Intrinsic Calibration (Noise Model)
+## 5. IMU Intrinsic Calibration (Noise Model) — superseded
 
-Determines the noise density and random walk parameters for the Witmotion IMU. These parameters feed into FAST-LIO2's noise model and significantly affect odometry quality.
+**Not run on the built rig**, for the same reason as Section 4. Determines the noise density and
+random walk parameters for the Witmotion IMU. The procedure below applies unchanged to any IMU —
+substitute the relevant topic for `/imu/witmotion`.
 
 ### Install allan_variance_ros
 
