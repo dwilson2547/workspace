@@ -101,6 +101,8 @@ def reindex_dir(nd):
     notes = [n for n in (parse_note(os.path.join(nd, f)) for f in sorted(os.listdir(nd))
                          if f.endswith(".md") and f != "README.md") if n]
     lines = ["# Notes index", ""]
+    if not notes:
+        lines.append("No project notes yet.")
     for n in notes:
         fn = os.path.basename(n["path"])
         tagstr = f" `{','.join(n['tags'])}`" if n["tags"] else ""
