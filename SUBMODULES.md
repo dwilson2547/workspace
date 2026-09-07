@@ -70,6 +70,46 @@ shadowing per-repo `.git/hooks`. The hook above chains to a local `prepare-commi
 but *other* hook types (e.g. `pre-commit`) in some repo would be bypassed. If you ever add per-repo
 hooks and they stop firing, that's why.
 
+## 2a. Install the git guards (required — one command)
+
+The pre-commit guard (CONVENTIONS.md §9) blocks commits on a detached HEAD, commits made while
+behind upstream, and staged secrets. It reaches every repo through `core.hooksPath`, which lives in
+`.git/config` and therefore **cannot be committed** — so it has to be installed once per clone:
+
+```bash
+./meta/bin/install-git-guards.sh          # --dry-run to preview
+```
+
+Idempotent; re-run it after adding a submodule.
+
+**This interacts with §2 above, and the interaction is not optional to understand.** Git consults
+exactly one hooks directory. Setting a *local* `core.hooksPath` (what the installer does) shadows
+the *global* `~/.git-hooks` from §2 completely — which silently disabled the commit-target stamp in
+all 87 repos the first time this was installed. The fix is already in place:
+`meta/bin/githooks/prepare-commit-msg` is a shim that chains to whatever global hook is configured,
+so both fire. If you add another *global* hook type later, add a matching shim here or it will not
+run inside the workspace.
+
+The same caveat §2 raises applies in reverse, and is worth restating: if a hook stops firing
+somewhere, `git config --get core.hooksPath` in that repo is the first thing to check.
+
+## 2b. Install the skill symlinks
+
+```bash
+./meta/SKILLS/install_skill_symlinks.sh   # --dry-run to preview
+```
+
+Links every top-level folder in `meta/SKILLS` containing a `SKILL.md` into `~/.claude/skills` and
+`~/.agents/skills`. Retired skills live in `meta/SKILLS/archive/` and are deliberately not
+discovered.
+
+## What does *not* need per-machine setup
+
+The session-start git sync (`meta/bin/wsgit-status`, CONVENTIONS.md §9) is wired through
+`.claude/settings.json`, which **is** committed, and neither the hook command nor the script
+hardcodes a path — so it works in any clone at any path with no setup at all. It fetches the
+superrepo and all submodules in parallel and fast-forwards whatever is safe before the first prompt.
+
 ## 3. When it must be unambiguous: `git -C`
 
 For scripts (or anything you don't want depending on `cwd`), target the repo explicitly:

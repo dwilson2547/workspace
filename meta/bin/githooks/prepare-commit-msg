@@ -1,0 +1,21 @@
+#!/bin/sh
+# Chains to the user's global prepare-commit-msg (the commit-target stamp
+# documented in SUBMODULES.md §2).
+#
+# Why this file has to exist: pointing core.hooksPath at this directory shadows
+# the global ~/.git-hooks entirely — git looks in exactly one hooks directory.
+# Without this shim, installing the pre-commit guard silently disables the
+# commit-target stamp in every repo it touches.
+
+global_dir=$(git config --global --get core.hooksPath 2>/dev/null)
+if [ -n "$global_dir" ] && [ "$global_dir" != "$(dirname "$0")" ]; then
+  case "$global_dir" in "~"*) global_dir="$HOME${global_dir#\~}";; esac
+  if [ -x "$global_dir/prepare-commit-msg" ]; then
+    exec "$global_dir/prepare-commit-msg" "$@"
+  fi
+fi
+
+# Fall back to a repo-local hook if one exists.
+local_hook="$(git rev-parse --git-dir 2>/dev/null)/hooks/prepare-commit-msg"
+[ -x "$local_hook" ] && exec "$local_hook" "$@"
+exit 0

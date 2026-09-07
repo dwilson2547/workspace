@@ -4,8 +4,9 @@
 > taxonomy, placement rules, and knowledge layout. Agents follow [`CLAUDE.md`](./CLAUDE.md) /
 > [`AGENTS.md`](./AGENTS.md) and the `workspace-conventions` skill.
 >
-> **Working here:** [`SUBMODULES.md`](./SUBMODULES.md) — per-machine setup (prompt + commit-target
-> hook) to avoid committing to the wrong repo in this submodule-heavy layout.
+> **New machine? Start here:** [`SUBMODULES.md`](./SUBMODULES.md) — everything that must be
+> installed once per clone (prompt context, commit-target stamp, git guards, skill symlinks) and
+> what needs no setup at all.
 >
 > **Skills location:** skills are managed under [`meta/SKILLS`](./meta/SKILLS). To (re)install
 > local symlinks for agent runtimes, run:
