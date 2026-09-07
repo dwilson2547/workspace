@@ -309,6 +309,9 @@ step:
 - [x] **VL53L1X ring addressing solved** — 2× PCA9548A, mounted and wired
 - [x] **All 9 ToF sensors (8 ring + 1 up) + both muxes mounted and wired**
 - [x] **HDZero camera + VTX fitted and wired** (80 mm MIPI cable) — 2026-08-17
+- [x] **ESP32 proximity firmware written** — [`firmware/cl35_proximity`](firmware/cl35_proximity/),
+      builds clean, untested on hardware. Boots into a scan mode that produces the
+      channel→direction map.
 - [ ] **ESP32-S3 wired to the sensor stack** ← the last hardware job
 - [ ] **ESP32-S3 wired to the FC** (UART, MAVLink)
 - [ ] **First power-up since the rework** — see the cautions above
@@ -324,6 +327,7 @@ step:
       threshold and timer are untested
 - [ ] Audible noise characterised (mic + acoustic FFT)
 - [ ] MTF-01 position hold working (assisted layer)
+- [ ] **Sensor map recorded** — run scan mode, fill in `src/config.cpp`
 - [ ] Obstacle avoidance live off the ToF ring (autonomous layer)
 - [ ] First indoor hover
 
