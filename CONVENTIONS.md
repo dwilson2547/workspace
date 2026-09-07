@@ -395,10 +395,25 @@ outright:
 `WSGIT_SKIP=1 git commit …` overrides for a single commit; use it for a false positive, not to get
 past a real one.
 
-`meta/bin/wsgit-status` fetches the superrepo **and every submodule in parallel** at session start
-(~9s for 87 repos) and reports anything BEHIND or unpushed. It previously skipped submodule fetches
-for speed, which is precisely what made remote divergence in a submodule invisible until push time.
-The hook's "behind" check is only as good as the last fetch, so these two work as a pair.
+### The repo is current before work starts
+
+Blocking at commit time is the wrong end of the problem — the work is already done and paid for.
+`meta/bin/wsgit-status` runs from a **SessionStart hook** (`.claude/settings.json`, committed so it
+travels to every machine) and, before the first prompt is answered:
+
+1. fetches the superrepo and all 86 submodules in parallel (~9s),
+2. **fast-forwards** everything it can do so safely — clean tree, no unpushed commits, no
+   divergence. A fast-forward under those conditions cannot lose work.
+3. reports only what it could not handle: dirty, diverged, detached-with-commits, or no upstream.
+
+So the normal case needs no decision from anyone. The pre-commit guard above is the backstop for
+drift during a long session, not the primary mechanism, and should now rarely fire.
+
+`WSGIT_NO_PULL=1` fetches and reports without moving anything.
+
+This tool previously did none of this: it skipped submodule fetches for speed, only printed advice,
+and — the actual reason nothing ever worked — **was never wired to any hook at all**, despite its
+own header claiming it ran at session start. It had never run once.
 
 ### The one gate: secrets and credentials
 
