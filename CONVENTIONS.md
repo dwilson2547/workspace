@@ -398,8 +398,8 @@ past a real one.
 ### The repo is current before work starts
 
 Blocking at commit time is the wrong end of the problem — the work is already done and paid for.
-`meta/bin/wsgit-status` runs from a **SessionStart hook** (`.claude/settings.json`, committed so it
-travels to every machine) and, before the first prompt is answered:
+`meta/bin/wsgit-status` runs from a **SessionStart hook** (`.claude/settings.json`) and, before the
+first prompt is answered:
 
 1. fetches the superrepo and all 86 submodules in parallel (~9s),
 2. **fast-forwards** everything it can do so safely — clean tree, no unpushed commits, no
@@ -410,6 +410,16 @@ So the normal case needs no decision from anyone. The pre-commit guard above is 
 drift during a long session, not the primary mechanism, and should now rarely fire.
 
 `WSGIT_NO_PULL=1` fetches and reports without moving anything.
+
+**Currently laptop-only.** `.gitignore:7` ignores `.claude/settings.json`, so the hook is not
+committed and does not exist on the desktop — where the same staleness problem applies. Un-ignoring
+it would fix that, but the hook command is an absolute path, so the file is only portable if the
+workspace lives at the same path on both machines or the command is rewritten to use
+`$CLAUDE_PROJECT_DIR`. Until then, the hook must be added by hand on any other machine.
+
+**Auto-pulling a submodule changes the superrepo's recorded pointer**, so a sync that advances one
+leaves the superrepo dirty with a legitimate pointer bump to commit. That is real state, not noise —
+but it does mean a session can start with a dirty tree it did not create.
 
 This tool previously did none of this: it skipped submodule fetches for speed, only printed advice,
 and — the actual reason nothing ever worked — **was never wired to any hook at all**, despite its
