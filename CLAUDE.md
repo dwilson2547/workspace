@@ -43,4 +43,15 @@ The essentials (full detail in `CONVENTIONS.md`):
 - **Helm/Argo** — self-deploying project → `<project>/helm/<project>/`; shared/cluster-wide →
   `infra/cluster-config/` (§6).
 
+- **First run on a machine** — two things live in `.git/config` and `~/`, so they cannot be
+  committed and may be missing on a fresh clone. Check, and install if absent:
+  ```bash
+  git config --get core.hooksPath   # expect <workspace>/meta/bin/githooks
+  ./meta/bin/install-git-guards.sh          # if it is not that
+  ls ~/.claude/skills/doc-indexer           # expect a symlink into meta/SKILLS
+  ./meta/SKILLS/install_skill_symlinks.sh   # if missing
+  ```
+  Full detail and the hooksPath interaction: [`SUBMODULES.md`](./SUBMODULES.md). The session-start
+  git sync needs no setup — it is committed and path-independent.
+
 Migration is opportunistic, not big-bang — see `CONVENTIONS.md` §8 for deferred debt.
