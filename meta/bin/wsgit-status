@@ -14,7 +14,8 @@
 # WSGIT_NO_PULL=1  fetch and report only, never move anything.
 
 set -uo pipefail
-WS="${WSGIT_ROOT:-/home/daniel/documents/workspace}"
+_self="$(readlink -f "${BASH_SOURCE[0]}")"
+WS="${WSGIT_ROOT:-$(cd "$(dirname "$_self")/../.." && pwd)}"
 FETCH_TIMEOUT="${WSGIT_FETCH_TIMEOUT:-15}"
 JOBS="${WSGIT_JOBS:-16}"
 

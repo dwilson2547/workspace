@@ -4,7 +4,8 @@
 # submodule. See CONVENTIONS.md §9.
 set -uo pipefail
 
-WS="${WSGIT_ROOT:-/home/daniel/documents/workspace}"
+_self="$(readlink -f "${BASH_SOURCE[0]}")"
+WS="${WSGIT_ROOT:-$(cd "$(dirname "$_self")/../.." && pwd)}"
 HOOKS="$WS/meta/bin/githooks"
 DRY=false
 [ "${1:-}" = "--dry-run" ] && DRY=true

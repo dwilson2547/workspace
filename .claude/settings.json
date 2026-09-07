@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel)/meta/bin/wsgit-status\"",
+            "timeout": 90,
+            "statusMessage": "Syncing workspace git state (fetch + fast-forward)..."
+          }
+        ]
+      }
+    ]
+  }
+}

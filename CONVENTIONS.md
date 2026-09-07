@@ -411,11 +411,15 @@ drift during a long session, not the primary mechanism, and should now rarely fi
 
 `WSGIT_NO_PULL=1` fetches and reports without moving anything.
 
-**Currently laptop-only.** `.gitignore:7` ignores `.claude/settings.json`, so the hook is not
-committed and does not exist on the desktop — where the same staleness problem applies. Un-ignoring
-it would fix that, but the hook command is an absolute path, so the file is only portable if the
-workspace lives at the same path on both machines or the command is rewritten to use
-`$CLAUDE_PROJECT_DIR`. Until then, the hook must be added by hand on any other machine.
+**Portable by construction.** Nothing here hardcodes a path. The hook command is
+`"$(git rev-parse --show-toplevel)/meta/bin/wsgit-status"`, and the script derives the workspace
+root from its own location via `readlink -f "${BASH_SOURCE[0]}"` rather than a literal path — so
+both work from any clone, at any path, on any machine. `.claude/settings.json` is committed
+(`settings.local.json` stays ignored, which is the distinction the ignore rule was reaching for).
+
+The one part that cannot travel is `core.hooksPath` for the pre-commit guard: it lives in
+`.git/config`, which is never committed. Run `meta/bin/install-git-guards.sh` once per clone — the
+installer travels even though the config cannot, the same way `husky` or a `make bootstrap` works.
 
 **Auto-pulling a submodule changes the superrepo's recorded pointer**, so a sync that advances one
 leaves the superrepo dirty with a legitimate pointer bump to commit. That is real state, not noise —
