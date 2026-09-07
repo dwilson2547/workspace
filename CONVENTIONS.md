@@ -377,6 +377,29 @@ discarded. Work is lost not because anything broke but because nobody could say 
   self-documenting than they first appear — and commit it separately so it keeps its own history.
   If it genuinely cannot be reconstructed, say so and ask rather than bundling it.
 
+### Enforced, not advisory
+
+The rules above are enforced by a `pre-commit` hook wired into the superrepo and every submodule
+via `core.hooksPath` (`meta/bin/githooks/`, installed by `meta/bin/install-git-guards.sh` — re-run
+it after adding a submodule). Guidance alone did not work; these are the failures it now blocks
+outright:
+
+1. **Detached HEAD.** A commit there is on no branch and is silently lost at the next checkout or
+   submodule update. This is the default state of a freshly checked-out submodule, which is exactly
+   why it keeps happening.
+2. **Behind upstream.** Committing on a stale base is what manufactures the conflicts. The hook
+   compares against the last fetched refs and tells you the sequence that works from where you are
+   standing — including `git stash` first, since `git pull` refuses to run with staged changes.
+3. **Secrets.** The gate below, applied to staged content.
+
+`WSGIT_SKIP=1 git commit …` overrides for a single commit; use it for a false positive, not to get
+past a real one.
+
+`meta/bin/wsgit-status` fetches the superrepo **and every submodule in parallel** at session start
+(~9s for 87 repos) and reports anything BEHIND or unpushed. It previously skipped submodule fetches
+for speed, which is precisely what made remote divergence in a submodule invisible until push time.
+The hook's "behind" check is only as good as the last fetch, so these two work as a pair.
+
 ### The one gate: secrets and credentials
 
 This is the only check that blocks a commit. Before staging, scan the diff for:

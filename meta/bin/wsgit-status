@@ -41,23 +41,47 @@ else
 fi
 [ "$fetch_rc" -ne 0 ] && lines+=("workspace: fetch failed or timed out — counts may be stale")
 
-# --- submodules: local-only check for unpushed work ------------------------
+# --- submodules: fetch in parallel, then report BEHIND and unpushed ---------
+# Fetching these was previously skipped because it took ~1 minute serially. Done
+# in parallel it is a few seconds, and skipping it was what made remote
+# divergence in a submodule invisible until push time — the single most common
+# source of conflicts here.
+sm_list=$(git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null | awk '{print $2}')
+
+printf '%s\n' "$sm_list" | while read -r sm; do
+    [ -n "$sm" ] && [ -e "$WS/$sm/.git" ] && printf '%s\0' "$sm"
+done | xargs -0 -P "${WSGIT_JOBS:-16}" -I{} sh -c \
+    'timeout '"$FETCH_TIMEOUT"' git -C "'"$WS"'/{}" fetch --quiet origin >/dev/null 2>&1' 2>/dev/null
+
 subs=$(
-    git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null |
-    awk '{print $2}' |
+    printf '%s\n' "$sm_list" |
     while read -r sm; do
         [ -n "$sm" ] || continue
         [ -e "$WS/$sm/.git" ] || continue
-        n=$(git -C "$WS/$sm" rev-list --count HEAD --not --remotes 2>/dev/null)
-        [ "${n:-0}" -gt 0 ] 2>/dev/null || continue
         sb=$(git -C "$WS/$sm" rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+        # behind: prefer the tracked upstream; fall back to origin/HEAD for detached checkouts
+        up=$(git -C "$WS/$sm" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)
+        if [ -z "$up" ]; then
+            up=$(git -C "$WS/$sm" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null)
+        fi
+        behind=0
+        [ -n "$up" ] && behind=$(git -C "$WS/$sm" rev-list --count "HEAD..$up" 2>/dev/null || echo 0)
+
+        n=$(git -C "$WS/$sm" rev-list --count HEAD --not --remotes 2>/dev/null)
         [ "$sb" = "HEAD" ] && sb="detached"
-        echo "  $sm [$sb]: $n commit(s) not on any remote"
+
+        if [ "${behind:-0}" -gt 0 ] 2>/dev/null; then
+            echo "  $sm [$sb]: $behind BEHIND $up — pull before editing"
+        fi
+        if [ "${n:-0}" -gt 0 ] 2>/dev/null; then
+            echo "  $sm [$sb]: $n commit(s) not on any remote"
+        fi
     done
 )
 
 if [ -n "$subs" ]; then
-    lines+=("submodules holding work that exists only on this machine:")
+    lines+=("submodules needing attention (all fetched just now):")
     while IFS= read -r l; do [ -n "$l" ] && lines+=("$l"); done <<< "$subs"
 fi
 

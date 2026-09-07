@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Blocks commits made against stale or unrecoverable git state, and commits
+# carrying secrets. Installed into the superrepo and every submodule via
+# core.hooksPath (meta/bin/install-git-guards.sh).
+#
+# Override for a single commit:  WSGIT_SKIP=1 git commit ...
+# Rationale: CONVENTIONS.md §9.
+
+[ -n "$WSGIT_SKIP" ] && exit 0
+
+RED=$'\033[31m'; YEL=$'\033[33m'; OFF=$'\033[0m'
+fail() { printf '%s\n' "${RED}BLOCKED:${OFF} $1" >&2; shift; for l in "$@"; do printf '  %s\n' "$l" >&2; done; exit 1; }
+
+repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+# 1. Detached HEAD — commits here are silently lost on the next checkout/submodule update.
+if [ "$branch" = "HEAD" ]; then
+  fail "detached HEAD in '$repo' — a commit here is not on any branch and will be lost." \
+       "This is the default state for a freshly checked-out submodule." \
+       "Fix:  git checkout main   (or: git switch -c <branch>)" \
+       "Then re-run your commit."
+fi
+
+# 2. Behind upstream — committing on a stale base is what creates the conflicts.
+if upstream=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null); then
+  behind=$(git rev-list --count "HEAD..$upstream" 2>/dev/null || echo 0)
+  if [ "${behind:-0}" -gt 0 ]; then
+    # git pull refuses to run with staged/modified tracked files, so give the
+    # sequence that actually works from where the user is standing.
+    if git diff --quiet && git diff --cached --quiet; then
+      hint="git pull --rebase"
+    else
+      hint="git stash && git pull --rebase && git stash pop"
+    fi
+    fail "'$repo' [$branch] is $behind commit(s) BEHIND $upstream." \
+         "Committing now builds on a stale base and creates a conflict on push." \
+         "Fix:  $hint" \
+         "(Counts come from the last fetch. Run 'git fetch' if unsure.)"
+  fi
+else
+  printf '%s\n' "${YEL}warning:${OFF} '$repo' [$branch] has no upstream — nothing will verify this is current." >&2
+fi
+
+# 3. Secrets — the §9 gate. Scans staged content only.
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+bad_names=$(printf '%s\n' "$staged" | grep -EI '(^|/)\.env($|\.)|\.pem$|\.key$|id_rsa|id_ed25519|\.netrc|kubeconfig|(^|/)credentials$|\.p12$|\.pfx$' || true)
+[ -n "$bad_names" ] && fail "staged files look like credential material:" $bad_names \
+     "Unstage them (git restore --staged <file>) and add them to .gitignore."
+
+hits=$(git diff --cached -U0 --diff-filter=ACMR | grep -E '^\+' | grep -InE \
+  -e '-----BEGIN [A-Z ]*PRIVATE KEY-----' \
+  -e '(AKIA|ASIA)[0-9A-Z]{16}' \
+  -e 'gh[pousr]_[A-Za-z0-9]{30,}' \
+  -e 'xox[baprs]-[A-Za-z0-9-]{10,}' \
+  -e '(postgres|postgresql|mysql|mongodb|redis|amqp)://[^:/@[:space:]]+:[^@[:space:]]+@' \
+  -e '(api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token|password|passwd)[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']{8,}' \
+  | grep -vEi 'example|placeholder|your[_-]|<[a-z]|xxx|dummy|fake|redact' | head -5 || true)
+[ -n "$hits" ] && fail "staged content matches credential patterns:" "$hits" \
+     "A secret that reaches history needs rotation plus a rewrite, not a follow-up commit." \
+     "If these are false positives: WSGIT_SKIP=1 git commit ..."
+
+exit 0
