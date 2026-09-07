@@ -29,7 +29,7 @@ with the craft." Reorder links in [`../inventory/bom.md`](../inventory/bom.md).
 | RadioMaster RP3 ELRS RX (CRSF) | 1 | **fitted** | bound `dwdrones`; 250 Hz, telem 1:4; CRSF confirmed in flight logs |
 | HGLRC M100-5883 (M10 GPS + compass) | 1 | **fitted** | external compass (`COMPASS_EXTERNAL = 1`); `COMPASS_ORIENT = 2` (`YAW_90`), auto-derived and flight-verified 2026-08-02 |
 | MicoAir MTF-01 (optical flow + ToF) | 1 | **fitted** | ⚠ not yet configured in ArduPilot |
-| TOF400C (VL53L1X) rangefinder | 11 | **fitted + wired** | full obstacle ring |
+| TOF400C (VL53L1X) rangefinder | 9 | **fitted + wired** | obstacle array — **8 horizontal ring + 1 up-facing**. Downward is the MTF-01, not one of these. |
 | **PCA9548A I²C mux** | 2 | **fitted + wired** | 8 ch each; resolves the shared `0x29` address |
 | **Waveshare ESP32-S3-Zero** (companion) | 1 | **on hand, not wired** | ⛔ **the only hardware left** — wire to the mux stack, and to the FC |
 | Dronetag BS (Remote ID) | 1 | **fitted** | ⚠ **record where its 12 V now comes from** — the HDZero VTX took the VTX connector on 2026-08-17 |

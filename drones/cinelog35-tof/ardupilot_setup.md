@@ -7,7 +7,7 @@
 **Remote ID:** Dronetag BS (standalone GNSS + BLE broadcast)
 **Companion:** Waveshare **ESP32-S3-Zero** — *replaces the planned Raspberry Pi 3B (2026-08-17)*
 **Video:** HDZero Whoop V2 VTX + HDZero Micro V3 camera (MSP DisplayPort OSD)
-**Sensors:** MicoAir MTF-01 optical flow, 11× VL53L1X on 2× PCA9548A — **all mounted and wired**
+**Sensors:** MicoAir MTF-01 optical flow, 9× VL53L1X (8 ring + 1 up) on 2× PCA9548A — **all mounted and wired**
 
 Status: RC bound and calibrated, accel calibrated, GPS + compass enumerating, compass orientation set. Switch channels mapped and arming verified on the bench (2026-08-02) — shares one TX16S model with the X500. **Assembled and wired as of 2026-08-17 except the ESP32** — sensor ring, muxes and the HDZero VTX are all in. ⚠ **Not powered up since that rework.** Not yet flown.
 
@@ -158,13 +158,17 @@ toilet-bowling.
 
 ### ESP32-S3 companion (ToF ring → proximity)
 
-The ESP32 presents the ring to ArduPilot as a MAVLink proximity sensor, publishing
+The ESP32 presents the array to ArduPilot as a MAVLink proximity sensor, publishing
 `OBSTACLE_DISTANCE`. ArduPilot's own avoidance layer consumes it — the companion computes no
 setpoints. See [simple object avoidance](https://ardupilot.org/copter/docs/common-simple-object-avoidance.html).
 
+**The full firmware spec is [`CL35 tof proximity handoff.md`](CL35%20tof%20proximity%20handoff.md)** —
+message fields, mux discipline, range-status handling and failure behaviour. This section covers only
+the FC-side parameters.
+
 ```
 SERIAL1_PROTOCOL = 2     # MAVLink2 — already set
-SERIAL1_BAUD     = 115   # currently 57; 57600 is probably enough for 11 scalars, but headroom is free
+SERIAL1_BAUD     = 115   # currently 57; 57600 is probably enough for 9 scalars, but headroom is free
 PRX1_TYPE        = 2     # MAVLink  (currently 0)
 ```
 
@@ -180,6 +184,9 @@ avoidance on a feed that hasn't been eyeballed.
 2. **Each distance tagged with the correct yaw angle.** `OBSTACLE_DISTANCE` is a sector array — the
    physical channel→direction map (which mux, which channel, pointing where) is currently recorded
    only in the wiring loom. **Write it down before it's needed**, ideally as a table in this file.
+   Only the **8 horizontal** sensors go in that array; the **up-facing** one has no valid bearing in a
+   flat boundary and must go out as `DISTANCE_SENSOR` with `MAV_SENSOR_ROTATION_PITCH_90` instead.
+   Give it a yaw and ArduPilot will brake sideways under a ceiling.
 3. **Sane handling of no-return.** A VL53L1X pointed at open space, a dark surface, or through duct
    material returns invalid/out-of-range, not "far". Report those as *unknown* per ArduPilot's
    convention rather than as a large distance — an invalid reading published as "4 m clear" is how
@@ -189,7 +196,7 @@ avoidance on a feed that hasn't been eyeballed.
 
 Bench, props off, in this order — each step is only debuggable if the one before it is known good:
 
-1. ESP32 alone on the bench: all 11 sensors readable through both muxes, plausible values.
+1. ESP32 alone on the bench: all 9 sensors readable through both muxes, plausible values.
 2. ESP32 → FC link up: FC sees a MAVLink heartbeat from the new sysid.
 3. Proximity view in Mission Planner: wave a hand at each sensor, confirm the **right sector** lights
    up. This is where a wrong channel→yaw map shows itself, and it is much cheaper to find here.
@@ -244,7 +251,7 @@ The M100 shipped with a **crossed** cable (vendor compensating for exactly this)
 
 **Dronetag BS on the 12 V rail.** Keeps the 5 V BEC headroom for the M100 and RP3. **Do not tap 6S pack directly** — 25.2 V hot off the charger exceeds the BS's 17 V limit. If an O3/O4 air unit is ever planned, solder a pigtail to the 12 V pad instead of consuming the VTX connector.
 
-**Companion switched from Pi 3B to ESP32-S3 (2026-08-17).** The job is reading 11 I²C rangefinders
+**Companion switched from Pi 3B to ESP32-S3 (2026-08-17).** The job is reading 9 I²C rangefinders
 through two muxes and emitting `OBSTACLE_DISTANCE` — a few hundred bytes per second of scalars. That
 never needed Linux. What the Pi cost for it: **over 1 A with WiFi active** (higher on peaks, prone to
 brownout, hence a dedicated BEC rather than sharing the FC's 5 V rail with the GPS and RX), the mass
@@ -345,7 +352,7 @@ time is the point — bringing both up together tells you there's a problem but 
 
 ### Sensor stack — the current front line
 - [x] Dronetag BS mounted
-- [x] **TOF stack mounted and wired: 11× VL53L1X, 2× PCA9548A muxes, MTF-01** (2026-08-17)
+- [x] **TOF stack mounted and wired: 9× VL53L1X, 2× PCA9548A muxes, MTF-01** (2026-08-17)
 - [ ] **Wire the ESP32-S3 to the mux stack**
 - [ ] **Wire the ESP32-S3 to the FC** (UART1 / SERIAL1)
 - [ ] **Record the channel → direction map** (which mux, which channel, pointing where) — it exists
@@ -355,7 +362,7 @@ time is the point — bringing both up together tells you there's a problem but 
 - [ ] **Configure the ESP32 proximity feed** (`PRX1_TYPE = 2`, distinct sysid)
 - [ ] Walk the bench validation ladder in order before enabling avoidance
 - [ ] `FLOW_ORIENT_YAW` is **independent of** `AHRS_ORIENTATION` — must match flow sensor forward relative to *vehicle*. Validate with slow low Loiter, watch for toilet-bowling.
-- [ ] I2C bus loading: 2 muxes + 11 sensors + compass share the bus. Keep runs short, away from ESC phase leads.
+- [ ] I2C bus loading: 2 muxes + 9 sensors + compass share the bus. Keep runs short, away from ESC phase leads.
 
 ### Video (HDZero)
 - [x] **80 mm MIPI cable fitted, camera to VTX, VTX to FC** (2026-08-17) — not yet powered

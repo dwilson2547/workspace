@@ -60,10 +60,6 @@ These are not yet specified and must be supplied by Dan. Do not guess them:
 6. **Library choice** — ST ULD (STSW-IMG009) or Pololu `VL53L1X`. The existing probe sketch already
    uses Pololu, which exposes `ranging_data.range_status` and the signal/ambient rates directly.
    Staying on Pololu is the lower-cost path; ULD is smaller but means rewriting known-good code.
-7. **Inventory reconciliation** — `inventory.md` records **11** TOF400C fitted and wired; this spec
-   uses 9. Confirm whether the other two are spares, unwired, or in use for something else, and
-   correct whichever document is wrong.
-
 ---
 
 ## 3. Bus discipline — the hard constraints

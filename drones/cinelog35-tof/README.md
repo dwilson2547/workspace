@@ -31,9 +31,9 @@ Indoor, GPS-denied autonomy on a small ducted platform:
 
 - **Optical flow + down-facing ToF** (MicoAir MTF-01) gives the flight controller a velocity/altitude
   reference for stable position hold without GPS.
-- **A ring of 11 ToF rangefinders** (VL53L1X) gives the companion computer a coarse obstacle field
-  around the craft (surround + up/down), which it turns into avoidance / autonomous navigation and
-  feeds back to the FC as setpoints.
+- **An array of 9 ToF rangefinders** (VL53L1X) — 8 in a horizontal ring plus 1 facing up — gives the
+  companion computer a coarse obstacle field around the craft, which it publishes to ArduPilot as
+  `OBSTACLE_DISTANCE`. Downward is covered by the MTF-01, not by this array.
 - The ducts make close-quarters flight (bumping walls, prop guards) survivable.
 
 ## Build spec
@@ -47,8 +47,8 @@ Indoor, GPS-denied autonomy on a small ducted platform:
 | RC link | **RadioMaster RP3 ELRS** (CRSF) | bind phrase `dwdrones`; 250 Hz, telem 1:4 |
 | GPS / compass | HGLRC M100-5883 (M10 GPS + QMC5883 compass) | optional outdoor; indoor nav is ToF/flow-based |
 | Optical flow + ToF | **MicoAir MTF-01** | down-facing flow + single-point lidar for position/altitude hold |
-| Obstacle ToF array | **11× TOF400C (VL53L1X)**, up to ~4 m | surround obstacle sensing; **mounted and wired** |
-| I²C expansion | **2× PCA9548A mux** | **mounted and wired** — solves the 0x29 address collision (8 channels each, 11 sensors) |
+| Obstacle ToF array | **9× TOF400C (VL53L1X)**, up to ~4 m | 8 horizontal ring + 1 up-facing; **mounted and wired** |
+| I²C expansion | **2× PCA9548A mux** | **mounted and wired** — solves the 0x29 address collision (8 channels each, 9 sensors) |
 | Companion computer | **Waveshare ESP32-S3-Zero** | reads the ToF ring through the muxes, feeds the FC. _Replaces the planned Raspberry Pi 3B._ |
 | Remote ID | Dronetag BS | standalone GNSS + BLE; no UART to the FC |
 | Video / FPV | **HDZero Whoop V2 VTX + HDZero Micro V3 camera** | digital HD; MSP DisplayPort OSD off the FC |
@@ -191,14 +191,14 @@ trigger a surprise auto-land. Sag compensation judges the pack on state of charg
 ## Sensor / autonomy architecture
 
 **The Raspberry Pi 3B is dropped; the ESP32-S3 is the companion.** The ToF ring is a fixed-rate
-stream of 11 scalar distances — a few hundred bytes per second of work — and reading eleven I²C
+stream of 9 scalar distances — a few hundred bytes per second of work — and reading nine I²C
 sensors through two muxes and emitting `OBSTACLE_DISTANCE` is comfortably inside an ESP32-S3's
 budget. Everything the Pi was carrying for that job (Linux, ~1 A of draw and brownout risk, its own
 BEC, WiFi, mavlink-router, boot time) was overhead paid for a task that never needed it. On a 3.5"
 airframe that mass and current matter.
 
 ```
-        [11× VL53L1X ToF ring]                      [MicoAir MTF-01]
+        [9× VL53L1X ToF array]                      [MicoAir MTF-01]
                   |                              (flow + down ToF, MAVLink)
                   | I2C                                     |
                   v                                         |
@@ -213,7 +213,7 @@ airframe that mass and current matter.
 - **MTF-01 → FC:** the flow/lidar module talks to the FC directly over MAVLink, giving
   loiter/position-hold with the ESP32 out of the loop. This is the "assisted" layer, and it works
   even if the companion is unpowered.
-- **ToF ring → ESP32 → FC:** the 11 VL53L1X hang off two PCA9548A muxes, the ESP32 sweeps them and
+- **ToF array → ESP32 → FC:** the 9 VL53L1X hang off two PCA9548A muxes, the ESP32 sweeps them and
   publishes the obstacle field to ArduPilot as `OBSTACLE_DISTANCE` messages. ArduPilot's own
   proximity/avoidance layer does the rest — the companion is a **sensor driver, not a navigator**.
   This is the "autonomous" layer.
@@ -225,21 +225,25 @@ companion never has to compute setpoints or override the pilot. It only has to d
 ### ⚠ Design notes still open
 
 - ~~**VL53L1X I2C address collision.**~~ **Resolved — 2× PCA9548A muxes, mounted and wired.** Every
-  VL53L1X powers up at the same address (`0x29`) and a single mux has only 8 channels, so 11 sensors
+  VL53L1X powers up at the same address (`0x29`) and a single mux has only 8 channels, so 9 sensors
   needed two. XSHUT sequencing was the alternative and was not taken.
-- **Sensor placement/coverage.** 11 sensors ≈ front/back/left/right + 4 diagonals + up + down (with
-  one spare / redundancy). Physically mounted — **record the actual channel→direction map**, because
-  ArduPilot needs each distance tagged with a yaw angle and that mapping is currently only in the
-  wiring.
+- **Sensor placement/coverage.** 9 sensors: **8 in a horizontal ring** (nominally 45° apart) **+ 1
+  facing up** for ceiling clearance. Downward is the MTF-01's lidar, not part of this array.
+  Physically mounted — **record the actual channel→direction map**, because ArduPilot needs each
+  horizontal distance tagged with a yaw angle and that mapping is currently only in the wiring. Note
+  the up-facing sensor does *not* belong in the `OBSTACLE_DISTANCE` array — see
+  [the handoff spec](CL35%20tof%20proximity%20handoff.md) §5.4.
 - **MAVLink IDs will collide if left alone.** Both the MTF-01 *and* the ESP32 speak MAVLink into the
   FC on separate serial ports. The MTF-01 already needs its `mav_id` moved off `1` on recent
   firmware (see [`ardupilot_setup.md`](ardupilot_setup.md)); give the ESP32 a third distinct sysid
   rather than discovering the clash as intermittent dropouts.
-- **I²C bus length and noise.** Eleven sensors, two muxes and the compass on one bus in a 3.5"
+- **I²C bus length and noise.** Nine sensors, two muxes and the compass on one bus in a 3.5"
   airframe full of ESC phase leads. Keep runs short and away from the phase wires; if the bus is
   flaky, that's the first suspect, not the sensors.
-- **Power budget.** ESP32 + 11 ToF + 2 muxes off the FC's 5 V BEC — much lighter than the Pi's ~1 A,
-  but confirm the rail still has headroom with the RP3 and M100 on it too.
+- **Power budget.** Two rails: the ESP32 runs off a **dedicated 5 V rail through a series Schottky**
+  (so USB can't back-feed the drone), and the **9 ToF + 2 muxes sit on a separate dedicated 3.3 V
+  rail**, common ground. Much lighter than the Pi's ~1 A — but ⚠ **record where each rail originates**
+  and confirm the source has headroom with the RP3 and M100 on it too.
 - **Total AUW** with the sensor ring, ESP32 and HDZero gear — and therefore the battery choice, which
   is still open.
 
@@ -303,7 +307,7 @@ step:
 - [x] Compass recalibrated — field stable at 502 mGauss, sd 11
 - [x] Battery capacity + low-voltage failsafe configured (Land, sag-compensated)
 - [x] **VL53L1X ring addressing solved** — 2× PCA9548A, mounted and wired
-- [x] **All 11 ToF sensors + both muxes mounted and wired**
+- [x] **All 9 ToF sensors (8 ring + 1 up) + both muxes mounted and wired**
 - [x] **HDZero camera + VTX fitted and wired** (80 mm MIPI cable) — 2026-08-17
 - [ ] **ESP32-S3 wired to the sensor stack** ← the last hardware job
 - [ ] **ESP32-S3 wired to the FC** (UART, MAVLink)
@@ -328,12 +332,20 @@ in [`ardupilot_setup.md`](ardupilot_setup.md#remaining-work).
 
 ## Build log
 
+- **2026-09-07** — **Sensor count and geometry corrected across the docs.** The array is **9 sensors —
+  8 in a horizontal ring + 1 facing up**, not the 11 previously recorded here, in `inventory.md` and
+  in `ardupilot_setup.md`; downward is the MTF-01's lidar, which had been double-counted as a ring
+  member. Power topology recorded properly for the first time: ESP32 on a dedicated 5 V rail behind a
+  series Schottky, ToF + muxes on a separate dedicated 3.3 V rail. Firmware spec written up as
+  [`CL35 tof proximity handoff.md`](CL35%20tof%20proximity%20handoff.md), which also moves the
+  up-facing sensor onto `DISTANCE_SENSOR`/`PITCH_90` rather than a slot in the `OBSTACLE_DISTANCE`
+  array. **Still only in the wiring loom: the channel→direction map.**
 - **2026-08-17** (later) — **HDZero VTX connected; the airframe is now fully assembled and wired
   except the ESP32.** The longer MIPI cable arrived and the camera-to-VTX run is made up. Nothing has
   been **powered up since the modifications**, so the next session is a careful first power-up
   (cautions recorded above) rather than straight into configuration. Remaining hardware work is a
   single item: wire the ESP32-S3 to the mux stack and to the FC.
-- **2026-08-17** — **~99 % assembled.** All 11 VL53L1X and both PCA9548A muxes are mounted and wired
+- **2026-08-17** — **~99 % assembled.** All 9 VL53L1X and both PCA9548A muxes are mounted and wired
   in the airframe. Two decisions recorded rather than made today, because the build has moved past
   them: the **Raspberry Pi 3B is dropped in favour of the ESP32-S3** as the companion — the ring is a
   few hundred bytes/sec of scalar distances, so Linux, ~1 A of draw, a dedicated BEC and a boot
