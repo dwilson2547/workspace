@@ -150,9 +150,30 @@ the CW pair runs ~70us harder than the CCW pair to hold a fixed yaw torque, abou
 
 Not flight-limiting on its own -- stable hover, VIBE ~7, zero clips, zero ERR --
 but it reduces yaw headroom, will saturate sooner under aggressive yaw, and should
-be fixed before AUTOTUNE_AXES=4. Likely causes on an X500 in order: arm tube
-rotated in its pinch clamp, motor not square on its mount, prop pitch wrong or
-damaged. Consistency across flights points to fixed mechanical, not intermittent.
+be fixed before AUTOTUNE_AXES=4.
+
+CORRECTION: an earlier version of this note named a rotated arm tube as the most
+likely cause. X500 arms are pinned through the tube and cannot rotate in the clamp,
+so that is ruled out.
+
+It is a genuine torque, not a PWM or ESC-calibration artifact. Yaw PID I-term sits
+steady and non-zero in all three flights (-0.0575, -0.0561, -0.0708), i.e. 11-14%
+of ATC_RAT_YAW_IMAX held continuously and never unwinding. An ESC or motor response
+mismatch would leave the yaw loop balanced with I near zero.
+
+Cause not yet identified. Splitting the autotune flight by throttle gives +74us at
+ThO 0.25-0.30 and +72us at 0.30-0.35, which looks flat -- but every flight so far is
+a steady hover spanning only ~0.10 of throttle, far too narrow to test whether the
+torque scales with RPM^2 (prop/aero) or is fixed (geometry). Do not read a cause
+out of that number.
+
+Cheapest discriminating test: swap the two CW props with each other and re-fly the
+same hover. Split unchanged means it is not an individual prop, pointing at the CW
+set as a whole or at motor mount geometry; split changes means one specific prop.
+Swapping all four props at once is more direct if a spare set exists. On the bench,
+sight each motor for cant in the horizontal plane, and hand-spin each with props off
+to find a dragging bearing -- both produce this signature with tube rotation ruled
+out.
 
 Analysis-process note: this was visible in the first two hover logs and was missed
 because only VIBE was checked. Low vibration says nothing about static motor trim
