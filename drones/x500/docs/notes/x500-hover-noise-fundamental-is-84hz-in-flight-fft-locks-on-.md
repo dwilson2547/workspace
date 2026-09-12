@@ -68,3 +68,33 @@ Also seen: the FFT auto-saves learned hover values on disarm, and with its
 3rd-harmonic lock it wrote FFT_THR_REF=0.0118, FFT_FREQ_HOVER=252, FFT_BW_HOVER=87.
 Harmless under INS_HNTCH_MODE=1, which reads INS_HNTCH_REF instead, but these are
 junk and must not be trusted if FFT mode is ever re-enabled.
+
+## AUTOTUNE drifts unless entered from PosHold (2026-09-11)
+
+The roll tune above was flown in noticeable wind and wandered badly enough that the
+pilot aborted. Cause was not the airframe: AUTOTUNE was entered from Stabilize, so
+only the altitude controller ran. The tune window logs 2038 PSCD messages and zero
+PSCN/PSCE, while the PosHold segment later in the SAME log does log PSCN/PSCE --
+so horizontal position control was genuinely absent, not just unlogged.
+
+ArduPilot holds position during autotune only when the mode is entered from Loiter
+or PosHold. Always enter from PosHold. Groundspeed tells the story: 0.13 and 0.08
+m/s mean in the two calm hovers against 0.81 mean / 5.32 peak during the tune.
+
+The pilot perceived the twitches favouring one direction. Not real -- roll rate
+tracking was symmetric (positive 0.695, negative 0.688 actual/desired), motor
+outputs balanced left/right (1491 vs 1491.5us), mean roll 0.07 deg. It was wind
+carrying the aircraft during each twitch. The "keeps going after the bump" feel is
+the 0.69 tracking ratio: baseline gains only achieve 69% of demanded rate, so it is
+mushy and momentum overruns. Resetting to baseline is still correct for tune
+quality, but it must be paired with PosHold entry, and ideally calm air.
+
+Separate finding from the same data, worth a bench check: motor averages M1=1450
+M2=1460 M3=1523 M4=1532. Roll and pitch pairs balance, but the CW pair runs 72us
+harder than the CCW pair -- the FC is continuously countering a yaw torque. Likely
+a motor mount out of square, a twisted arm, or a prop mismatch. It consumes yaw
+headroom and will matter when yaw is tuned.
+
+Method note: AHRS_WIND_MAX=0 and copters do not populate the EKF wind estimate, so
+XKF2 VWN/VWE reading 0.0 means "not estimated", never "no wind". Use GPS groundspeed
+against a calm-hover baseline instead.
