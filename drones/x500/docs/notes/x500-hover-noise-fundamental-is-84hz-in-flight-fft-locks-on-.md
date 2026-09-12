@@ -103,10 +103,16 @@ against a calm-hover baseline instead.
 
 Ordered by likelihood of biting, from the 2026-09-11 sessions.
 
-1. Switch map forces the bad entry. FLTMODE5=0 (Stabilize) sits immediately below
-   FLTMODE6=15 (AutoTune) on FLTMODE_CH=6, so stepping into AutoTune always comes
-   from Stabilize and never holds position. Set FLTMODE5=16 (PosHold) -- this is a
-   structural fix, not a matter of flying carefully.
+1. Enter AutoTune via the middle detent, deliberately. CORRECTION: an earlier
+   version of this note said to set FLTMODE5=16. That is wrong and does nothing.
+   Flight mode is a 3-POSITION switch on FLTMODE_CH=6; CH6 only ever reads ~950,
+   ~1500 and ~2000us, which land in mode slots 1/4/6. Slots 2, 3 and 5 are
+   unreachable, so FLTMODE5 is dead config.
+   The middle detent is ALREADY PosHold (FLTMODE4=16), which is what autotune
+   wants. The failure was flicking bottom to top fast enough that the middle never
+   registered -- the 2026-09-11 log jumps Stabilize straight to AutoTune, and the
+   only ~1500us samples in it come from the descent at 296.5s. Stop at the middle,
+   confirm PosHold, then go to top. Technique, not configuration.
 
 2. Battery failsafe discards a tune. BATT_FS_LOW_ACT=2 (RTL) at BATT_LOW_VOLT=14.4
    on a 3300mAh 4S. RTL leaves AUTOTUNE mode, which loses the gains exactly like
@@ -127,3 +133,27 @@ Ordered by likelihood of biting, from the 2026-09-11 sessions.
 7. MOT_HOVER_LEARN=2 keeps moving MOT_THST_HOVER while INS_HNTCH_REF stays pinned
    by hand. Fine at current drift (0.3075 -> 0.3036), but re-set INS_HNTCH_REF if a
    payload changes hover throttle, or the notch tracks the wrong frequency.
+
+## Yaw-axis motor imbalance is longstanding, not new (2026-09-11)
+
+Present in every flight examined, not introduced by any of the notch or tune work:
+
+  flight                     M1(FR,CCW) M2(RL,CCW) M3(FL,CW) M4(RR,CW)  yaw split
+  hover 1 (FFT notch)           1439       1470      1512      1523      +63us
+  hover 2 (throttle notch)      1457       1478      1523      1539      +64us
+  autotune flight               1450       1460      1523      1532      +73us
+
+Roll split -10/-3/-1us and pitch split -21/-19/-9us, i.e. laterally and
+longitudinally the aircraft is well balanced. The imbalance is purely rotational:
+the CW pair runs ~70us harder than the CCW pair to hold a fixed yaw torque, about
+8% of usable output range (MOT_SPIN_MIN 0.06 to MOT_SPIN_MAX 0.95) spent on trim.
+
+Not flight-limiting on its own -- stable hover, VIBE ~7, zero clips, zero ERR --
+but it reduces yaw headroom, will saturate sooner under aggressive yaw, and should
+be fixed before AUTOTUNE_AXES=4. Likely causes on an X500 in order: arm tube
+rotated in its pinch clamp, motor not square on its mount, prop pitch wrong or
+damaged. Consistency across flights points to fixed mechanical, not intermittent.
+
+Analysis-process note: this was visible in the first two hover logs and was missed
+because only VIBE was checked. Low vibration says nothing about static motor trim
+-- check the RCOU per-motor means and the three pair splits as a separate step.
