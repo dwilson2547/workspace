@@ -178,3 +178,41 @@ out.
 Analysis-process note: this was visible in the first two hover logs and was missed
 because only VIBE was checked. Low vibration says nothing about static motor trim
 -- check the RCOU per-motor means and the three pair splits as a separate step.
+
+## Yaw torque points at a dragging CCW motor; M2 (rear left) is the suspect
+
+Pilot independently observed the rear-left motor looking weak on spin-up. That
+matches the yaw signature rather than contradicting it.
+
+ArduPilot QUAD/X puts M1 (front right) and M2 (rear left) as the CCW diagonal, M3
+(front left) and M4 (rear right) as CW. A CCW motor with excess drag needs more
+torque to hold RPM, so the frame feels excess CW reaction, and the FC cancels it by
+raising the CW props. Observed compensation is exactly that: M3/M4 up +63/+64/+73us
+across the three flights, with a steady non-zero yaw I-term confirming real torque.
+So the signature identifies "a CCW motor is dragging", and the CCW motors are M1
+and M2.
+
+It is a TORQUE fault, not a thrust fault. If M2 were simply down on thrust it would
+need more PWM than M1 beyond the aft-CG offset. Comparing within each rotation pair
+(equal values mean pure CG):
+
+  flight      CCW (M2-M1)   CW (M4-M3)   M2 excess
+  hover 1        +30           +11          19us
+  hover 2        +22           +16           6us
+  autotune       +10            +9           1us
+
+Inconsistent and trending to zero. Takeoff excursions agree -- all three flights
+pitch nose-DOWN, where a weak rear-left corner would drop and pitch nose-UP with
+roll left. A dragging bearing or marginal ESC fits: worst at spin-up where static
+friction and cogging dominate, nearly invisible at hover RPM, but costing extra
+torque continuously.
+
+Decisive test, cheap: swap M2's ESC with a neighbour's (or swap the three motor
+leads at the ESC). Fault following the ESC means ESC; staying with the motor means
+motor. Do a props-off hand-spin of all four first, and check M2's bullets and
+solder joints for a high-resistance phase.
+
+Constraint: no per-motor RPM is available to settle this from logs. MOT_PWM_TYPE=0
+with no ESC telemetry, and per info.txt the motors are wired to the I/O board while
+DShot needs FMU outputs -- so bidirectional DShot is a rewire, not a parameter
+change. It would also unlock an RPM-driven notch.
