@@ -98,3 +98,32 @@ headroom and will matter when yaw is tuned.
 Method note: AHRS_WIND_MAX=0 and copters do not populate the EKF wind estimate, so
 XKF2 VWN/VWE reading 0.0 means "not estimated", never "no wind". Use GPS groundspeed
 against a calm-hover baseline instead.
+
+## Autotune footguns on this airframe (checklist)
+
+Ordered by likelihood of biting, from the 2026-09-11 sessions.
+
+1. Switch map forces the bad entry. FLTMODE5=0 (Stabilize) sits immediately below
+   FLTMODE6=15 (AutoTune) on FLTMODE_CH=6, so stepping into AutoTune always comes
+   from Stabilize and never holds position. Set FLTMODE5=16 (PosHold) -- this is a
+   structural fix, not a matter of flying carefully.
+
+2. Battery failsafe discards a tune. BATT_FS_LOW_ACT=2 (RTL) at BATT_LOW_VOLT=14.4
+   on a 3300mAh 4S. RTL leaves AUTOTUNE mode, which loses the gains exactly like
+   switching to PosHold does. Tune flights run ~4min; land deliberately first.
+
+3. Gains save ONLY on land+disarm while still in AUTOTUNE mode.
+
+4. Switching out of AUTOTUNE in flight restores the ORIGINAL gains; switching back
+   in restores the tuned ones. So flipping out to "test the new tune" actually
+   flies the old gains and tells you nothing.
+
+5. Save a param dump after each successful axis. Roll has now been lost twice by
+   two different mechanisms (incomplete tune, then unsaved tune).
+
+6. Yaw autotune will fight the 72us CW/CCW motor split documented above. Square the
+   mounts before AUTOTUNE_AXES=4.
+
+7. MOT_HOVER_LEARN=2 keeps moving MOT_THST_HOVER while INS_HNTCH_REF stays pinned
+   by hand. Fine at current drift (0.3075 -> 0.3036), but re-set INS_HNTCH_REF if a
+   payload changes hover throttle, or the notch tracks the wrong frequency.
