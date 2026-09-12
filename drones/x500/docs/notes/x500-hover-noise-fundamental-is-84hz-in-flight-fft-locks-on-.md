@@ -39,3 +39,32 @@ two flights with uncontrolled air and stick input; RMS is the metric that matter
 FFT left enabled for logging independently put the fundamental at 87.4Hz this
 flight against 84.2Hz previously, both with FHX h3~90%. Mid-80s either way, well
 inside the 40Hz bandwidth, so FREQ=84 stands.
+
+## Roll autotune, clean run 2026-09-11 (log 2026-09-11 20-16-23.bin)
+
+AUTOTUNE_AXES=1 from a reset baseline with the verified notch active. Reached
+"Roll complete" / "Success" at 282.3s:
+
+  Roll Rate: P:0.108, I:0.108, D:0.0036
+  Roll Angle P:10.068, Max Accel:105470   (= ATC_ACC_R_MAX 1054.7)
+
+ANG_RLL_P came out at 10.068 against 10.06836 from the earlier noise-contaminated
+tune -- five-figure agreement across two runs with very different D-term noise.
+That value is a real property of the airframe, not a tuning artifact, and the
+roll/pitch angle-P asymmetry is simply that pitch has never been tuned.
+
+Rate P keeps falling (0.135 default -> 0.1197 noisy -> 0.108 clean) and D will not
+move off 0.0036 even with 39% less D-term noise. Consistent with AUTOTUNE_AGGR at
+0.075; worth trying 0.1 if a crisper tune is wanted.
+
+GOTCHA that cost this flight: gains are only committed if you land and disarm
+while STILL in AUTOTUNE mode. Mode went AutoTune -> PosHold at 296.5s -> Stabilize
+-> disarm, so the originals were restored and nothing was saved. The only roll-gain
+PARM writes in the whole log are the baseline values at 51.9s. Recoverable without
+re-flying, because the final values are printed in the MSG stream -- read them out
+and set them by hand.
+
+Also seen: the FFT auto-saves learned hover values on disarm, and with its
+3rd-harmonic lock it wrote FFT_THR_REF=0.0118, FFT_FREQ_HOVER=252, FFT_BW_HOVER=87.
+Harmless under INS_HNTCH_MODE=1, which reads INS_HNTCH_REF instead, but these are
+junk and must not be trusted if FFT mode is ever re-enabled.
