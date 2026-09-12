@@ -216,3 +216,9 @@ Constraint: no per-motor RPM is available to settle this from logs. MOT_PWM_TYPE
 with no ESC telemetry, and per info.txt the motors are wired to the I/O board while
 DShot needs FMU outputs -- so bidirectional DShot is a rewire, not a parameter
 change. It would also unlock an RPM-driven notch.
+
+Hand-spin done 2026-09-11: all four motors feel about the same by hand, props off.
+No obvious bearing drag on M2. That weakens the bearing theory and promotes the ESC
+and the phase connections, so the ESC swap is now the leading test rather than the
+fallback. Note a marginal ESC or a high-resistance joint would not necessarily be
+detectable by hand -- this rules out gross bearing drag, nothing more.
