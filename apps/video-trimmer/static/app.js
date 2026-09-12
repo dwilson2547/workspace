@@ -198,7 +198,7 @@ function updateSnapHint() {
 
   if (!preset || !preset.lossless || state.in == null || !dur) {
     els.snap.classList.remove("show");
-    if (preset && !preset.lossless && state.in != null) {
+    if (preset) {
       els.hint.textContent = preset.note;
       els.hint.classList.remove("warn");
     }
