@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>video-trimmer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%234da3ff'/%3E%3Cpath d='M6 4.5v7l5-3.5z' fill='%2306121f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+
+  <aside id="sidebar">
+    <div class="side-head">
+      <h1>video-trimmer</h1>
+      <div class="path" id="src-path">loading…</div>
+    </div>
+    <div id="file-list"></div>
+  </aside>
+
+  <main id="main">
+
+    <div id="stage">
+      <div id="empty">
+        Pick a clip on the left.<br>
+        <span style="font-size:12px">
+          <kbd>I</kbd> in &nbsp; <kbd>O</kbd> out &nbsp; <kbd>space</kbd> play
+          &nbsp; <kbd>←</kbd><kbd>→</kbd> frame step &nbsp; <kbd>enter</kbd> export
+        </span>
+      </div>
+      <video id="video" class="hidden" preload="auto" playsinline></video>
+      <div id="badge" class="hidden"></div>
+    </div>
+
+    <div id="controls">
+
+      <div class="timecodes">
+        <span class="now" id="tc-now">00:00:00:00</span>
+        <span class="sep">|</span>
+        <span><span class="lbl">in</span> <span class="in-v" id="tc-in">—</span></span>
+        <span><span class="lbl">out</span> <span class="out-v" id="tc-out">—</span></span>
+        <span><span class="lbl">sel</span> <span class="dur-v" id="tc-dur">—</span></span>
+        <span class="spacer"></span>
+        <span class="lbl" id="tc-total">—</span>
+      </div>
+
+      <div id="timeline">
+        <div id="keyframes"></div>
+        <div id="selection" class="empty"></div>
+        <div id="snap"></div>
+        <div id="playhead"></div>
+      </div>
+
+      <div class="row">
+        <button id="btn-play" disabled>▶ Play <kbd>space</kbd></button>
+        <button id="btn-in" class="mark-in" disabled>Mark in <kbd>I</kbd></button>
+        <button id="btn-out" class="mark-out" disabled>Mark out <kbd>O</kbd></button>
+        <button id="btn-preview" disabled>Preview selection</button>
+        <button id="btn-clear" disabled>Clear</button>
+        <span class="spacer"></span>
+        <span class="lbl" style="color:var(--muted);font-size:12px">
+          <kbd>←</kbd><kbd>→</kbd> frame &nbsp; <kbd>shift</kbd>+ 1s &nbsp;
+          <kbd>[</kbd><kbd>]</kbd> jump to in/out
+        </span>
+      </div>
+
+      <div class="row">
+        <select id="preset"></select>
+
+        <span id="quality-wrap">
+          <label for="quality" style="color:var(--muted);font-size:12px">quality</label>
+          <input type="range" id="quality" min="14" max="34" value="21">
+          <span id="quality-val">CQ 21</span>
+        </span>
+
+        <span class="spacer"></span>
+        <button id="btn-export" class="primary" disabled>Export <kbd>enter</kbd></button>
+      </div>
+
+      <div class="hint" id="hint"></div>
+
+      <div id="export-status">
+        <div class="status-line">
+          <span class="msg" id="export-msg"></span>
+          <span class="pct" id="export-pct"></span>
+        </div>
+        <div class="bar"><div id="export-bar"></div></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
