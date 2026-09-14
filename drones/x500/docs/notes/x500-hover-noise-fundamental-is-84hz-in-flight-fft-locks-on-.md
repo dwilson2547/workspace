@@ -222,3 +222,30 @@ No obvious bearing drag on M2. That weakens the bearing theory and promotes the 
 and the phase connections, so the ESC swap is now the leading test rather than the
 fallback. Note a marginal ESC or a high-resistance joint would not necessarily be
 detectable by hand -- this rules out gross bearing drag, nothing more.
+
+## Pitch autotune, 2026-09-14 (tlog "2026-09-14 16-54-22.tlog")
+
+AUTOTUNE_AXES=2 with roll set by hand beforehand and the verified 84Hz notch
+active. Reached "Pitch complete" / "Success" at 17:01:02:
+
+  Pitch Rate: P:0.108, I:0.108, D:0.0036
+  Pitch Angle P:9.589, Max Accel:105237   (= ATC_ACC_P_MAX 1052.37)
+
+Saved values on the board: ATC_RAT_PIT_P/I 0.1085964, D 0.003647688.
+Pitch angle P 9.589 against roll 10.068 -- the roll/pitch angle-P asymmetry
+noted earlier is now closed, and it was exactly what it looked like: pitch had
+simply never been tuned.
+
+FOOTGUN 8, new and nastier than the others: the tune declared Success and then
+saved ONLY the rate PID. ATC_ANG_PIT_P and ATC_ACC_P_MAX were left at their 4.5
+and 1100 defaults despite being printed one line above "Success". Set both by
+hand afterwards; confirmed on the board at 17:07:40/41. Full diagnosis, and how
+to distinguish this from a stale GCS dump, in the domain note
+[[ardupilot-autotune-can-report-success-and-save-only-the-rate]] and the tool
+drones/tools/tlog_params.py. Amends item 5 of the checklist above: saving a
+param dump after each axis is not sufficient, because the dump can disagree
+with the board -- check ATC_ANG_<axis>_P against 4.5 explicitly.
+
+Yaw remains blocked by footgun 6: the ~70us CW/CCW motor split is still
+unresolved (hand-spin ruled out gross bearing drag; the ESC swap test has not
+been run). Do not set AUTOTUNE_AXES=4 until it is.
