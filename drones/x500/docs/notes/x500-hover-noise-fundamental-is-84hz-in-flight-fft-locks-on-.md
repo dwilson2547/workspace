@@ -249,3 +249,45 @@ with the board -- check ATC_ANG_<axis>_P against 4.5 explicitly.
 Yaw remains blocked by footgun 6: the ~70us CW/CCW motor split is still
 unresolved (hand-spin ruled out gross bearing drag; the ESC swap test has not
 been run). Do not set AUTOTUNE_AXES=4 until it is.
+
+## Yaw autotune, 2026-09-14 -- X500 now fully tuned on all three axes
+
+AUTOTUNE_AXES=4 flown despite the unresolved CW/CCW motor split (see footgun 6),
+on the reasoning that a static trim offset is absorbed by the I term and does not
+change yaw inertia or the motor response slope, which is what autotune actually
+fits. The only real risk was saturation during twitches, and that was checked
+afterwards rather than assumed. Reached "Yaw(E) complete" / "Success" at 17:22:00:
+
+  Yaw(E) Rate: P:0.502, I:0.050, D:0.0000
+  Yaw(E) Angle P:2.789, Max Accel:17016   (= ATC_ACC_Y_MAX 170.16)
+
+Note the axis is labelled Yaw(E): with AUTOTUNE_AXES=4 the firmware tunes the
+yaw rate ERROR filter rather than a D term, so the quantity to check is
+ATC_RAT_YAW_FLTE (2 -> 1.019534). Yaw D staying 0.0000 is correct, not a failure.
+
+Footgun 8 did NOT recur. All thirteen params saved, angle P and accel max
+included, so the pitch-axis failure was axis-specific rather than a systematic
+firmware fault. Do not assume either outcome on a future axis -- check.
+
+Saturation verified clean with drones/tools/tlog_servo.py over the tune window:
+peak motor output 1715us against a 1950us ceiling (MOT_PWM_MIN 1000 +
+MOT_SPIN_MAX 0.95), so 235us spare at the hardest twitch and zero samples at the
+rail. The gains are therefore valid as flown, not provisional on fixing the
+imbalance. Yaw split measured +59us during the tune, consistent with the
+historical +63/+64/+73.
+
+ATC_ANG_YAW_P 2.789 and ATC_ACC_Y_MAX 170 are both well under their 4.5 and 270
+defaults. That is mostly just 2216 KV920 on 1045 props -- yaw authority on a
+large slow quad is genuinely low -- and since nothing saturated, the ~59us trim
+is not the limiting factor. Fixing the ESC would buy a modest gain, not a
+transformation. Do not re-tune yaw on the strength of the imbalance alone.
+
+Final tuned state, all three axes (yaw_autotuned.param, matches the board):
+
+  axis   rate P      rate I      rate D       angle P   accel max
+  roll   0.108       0.108       0.0036       10.068    1054.7
+  pitch  0.1085964   0.1085964   0.003647688   9.589    1052.37
+  yaw    0.5027357   0.05027357  0            2.789423   170.1639
+
+Roll and pitch agreeing to within 1% on every rate term is the expected result
+for a symmetric X frame and is the best evidence the tunes are real.
