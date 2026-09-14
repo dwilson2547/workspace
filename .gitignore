@@ -4,3 +4,7 @@
 
 # Claude Code local settings — may contain credentials in allow-list entries
 .claude/settings.local.json
+
+# Python venvs (e.g. drones/tools/.venv for blackbox analysis)
+.venv/
+__pycache__/
