@@ -32,7 +32,8 @@ Status: **flying.** One live change: the **Nano90 camera is being replaced** —
 | Video / FPV | **HDZero Freestyle V2 VTX** on **UART3** (MSP DisplayPort, HD OSD) + **Nano90** camera | **fitted** — camera being replaced |
 | _(superseded)_ | ~~RushFPV Tank Ultimate Mini + Caddx Ratel 2~~ — analog, **removed; now spares** | see [inventory](inventory.md) |
 
-Parts: [`inventory.md`](inventory.md).
+Parts: [`inventory.md`](inventory.md). Tuning state and blackbox findings:
+[`docs/tuning.md`](docs/tuning.md).
 
 ## Frame — Angel30
 
