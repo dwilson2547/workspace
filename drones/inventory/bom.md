@@ -271,6 +271,25 @@ README. Nothing purchased yet.
 - **BetaFPV Pavo20 Pro II frame** — spare frame for the Pavo20, Amazon `B0G6KW59K4`:
   <https://www.amazon.com/dp/B0G6KW59K4>
 
+### Prop restock — stock by consumption rate, not by count
+
+Per-aircraft prop counts go stale within a single session, so they are not tracked here. What is
+stable is how fast each airframe eats props, which is what restock depth should follow:
+
+- **Pavo20 Pro II — deepest stock in the fleet.** Turtle mode is used routinely to get airborne
+  again after a crash rather than walking out to flip it, and on a ducted build the duct holds the
+  blade against the ground while it spins, so it grinds rather than skips. This is a deliberate
+  trade — flight time is what builds skill, and crash frequency made manual flipping the thing that
+  ended sessions. Budget props accordingly instead of trying to fly them less. Worth checking
+  `crash_flip_motor_percent` in the Pavo's CLI: it sets turtle throttle, and any value above the
+  minimum that reliably flips the quad is being paid for in props.
+- **Angel30 3" — replace on damage, do not straighten.** Polycarbonate blades bent back leave a
+  weakened zone that behaves differently under load, and at ~38,000 RPM this is the airframe in the
+  fleet where a blade letting go matters most. A straightened blade also invalidates any blackbox
+  noise baseline, which has already cost one flight's data.
+- **X500 / DH600 — shallow stock is fine.** Both are flown conservatively (the X500 on position
+  hold and RTL), so prop attrition is near zero. One spare set each is adequate.
+
 ## X500 payload — VLP-16 lidar
 
 Decided 2026-08-17. Sensor is **already owned** (shared with
