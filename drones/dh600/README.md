@@ -10,9 +10,13 @@ domain: drones
 agility. Largest craft in the domain and the first with a proper gimbal payload and a long-range
 HD video + control link.
 
-Status: **airframe largely assembled; all parts on hand (2026-09-01).** Motors, ESCs, power module,
-GPS and the Dronetag are mounted; the full SIYI stack has arrived. **The build is no longer waiting
-on any supplier — it is blocked on fabrication**, specifically a
+Status: **electrical bring-up complete; blocked on fabrication (2026-09-17).** ArduPilot Copter
+4.7.1 is flashed and configured — ELRS, SiK, GPS, motor directions, spin thresholds and battery
+failsafes are all done and captured in [`dh600.param`](dh600.param). The **only remaining work
+before a maiden is the top plate**, because accelerometer and compass calibration both require the
+FC bolted in its final position. Motors, ESCs, power module, GPS and the Dronetag are mounted; the
+full SIYI stack has arrived. **The build is not waiting on any supplier — it is blocked on
+fabrication**, specifically a
 [custom top plate and gimbal mount](#custom-fabrication--top-plate-and-gimbal-mount). Specs below
 were settled during planning — motors, props, power path, RC architecture, autopilot and gimbal
 integration all have sourced numbers behind them. Raw source list with prices:
@@ -743,7 +747,8 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] 6S 12 Ah pack ordered (Tattu-class, AS150, $270)
 - [ ] 2× 6S 5–6 Ah shakedown packs for maiden / ESC cal / PID tuning
 - [ ] Charger capability confirmed for 6S 12 Ah (D6 Pro is 200 W AC ≈ 1.5 h; DC supply for faster)
-- [ ] RP3 bound to TX16S (phrase `dwdrones`), CRSF on GPS2, crossed TX/RX verified
+- [x] **RP3 bound to TX16S** (phrase `dwdrones`), CRSF on **TELEM1** (not GPS2 — see wiring table),
+      crossed TX/RX verified; radio calibration done (2026-09-17)
 - [ ] ELRS packet rate set to **50 Hz** for range (latency irrelevant on this platform)
 - [ ] **Antenna placement planned** — 5 antennas, all outside the carbon, RP3 pair orthogonal, TX/RX
       separated (see [antenna installation](#antenna-installation))
@@ -755,16 +760,61 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] Consider a directional ground-station antenna for long-range sorties
 - [ ] **12 V/3 A BEC** sourced (feeds HM30 air unit + A8 mini); confirm air unit's current draw
 - [ ] All parts ordered
-- [ ] Airframe assembled + FC flashed with **current-stable ArduPilot** (needed for `MNT1_TYPE=8`)
-- [ ] Motor/ESC direction + calibration
+- [x] **FC flashed — ArduPilot Copter 4.7.1 stable**, via QGroundControl (2026-09-17). Mission
+      Planner cannot flash on Linux; see the build log entry for why
+- [x] **Motor/ESC direction + calibration** (2026-09-17) — quad X order and directions verified,
+      all four break away at 14%, `MOT_SPIN_ARM,0.15` / `MOT_SPIN_MIN,0.18`
 - [ ] HM30 link bound (video + telemetry), A8 mini gimbal live on the bench via MAVLink
 - [ ] Battery leads twisted; mains routed clear of the GPS mast base
 - [ ] GPS mast checked for a **positive repeatable lock** (folding mast vs. fixed calibration)
-- [ ] GPS lock + compass calibrated, **CompassMot run** (high-current build — see interference note)
+- [ ] ⛔ GPS lock + compass calibrated, **CompassMot run** (high-current build — see interference
+      note) — **blocked: needs the FC bolted down**, so it waits on the top plate
+- [x] **Battery failsafe configured for 6S** (2026-09-17) — `BATT_LOW_VOLT,21.6` /
+      `BATT_CRT_VOLT,20.4`, RTL on low, Land on critical; was shipped at 3S defaults with both
+      actions disabled
+- [x] **Flight modes on RC6** — Stabilize / PosHold / AutoTune on a 3-position switch (2026-09-17)
+- [ ] ⛔ Accelerometer calibration — **blocked: needs the FC bolted down**
 - [ ] Hover test + **measured** hover current / endurance
 - [ ] First cinematic mission flight
 
 ## Build log
+
+- **2026-09-17** — **Electrical bring-up done; the blocker is now purely mechanical.** Flashed
+  ArduPilot Copter 4.7.1 stable and configured everything that does not require the FC to be
+  mounted. What is left before a maiden is the top plate, then two calibrations.
+
+  **Mission Planner cannot flash a board on Linux.** Its firmware installer calls
+  `SetupDiGetClassDevs` out of `setupapi.dll` — a Windows API — so `GetAllCOMPorts()` throws
+  `DllNotFoundException` under Mono and the installer can never enumerate a port to upload to. It
+  falls back to a legacy page that offers **fmuv3** builds, which are Pixhawk1-era and wrong for a
+  6C. This is not a version problem: 1.3.83 is current, and every MP build has that code path.
+  Connecting and parameter editing work fine (the port list is cosmetic — the saved `comport` in
+  `config.xml` is what opens the link), so MP stays usable for tuning. **Use QGroundControl to
+  flash.** Board shipped with stock PX4, which is Holybro's factory default, not a mis-flash.
+
+  **The port table in this README was wrong** — it said ELRS on GPS2. That came from planning commit
+  `bd5ef70`, written three weeks before the FC was mounted, and had been read as a record of what
+  was wired ever since. ELRS is on **TELEM1**. The table now carries a ✅ wired / ⬜ planned column
+  so the distinction survives; see `f78e308`.
+
+  Consequence of that move: **`BRD_SER1_RTSCTS=0` is mandatory.** TELEM1 is the only port with
+  RTS/CTS wired, CRSF does not use flow control, and the default of `2` (auto) can kill the link.
+  It also leaves the HM30 with no flow-control port — GPS2/UART8 has none — which is recorded as
+  unverified in the wiring section.
+
+  **Spin thresholds measured, not guessed.** All four motors break away at 14% and none at 13%, so
+  `MOT_SPIN_ARM` went 0.10 → 0.15 (a point of margin for colder packs) and `MOT_SPIN_MIN` to 0.18.
+  Stock 0.10 was below the reliable start point, which on a 600 mm airframe is a tip-over at arm.
+  That matched 14% across all four is also the only real evidence the ESCs are calibrated — an
+  analog ESC exposes no calibration state to query, so a common breakaway threshold is the
+  indicator. Beeping at power-up means nothing, and neither does `ESC_CALIBRATION`.
+
+  **Battery failsafe was live-dangerous as shipped:** `BATT_LOW_VOLT,10.5` is a 3S value, i.e.
+  1.75 V/cell on this pack, with both failsafe actions set to `0`. There was no low-battery
+  protection of any kind. Now 21.6 / 20.4 with RTL and Land, `BATT_CAPACITY,8000`.
+
+  Also fixed `RSSI_TYPE` 9 → 3; 9 is out of range (valid 0–5). Param snapshots are tracked in
+  `dh600.param`.
 
 - **2026-09-01** — **The whole SIYI stack is now on hand** — the A8 mini, the **AI Tracking Module 2
   (10T)** and the **LAN→HDMI converter** all landed, so nothing on this build is waiting on a
