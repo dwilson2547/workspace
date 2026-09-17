@@ -10,13 +10,12 @@ domain: drones
 agility. Largest craft in the domain and the first with a proper gimbal payload and a long-range
 HD video + control link.
 
-Status: **electrical bring-up complete; blocked on fabrication (2026-09-17).** ArduPilot Copter
-4.7.1 is flashed and configured — ELRS, SiK, GPS, motor directions, spin thresholds and battery
-failsafes are all done and captured in [`dh600.param`](dh600.param). The **only remaining work
-before a maiden is the top plate**, because accelerometer and compass calibration both require the
-FC bolted in its final position. Motors, ESCs, power module, GPS and the Dronetag are mounted; the
-full SIYI stack has arrived. **The build is not waiting on any supplier — it is blocked on
-fabrication**, specifically a
+Status: **flying; in tuning (2026-09-17).** Maiden flown, roll axis autotuned. Top plate is made
+and fitted, and **all accessories are mounted except the A8 mini itself**, which is deliberately
+left off test flights rather than risk an $800 camera on an untuned airframe. The aircraft is
+therefore within ~95 g of final AUW, so tuning done now carries over. Remaining work is tuning:
+harmonic notch, then a full re-tune. ArduPilot Copter 4.7.1, configuration captured in
+[`dh600.param`](dh600.param). Superseded, kept for history: the build was previously blocked on a
 [custom top plate and gimbal mount](#custom-fabrication--top-plate-and-gimbal-mount). Specs below
 were settled during planning — motors, props, power path, RC architecture, autopilot and gimbal
 integration all have sourced numbers behind them. Raw source list with prices:
@@ -731,12 +730,11 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [x] **Motors, ESCs, power module, GPS and Dronetag mounted in the frame** (2026-08-17)
 - [x] **Full SIYI stack on hand** — HM30 air + ground, A8 mini, AI Tracking Module 2, LAN→HDMI
       (2026-09-01)
-- [ ] ⛔ **Design and print the custom top plate** — the critical path. Factory plate doesn't clear
-      the FC on its soft mount. Must carry FC + HM30 air unit + AI module, **vent the HM30's fan**,
-      and anchor the antenna booms
+- [x] **Custom top plate designed, printed and fitted** (2026-09-17) — carries FC + HM30 air unit +
+      AI module, vents the HM30's fan, anchors the antenna booms
 - [ ] **Design and print the front gimbal mount** — swing-up / detachable, so the A8 mini isn't the
       lowest point with the gear folded
-- [ ] **Mount the HM30 air unit** — held until the top plate exists
+- [x] **HM30 air unit mounted** (2026-09-17)
 - [ ] Mount the A8 mini + AI Tracking Module 2
 - [ ] Put the **Dronetag BS** serial on the FAA registration (the module's serial, not the aircraft's)
 - [ ] Check the AI Tracking Module's mass / voltage / Ethernet position against the existing budget
@@ -767,13 +765,13 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 - [ ] HM30 link bound (video + telemetry), A8 mini gimbal live on the bench via MAVLink
 - [ ] Battery leads twisted; mains routed clear of the GPS mast base
 - [ ] GPS mast checked for a **positive repeatable lock** (folding mast vs. fixed calibration)
-- [ ] ⛔ GPS lock + compass calibrated, **CompassMot run** (high-current build — see interference
-      note) — **blocked: needs the FC bolted down**, so it waits on the top plate
+- [x] GPS lock + compass calibrated (2026-09-17); **CompassMot** still to run (high-current build —
+      see interference note)
 - [x] **Battery failsafe configured for 6S** (2026-09-17) — `BATT_LOW_VOLT,21.6` /
       `BATT_CRT_VOLT,20.4`, RTL on low, Land on critical; was shipped at 3S defaults with both
       actions disabled
 - [x] **Flight modes on RC6** — Stabilize / PosHold / AutoTune on a 3-position switch (2026-09-17)
-- [ ] ⛔ Accelerometer calibration — **blocked: needs the FC bolted down**
+- [x] **Accelerometer calibration** (2026-09-17)
 - [ ] Hover test + **measured** hover current / endurance
 - [ ] First cinematic mission flight
 
