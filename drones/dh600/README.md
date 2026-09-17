@@ -652,7 +652,7 @@ extreme.
 
 ## Serial port wiring (Pixhawk 6C, full size)
 
-**The port budget closes exactly — no spare UARTs.** The full-size 6C gives 5 usable UARTs
+**The port budget closes with one UART spare.** The full-size 6C gives 5 usable UARTs
 (TELEM1/2/3 + GPS1/2) plus a dedicated RC input and a dedicated S.Bus output. All five UARTs are
 committed once the HM30 and gimbal go on; only RC IN is left.
 
@@ -668,8 +668,8 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
 | TELEM1 | UART7 | `SERIAL1` | **RP3 ELRS (CRSF)** | ✅ wired | `SERIAL1_PROTOCOL=23`, `BRD_SER1_RTSCTS=0` — see below |
 | TELEM2 | UART5 | `SERIAL2` | **SiK 915 MHz radio** | ✅ wired | MAVLink2 @ 57600 — ArduPilot defaults are already correct |
 | GPS1 | USART1 | `SERIAL3` | M10 GPS / compass | ✅ wired | from FC kit; port has the safety-switch pins |
-| GPS2 | UART8 | `SERIAL4` | HM30 air unit — MAVLink telemetry | ⬜ planned | moved here when ELRS took TELEM1; ⚠ **no RTS/CTS pins on UART8** |
-| TELEM3 | USART2 | `SERIAL5` | A8 mini gimbal UART | ⬜ planned | SIYI driver, `SERIAL5_PROTOCOL=8` / `_BAUD=115`, `MNT1_TYPE=8` |
+| TELEM3 | USART2 | `SERIAL5` | HM30 air unit — MAVLink telemetry | ⬜ planned | `SERIAL5_PROTOCOL=2`, `SERIAL5_BAUD=115` |
+| GPS2 | UART8 | `SERIAL4` | spare | — | the remaining full UART; the A8 mini would need it if ever fitted |
 | RC IN | — | — | unused | — | available if the RP3 is ever run as S.Bus instead of CRSF |
 | S.Bus OUT | — | — | spare | — | |
 | CAN1 / CAN2 | — | — | spare | — | |
@@ -685,10 +685,11 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
 > back to the TX16S screen. Set `RSSI_TYPE=3`. ⚠ CRSF wiring is crossed (FC-TX → RX-RX, FC-RX →
 > RX-TX), the same gotcha flagged on the X500.
 
-> ⚠ **HM30 has nowhere with flow control to go.** The original plan put it on TELEM1 partly *for*
-> full flow control; with ELRS there, GPS2/UART8 is the only full UART left and it has none. MAVLink
-> at 115200 over a short cable should not need it, but this is unverified — if HM30 telemetry proves
-> lossy, the fix is swapping HM30 to TELEM1 and ELRS to GPS2, accepting CRSF without flow control.
+> **Only TELEM1 and TELEM2 have flow control** (`UART7`/`UART5` carry RTS/CTS; `USART2` and `UART8`
+> do not), and ELRS and the SiK hold both. So the HM30 lands on a 3-wire port either way — TELEM3
+> and GPS2 are electrically identical, and TELEM3 wins on being a telemetry port with the right
+> connector. MAVLink at 115200 over a short cable should not need flow control, but that is
+> unverified; if HM30 telemetry proves lossy, the swap is HM30 to TELEM1 and ELRS to TELEM3.
 
 **A8 mini topology:** video goes **A8 mini → air unit over Ethernet** (SIYI Gimbal-to-Link cable) — it
 never touches the FC. Gimbal control is **MAVLink over TELEM3**, driven by RC6/RC7 arriving via ELRS.
@@ -702,16 +703,17 @@ triggering from Mission Planner.
 
 | Parameter | Value |
 |-----------|-------|
-| `SERIAL5_PROTOCOL` | 8 (SToRM32 Gimbal Serial) |
-| `SERIAL5_BAUD` | 115 (115200 bps) |
+| `SERIAL4_PROTOCOL` | 8 (SToRM32 Gimbal Serial) |
+| `SERIAL4_BAUD` | 115 (115200 bps) |
 | `MNT1_TYPE` | 8 (Siyi) |
 | `MNT1_RC_RATE` | 90 (deg/s, RC targeting speed) |
-| `RC6_OPTION` / `RC7_OPTION` | 213 / 214 (mount pitch / yaw) |
+| `RC7_OPTION` / `RC8_OPTION` | 214 / 213 (mount yaw / pitch) |
 
-> The ArduPilot docs use TELEM2 in their example; this build uses TELEM3. **Resolved 2026-09-17:**
-> TELEM3 is `SERIAL5` on the 6C, confirmed against `Pixhawk6C/hwdef.dat` `SERIAL_ORDER` — so the
-> params are `SERIAL5_*`, not the `SERIAL2_*` the upstream docs imply. Two RC channels for pitch/yaw
-> is trivial against the 16 available over ELRS.
+> ⬜ **Nothing here is configured — the A8 mini is not fitted**, and is deliberately left off test
+> flights rather than risk the camera on an untuned airframe. GPS2 is the only UART left, so these
+> are `SERIAL4_*` if it ever goes on; confirm against the wiring table rather than this block,
+> because the port has moved once already. RC6 is the flight mode channel on this build, so mount
+> pitch cannot use it — hence RC7/RC8.
 
 > ⚠ `MNT1_TYPE = 8` only exists on reasonably recent ArduPilot — "no MNT1 settings visible" is the
 > classic symptom of firmware too old for the SIYI option. Flash current stable before debugging wiring.
@@ -797,8 +799,10 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
 
   Consequence of that move: **`BRD_SER1_RTSCTS=0` is mandatory.** TELEM1 is the only port with
   RTS/CTS wired, CRSF does not use flow control, and the default of `2` (auto) can kill the link.
-  It also leaves the HM30 with no flow-control port — GPS2/UART8 has none — which is recorded as
-  unverified in the wiring section.
+  It also leaves the HM30 without flow control, but so would any remaining port: only TELEM1 and
+  TELEM2 carry RTS/CTS on this board and ELRS and the SiK hold both. HM30 goes on **TELEM3**.
+  (An earlier version of this entry put it on GPS2 and framed that as a flow-control constraint —
+  wrong on both counts: TELEM3 and GPS2 are electrically identical 3-wire UARTs.)
 
   **Spin thresholds measured, not guessed.** All four motors break away at 14% and none at 13%, so
   `MOT_SPIN_ARM` went 0.10 → 0.15 (a point of margin for colder packs) and `MOT_SPIN_MIN` to 0.18.
