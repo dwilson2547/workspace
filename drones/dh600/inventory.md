@@ -42,7 +42,7 @@ drafting time (2026-07-26) — they drift, treat as indicative.
 | **Custom front gimbal mount** (printed) | 1 | **to design** | ~$0 | swing-up / detachable, so the A8 mini isn't the lowest-hanging part with the gear folded. Check antenna keep-out against gimbal yaw in the **flight** position |
 | FC silicone bushings | 1 set | **to buy** | $2.66 | vibration isolation; ⚠ may be redundant with the soft mount above — check before buying both |
 | **Dronetag BS** Remote ID module | 1 | **mounted 2026-08-17** | ? | same as the CL35. Standalone GNSS + BLE broadcast, no UART to the FC. Serial goes on the FAA registration, not the aircraft's |
-| RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into GPS2; bind phrase `dwdrones`; run at **50 Hz** for range |
+| RadioMaster RP3 ELRS RX (CRSF) | 1 | **to buy** | $18.48 | **on the aircraft**, CRSF into **TELEM1**; bind phrase `dwdrones`; run at **50 Hz** for range |
 | SiK 915 MHz telemetry radio | 1 | check X500 spare | — | on TELEM2; may need a second set if the X500's stays put |
 | Antenna booms/brackets (printed) | 5 | **to make** | ~$0 | centre-body downward booms — must not cross the folding arms or retract gear; RP3 pair orthogonal and widely separated |
 | muzi works 17 cm 915 MHz whip | **2** | **to buy** | ~$10 ea | one per SiK end (aircraft + laptop). SWR 1.3 vs stock 3.5, ~3–6 dB. Airframe one is **184 mm — mount pointing up**, won't clear the 135 mm gear |

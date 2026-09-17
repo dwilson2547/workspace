@@ -226,7 +226,7 @@ quoted 2026-07-26 and will have drifted.
 - **Dronetag BS** Remote ID module — **mounted**; same module as the CL35.
 - **FC soft mount** — **on order**, and currently the critical-path item: the Pixhawk and the HM30 air
   unit are both waiting on it.
-- **RX** — RadioMaster RP3 ELRS ($18.48), **on the aircraft**, CRSF into GPS2, run at 50 Hz:
+- **RX** — RadioMaster RP3 ELRS ($18.48), **on the aircraft**, CRSF into TELEM1, run at 50 Hz:
   <https://www.aliexpress.us/item/3256811780581682.html>
 - _Control-link upgrade (not planned):_ Gemini is a TX+RX scheme, not a receiver swap — needs a
   **Nomad** dual-1W Xrossband module **and** a **DBR4** receiver. Its 900 MHz half would collide with

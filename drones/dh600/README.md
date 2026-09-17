@@ -91,7 +91,7 @@ _Written as the intended build during planning; most of it is now fitted hardwar
 | Video + telemetry | **SIYI HM30** | 5.1–5.825 GHz proprietary link; **not** used for RC on this build |
 | Camera / gimbal | **SIYI A8 mini** | 3-axis, 95 g, 55×55×70 mm; 11–25.2 V, 12 W peak / 5 W avg; native ArduPilot driver |
 | Telemetry | SiK 915 MHz radio | on **TELEM2**; independent of the 5.8 GHz HM30 link |
-| RC link | RadioMaster RP3 ELRS (CRSF), dual-antenna diversity | **on the aircraft**, CRSF into GPS2; 16 ch, ~5 ms at 50 Hz, telemetry back to the TX16S |
+| RC link | RadioMaster RP3 ELRS (CRSF), dual-antenna diversity | **on the aircraft**, CRSF into **TELEM1** (`SERIAL1_PROTOCOL=23`, `BRD_SER1_RTSCTS=0`); 16 ch, ~5 ms at 50 Hz, telemetry back to the TX16S |
 | Battery | **6S LiPo 12000 mAh 15C** (Tattu-class, 1619 g) | settled — endurance curve is flat, 16 Ah buys ~3 min for 540 g |
 | Remote ID | **Dronetag BS** (mounted 2026-08-17) | same module as the CL35; standalone GNSS + BLE, no UART to the FC |
 | Onboard tracking | **SIYI AI Tracking Module 2 (10T)** | 10 TOPS; pairs with the A8 mini for onboard object tracking |
