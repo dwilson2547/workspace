@@ -921,6 +921,9 @@ it works with the HM30 ground unit powered off. Two MAVLink links is a normal Ar
   out of the TX16S module bay**, so TX16S → HM30 direct at 16 ch is a viable fallback if ELRS ever
   disappoints. Gimbal is unaffected — ArduPilot's SIYI driver over TELEM3 takes RC6/RC7 from ELRS, so
   the **S.Bus Y cable is dropped**. RP3 moves to GPS2 as CRSF; RC IN now unused.
+  > ⚠ **Superseded 2026-09-17.** The RP3 was wired to **TELEM1**, not GPS2. This entry records
+  > the decision as made on 2026-07-26 and is kept for history — it is not current fact. See the
+  > [serial port wiring](#serial-port-wiring-pixhawk-6c-full-size) table.
 - **2026-07-26** — Checked the range budget after asking whether the control link would out-range the
   camera. It's the other way round and that's the safe ordering: 2.4 GHz sees ~7.7 dB less path loss
   than 5.8 GHz, and the HM30's 1080p60 bitrate needs far more SNR than RC does, so **video fails first
