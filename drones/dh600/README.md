@@ -95,7 +95,7 @@ _Written as the intended build during planning; most of it is now fitted hardwar
 | Battery | **6S LiPo 12000 mAh 15C** (Tattu-class, 1619 g) | settled — endurance curve is flat, 16 Ah buys ~3 min for 540 g |
 | Remote ID | **Dronetag BS** (mounted 2026-08-17) | same module as the CL35; standalone GNSS + BLE, no UART to the FC |
 | Onboard tracking | **SIYI AI Tracking Module 2 (10T)** | 10 TOPS; pairs with the A8 mini for onboard object tracking |
-| Autopilot stack | **ArduPilot** | settled; native SIYI gimbal driver (`MNT1_TYPE=8`) |
+| Autopilot stack | **ArduPilot** | settled |
 
 Parts on hand vs. still-to-buy: [`inventory.md`](inventory.md).
 
@@ -106,7 +106,7 @@ around:
 
 | Unit | Role | Status |
 |---|---|---|
-| **HM30 air unit** | 5.8 GHz video + MAVLink telemetry, aircraft side | on hand — **mounting deferred until the top plate is done** |
+| **HM30 air unit** | 5.8 GHz video + MAVLink telemetry, aircraft side | mounted |
 | **HM30 ground unit** | ground side of the link | on hand |
 | **A8 mini gimbal camera** | the mission payload | on hand |
 | **AI Tracking Module 2 (10T)** | onboard object tracking alongside the gimbal | **on hand** (2026-09-01) |
@@ -652,7 +652,7 @@ extreme.
 
 ## Serial port wiring (Pixhawk 6C, full size)
 
-**The port budget closes with one UART spare.** The full-size 6C gives 5 usable UARTs
+**Two UARTs are spare.** The full-size 6C gives 5 usable UARTs
 (TELEM1/2/3 + GPS1/2) plus a dedicated RC input and a dedicated S.Bus output. All five UARTs are
 committed once the HM30 and gimbal go on; only RC IN is left.
 
@@ -668,8 +668,8 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
 | TELEM1 | UART7 | `SERIAL1` | **RP3 ELRS (CRSF)** | ✅ wired | `SERIAL1_PROTOCOL=23`, `BRD_SER1_RTSCTS=0` — see below |
 | TELEM2 | UART5 | `SERIAL2` | **SiK 915 MHz radio** | ✅ wired | MAVLink2 @ 57600 — ArduPilot defaults are already correct |
 | GPS1 | USART1 | `SERIAL3` | M10 GPS / compass | ✅ wired | from FC kit; port has the safety-switch pins |
-| TELEM3 | USART2 | `SERIAL5` | HM30 air unit — MAVLink telemetry | ⬜ planned | `SERIAL5_PROTOCOL=2`, `SERIAL5_BAUD=115` |
-| GPS2 | UART8 | `SERIAL4` | spare | — | the remaining full UART; the A8 mini would need it if ever fitted |
+| TELEM3 | USART2 | `SERIAL5` | unused | — | |
+| GPS2 | UART8 | `SERIAL4` | unused | — | |
 | RC IN | — | — | unused | — | available if the RP3 is ever run as S.Bus instead of CRSF |
 | S.Bus OUT | — | — | spare | — | |
 | CAN1 / CAN2 | — | — | spare | — | |
@@ -685,46 +685,6 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
 > back to the TX16S screen. Set `RSSI_TYPE=3`. ⚠ CRSF wiring is crossed (FC-TX → RX-RX, FC-RX →
 > RX-TX), the same gotcha flagged on the X500.
 
-> **Only TELEM1 and TELEM2 have flow control** (`UART7`/`UART5` carry RTS/CTS; `USART2` and `UART8`
-> do not), and ELRS and the SiK hold both. So the HM30 lands on a 3-wire port either way — TELEM3
-> and GPS2 are electrically identical, and TELEM3 wins on being a telemetry port with the right
-> connector. MAVLink at 115200 over a short cable should not need flow control, but that is
-> unverified; if HM30 telemetry proves lossy, the swap is HM30 to TELEM1 and ELRS to TELEM3.
-
-**A8 mini topology:** video goes **A8 mini → air unit over Ethernet** (SIYI Gimbal-to-Link cable) — it
-never touches the FC. Gimbal control is **MAVLink over TELEM3**, driven by RC6/RC7 arriving via ELRS.
-The SIYI **S.Bus Y cable is not needed** on this build.
-
-### ArduPilot gimbal config (A8 mini on TELEM3)
-
-ArduPilot has a **native SIYI driver** — plain 3-wire UART (RX/TX/GND), and it translates MAVLink
-gimbal and camera commands into SIYI's proprietary protocol, giving ROI, click-to-point and camera
-triggering from Mission Planner.
-
-| Parameter | Value |
-|-----------|-------|
-| `SERIAL4_PROTOCOL` | 8 (SToRM32 Gimbal Serial) |
-| `SERIAL4_BAUD` | 115 (115200 bps) |
-| `MNT1_TYPE` | 8 (Siyi) |
-| `MNT1_RC_RATE` | 90 (deg/s, RC targeting speed) |
-| `RC7_OPTION` / `RC8_OPTION` | 214 / 213 (mount yaw / pitch) |
-
-> ⬜ **Nothing here is configured — the A8 mini is not fitted**, and is deliberately left off test
-> flights rather than risk the camera on an untuned airframe. GPS2 is the only UART left, so these
-> are `SERIAL4_*` if it ever goes on; confirm against the wiring table rather than this block,
-> because the port has moved once already. RC6 is the flight mode channel on this build, so mount
-> pitch cannot use it — hence RC7/RC8.
-
-> ⚠ `MNT1_TYPE = 8` only exists on reasonably recent ArduPilot — "no MNT1 settings visible" is the
-> classic symptom of firmware too old for the SIYI option. Flash current stable before debugging wiring.
-> Docs: <https://ardupilot.org/copter/docs/common-siyi-zr10-gimbal.html>
-
-> There is **only one RC source** on this build — the RP3 on TELEM1. The HM30's S.Bus output is left
-> unconnected, so the dual-RC-source failover problem never arises.
-
-Why keep the SiK alongside HM30 telemetry: HM30 is 5.8 GHz and much more line-of-sight sensitive than
-915 MHz, so the SiK link holds telemetry through obstructions and orientations where video drops — and
-it works with the HM30 ground unit powered off. Two MAVLink links is a normal ArduPilot config.
 
 ## Status
 
