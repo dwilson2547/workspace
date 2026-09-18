@@ -1,6 +1,6 @@
 ---
 kind: decision
-status: proposed
+status: accepted
 date: 2026-09-18T18:46:59-04:00
 source: docs/notes/dh600-hover-noise-fundamental-is-56hz-second-harmonic-dominates-roll.md
 ---
@@ -41,7 +41,20 @@ MODE 1 with the 2026-09-18 measurement:
 `INS_GYRO_FILTER` stays 20 for the verification flight. Raising it is a separate step after the
 notch is proven.
 
-## Accepted when
+## Accepted 2026-09-18
 
-A second hover with `INS_RAW_LOG_OPT=9` shows the notch centre tracking throttle near 56 Hz and
-roll/pitch D-term RMS below the 0.0074/0.0079 baseline. Then autotune pitch and yaw, then roll again.
+Verification hover, log `2026-09-18 18-56-27.bin`, 169 s airborne in PosHold at ThO 0.171,
+same day, same pack type, same configuration plus the table above.
+
+| metric | baseline | with notch |
+|---|---|---|
+| roll D-term RMS | 0.0074 | 0.0019 (−74 %) |
+| pitch D-term RMS | 0.0079 | 0.0022 (−73 %) |
+| roll / pitch D-term peak | 0.0266 / 0.0359 | 0.0070 / 0.0072 |
+| notch centre (FTNS) | — | 56.7 Hz, range 55.2–58.4, tracks √(ThO/REF) with r = 0.978, mean error 0.07 Hz |
+| 2nd-harmonic band 100–125 Hz, roll, post-filter | 4.1e-5 (LPF only) | < 1e-6 |
+| VIBE mean | 5.8 / 8.3 / 7.1 | 7.0 / 7.8 / 7.5, no clips |
+
+Hover learn moved 0.167 → 0.175 during the flight; `INS_HNTCH_REF` stays 0.167 unless a later
+flight shows the centre drifting. Next: autotune pitch and yaw with this notch active, then roll
+again (`docs/notes/…56hz…` for the baseline numbers).

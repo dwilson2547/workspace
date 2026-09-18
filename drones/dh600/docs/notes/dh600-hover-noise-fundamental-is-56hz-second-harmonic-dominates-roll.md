@@ -28,3 +28,15 @@ Answers the min-throttle question of 2026-09-18: hover RCOU sits at 1400–1433 
 `MOT_SPIN_MIN` floor of 1180 µs, lowest sample 1338 µs. `MOT_THST_HOVER` is thrust demand
 before the expo curve, not output; there is 220 µs of descent authority below hover and the floor
 stays where it is.
+
+## Verified 2026-09-18 (log `2026-09-18 18-56-27.bin`)
+
+Notch flown per decision 0005 (MODE 1, FREQ 56, BW 28, HMNCS 7, REF 0.167, FM_RAT 0.5). 169 s
+airborne at ThO 0.171. Notch centre averaged 56.7 Hz and tracked √(throttle/REF) with r = 0.978
+and 0.07 Hz mean error, which is the signature of correct throttle scaling. Roll D-term RMS
+0.0074 → 0.0019, pitch 0.0079 → 0.0022; D peaks down four to five times. The 116 Hz roll peak,
+4.1e-5 after the 20 Hz low-pass alone, is below 1e-6 with the notch. VIBE unchanged, no clips.
+
+Window trap: the log ends in PosHold on the ground, so a window to end-of-log includes the landing
+and lands D-term RMS at zero for those seconds. Gate the window on Alt > 1 m and ThO > 0.05
+before comparing; the −73 % held either way but the peaks did not.

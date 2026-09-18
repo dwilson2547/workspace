@@ -10,11 +10,12 @@ domain: drones
 agility. Largest craft in the domain and the first with a proper gimbal payload and a long-range
 HD video + control link.
 
-Status: **flying; in tuning (2026-09-17).** Maiden flown, roll axis autotuned. Top plate is made
+Status: **flying; in tuning (2026-09-18).** Maiden flown, roll axis autotuned, harmonic notch
+measured and verified ([decision 0005](docs/decisions/0005-throttle-based-notch-no-rpm-source.md)). Top plate is made
 and fitted, and **all accessories are mounted except the A8 mini itself**, which is deliberately
 left off test flights rather than risk an $800 camera on an untuned airframe. The aircraft is
 therefore within ~95 g of final AUW, so tuning done now carries over. Remaining work is tuning:
-harmonic notch, then a full re-tune. ArduPilot Copter 4.7.1, configuration captured in
+autotune pitch and yaw with the notch active, then roll again. ArduPilot Copter 4.7.1, configuration captured in
 [`dh600.param`](dh600.param). Superseded, kept for history: the build was previously blocked on a
 [custom top plate and gimbal mount](#custom-fabrication--top-plate-and-gimbal-mount). Specs below
 were settled during planning — motors, props, power path, RC architecture, autopilot and gimbal
@@ -747,6 +748,15 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
 
 ## Build log
 
+- **2026-09-18** — **Harmonic notch measured and verified in two hovers.** No RPM source on this
+  build (XRotor 40 A are PWM-only, motors on the IO MCU outputs), so the notch is throttle-scaled
+  from a raw-gyro hover, the X500 method. Fundamental is a 53.6/57.8 Hz motor pair; the 2nd
+  harmonic near 116 Hz was the largest peak on roll. Flown with `INS_HNTCH` MODE 1, FREQ 56,
+  BW 28, HMNCS 7, REF 0.167, FM_RAT 0.5: roll and pitch D-term RMS down 74 % and 73 %, notch
+  centre tracking throttle to 0.07 Hz. Also settled from the first log: hover motor outputs sit at
+  1400–1433 µs against the 1180 µs `MOT_SPIN_MIN` floor, so the floor stays. Details:
+  [decision 0005](docs/decisions/0005-throttle-based-notch-no-rpm-source.md) and the
+  [notes](docs/notes/README.md). Next: autotune pitch and yaw, then roll again.
 - **2026-09-17** — **Electrical bring-up done; the blocker is now purely mechanical.** Flashed
   ArduPilot Copter 4.7.1 stable and configured everything that does not require the FC to be
   mounted. What is left before a maiden is the top plate, then two calibrations.
