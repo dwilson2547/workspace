@@ -464,3 +464,29 @@ repo visibility can change and history outlives the assumption.
 **Submodules:** the superrepo commit records a pointer; the content commit happens inside the
 submodule. The gate applies at **both** levels, and the submodule is where the secret would actually
 land.
+
+---
+
+## 10. Factual provenance: docs state what is known, never what is plausible
+
+The most expensive documentation failure here is not a misplaced file — it is an agent filling a
+vacuum with a plausible-sounding value: a port assignment, a channel map, a parameter, a part
+number. The doc then asserts it with the same confidence as everything around it, and a later
+session — possibly mid-build, hands on hardware — acts on it as fact. It has happened more than
+once (`drones/docs/issues/2026_09_17_agent_invented_hardware_specs.md`).
+
+The rule:
+
+- **Every specific claim in a doc is verified, planned, or unknown — and says which.** Verified
+  means observed on the hardware, read from a config dump, or stated by the user. Planned means
+  decided but not yet confirmed on the real thing. Unknown means write `⚠ unverified` or `TBD` —
+  never fill the gap from a "typical" setup. An explicitly empty cell is useful information; an
+  invented value is a landmine for a future session.
+- **Tables that drive action carry a status column.** The `✅ verified / ⬜ planned` pattern from
+  the drone build docs is the reference (`drones/docs/topics/hardware-docs.md`). The invariant it
+  exists to enforce: *do not configure against a ⬜ row without eyes on the hardware first.*
+- **Agents do not upgrade a claim's status.** Only a measurement, a config dump, or the user can
+  move a claim from planned/unverified to verified. Editing the surrounding text is not evidence.
+- **When correcting an invented value, say so in the commit message.** History is how the next
+  session learns the current text was fought for, not drafted — "kill the last three
+  ELRS-on-GPS2 claims" carries that signal; "update README" does not.

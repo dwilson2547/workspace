@@ -42,6 +42,10 @@ The essentials (full detail in `CONVENTIONS.md`):
   planning to fix it in the next commit (§9).
 - **Helm/Argo** — self-deploying project → `<project>/helm/<project>/`; shared/cluster-wide →
   `infra/cluster-config/` (§6).
+- **Provenance** — every specific claim in a doc is *verified*, *planned*, or marked
+  `⚠ unverified` (§10). Never fill an unknown with a plausible value from a "typical" setup, and
+  never upgrade a claim's status without a measurement, a config dump, or the user's word. Do not
+  configure against planned/⬜ rows without eyes on the hardware.
 
 - **First run on a machine** — two things live in `.git/config` and `~/`, so they cannot be
   committed and may be missing on a fresh clone. Check, and install if absent:
