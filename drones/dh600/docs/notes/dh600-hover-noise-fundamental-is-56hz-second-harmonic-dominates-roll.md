@@ -40,3 +40,11 @@ and 0.07 Hz mean error, which is the signature of correct throttle scaling. Roll
 Window trap: the log ends in PosHold on the ground, so a window to end-of-log includes the landing
 and lands D-term RMS at zero for those seconds. Gate the window on Alt > 1 m and ThO > 0.05
 before comparing; the −73 % held either way but the peaks did not.
+
+## Pitch autotune with the notch active (2026-09-18 19:15, from the GCS message stream)
+
+    AutoTune: Pitch Angle P:7.155, Max Accel:57731
+    AutoTune: Pitch Rate: P:0.097, I:0.097, D:0.0044
+
+Whole axis in 2–3 minutes against roughly ten per axis on the X500 and on the DH600 roll tune
+two days earlier, both flown without a notch. Log not yet analysed; values as printed. Yaw next.
