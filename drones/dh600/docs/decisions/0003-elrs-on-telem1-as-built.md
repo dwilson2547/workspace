@@ -1,10 +1,17 @@
-# 0003 — ELRS CRSF on TELEM1; HM30 and gimbal FC ports left open
+---
+kind: decision
+status: accepted
+date: 2026-09-17T13:26:08-04:00
+supersedes: 0002
+satisfies: [0004]
+source: f78e308
+---
 
-**Status:** accepted · **Date:** 2026-09-17 · verified against `dh600.param` and the bench
+# 0003 — ELRS CRSF on TELEM1; HM30 and gimbal FC ports left open
 
 ## Context
 
-The aircraft was wired with the RP3 on TELEM1, not the GPS2 of
+Verified against `dh600.param` and the bench on 2026-09-17. The aircraft was wired with the RP3 on TELEM1, not the GPS2 of
 [0002](0002-elrs-direct-crsf-on-gps2.md). Commit `f78e308` corrected the README to as-built. This
 records the decision that correction implies.
 

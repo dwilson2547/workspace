@@ -1,0 +1,512 @@
+#!/usr/bin/env python3
+"""scope-creep — a project's requirements, constraints, decisions and outcomes as a
+timeline tree, read straight from `docs/decisions/*.md` files.
+
+The files are the graph. This tool parses them, derives the edges and the dead
+branches, adds git history, and serves a zoomable view. Nothing is stored
+anywhere else. Schema: docs/node-schema.md.
+
+Usage:
+  scope-creep scan  [ROOT]                      list every node found under ROOT
+  scope-creep graph [ROOT] [--project P] [--no-git]   the graph as JSON
+  scope-creep new   PROJECT_DIR KIND "TITLE" [--satisfies ID ...] [--supersedes ID]
+                    [--depends-on ID ...] [--resolves ID] [--source S] [--status S]
+  scope-creep serve [ROOT] [--port N]           HTTP API + the built UI (ui/dist)
+
+ROOT defaults to the nearest ancestor holding CONVENTIONS.md, else the cwd.
+"""
+import argparse
+import datetime
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+
+HERE = os.path.dirname(os.path.realpath(__file__))
+KINDS = ("requirement", "constraint", "decision", "outcome")
+DEAD = {"rejected", "superseded", "abandoned"}
+TERMINAL = {"accepted", "done", "satisfied", "verified"}
+DEFAULT_STATUS = {"requirement": "open", "constraint": "open", "decision": "proposed", "outcome": "verified"}
+LIST_FIELDS = ("satisfies", "depends_on")
+REF_FIELDS = ("supersedes", "superseded_by", "resolves")
+NUM_RE = re.compile(r"^(\d{4})[-_]")
+FM_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.S)
+HDR_STATUS_RE = re.compile(r"\*\*Status:\*\*\s*([^·\n]+)")
+HDR_DATE_RE = re.compile(r"\*\*Date:\*\*\s*(\d{4}-\d{2}-\d{2}[^\s·]*)")
+SUP_BY_RE = re.compile(r"superseded\s+by\s+(\d{4})", re.I)
+
+
+# ----------------------------------------------------------------------------
+# parsing
+# ----------------------------------------------------------------------------
+def find_root(start=None):
+    d = os.path.realpath(start or os.getcwd())
+    while True:
+        if os.path.isfile(os.path.join(d, "CONVENTIONS.md")):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            return os.path.realpath(start or os.getcwd())
+        d = parent
+
+
+def parse_frontmatter(text):
+    """Tiny YAML subset: `key: value`, `key: [a, b]`, `key:` + `- item` lines.
+    Enough for the schema; no nesting, no quotes needed."""
+    m = FM_RE.match(text)
+    if not m:
+        return {}, text
+    fm, body = {}, text[m.end():]
+    key = None
+    for line in m.group(1).splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line.startswith((" ", "\t")) and line.strip().startswith("- ") and key:
+            fm.setdefault(key, [])
+            if not isinstance(fm[key], list):
+                fm[key] = [fm[key]] if fm[key] else []
+            fm[key].append(line.strip()[2:].strip().strip("'\""))
+            continue
+        if ":" not in line:
+            continue
+        key, _, val = line.partition(":")
+        key, val = key.strip(), val.strip()
+        if val.startswith("[") and val.endswith("]"):
+            fm[key] = [v.strip().strip("'\"") for v in val[1:-1].split(",") if v.strip()]
+        else:
+            fm[key] = val.strip("'\"")
+    return fm, body
+
+
+def norm_ref(ref, project):
+    """`0002` → `<project>#0002`; `meta/x#0002` stays. Refs are strings."""
+    ref = str(ref).strip()
+    if not ref:
+        return None
+    if "#" in ref:
+        return ref
+    return f"{project}#{ref.zfill(4)}"
+
+
+def parse_node(path, root):
+    with open(path, encoding="utf-8", errors="replace") as f:
+        text = f.read()
+    fm, body = parse_frontmatter(text)
+    rel = os.path.relpath(path, root)
+    project = os.path.relpath(os.path.dirname(os.path.dirname(os.path.dirname(path))), root)
+    if project == ".":
+        project = os.path.basename(root)
+    fname = os.path.basename(path)
+    m = NUM_RE.match(fname)
+    num = fm.get("id") or (m.group(1) if m else os.path.splitext(fname)[0])
+    node_id = f"{project}#{str(num).zfill(4)}"
+
+    title = None
+    for line in body.splitlines():
+        if line.startswith("# "):
+            title = re.sub(r"^\d{4}\s*[—–-]\s*", "", line[2:].strip())
+            break
+    title = title or os.path.splitext(fname)[0]
+
+    kind = (fm.get("kind") or "decision").lower()
+    if kind not in KINDS:
+        kind = "decision"
+    status = (fm.get("status") or "").lower()
+    date = fm.get("date")
+    legacy = not fm
+    if not status:
+        hm = HDR_STATUS_RE.search(body[:800])
+        status = hm.group(1).strip().lower() if hm else DEFAULT_STATUS[kind]
+    if not date:
+        dm = HDR_DATE_RE.search(body[:800])
+        date = dm.group(1) if dm else None
+    superseded_by = fm.get("superseded_by")
+    sb = SUP_BY_RE.search(status)
+    if sb:
+        superseded_by = superseded_by or sb.group(1)
+        status = "superseded"
+    node = {
+        "id": node_id,
+        "project": project,
+        "num": str(num).zfill(4),
+        "path": rel,
+        "title": title,
+        "kind": kind,
+        "status": status,
+        "date": date,
+        "source": fm.get("source"),
+        "supersedes": norm_ref(fm.get("supersedes"), project) if fm.get("supersedes") else None,
+        "superseded_by": norm_ref(superseded_by, project) if superseded_by else None,
+        "resolves": norm_ref(fm.get("resolves"), project) if fm.get("resolves") else None,
+        "satisfies": [norm_ref(r, project) for r in _as_list(fm.get("satisfies"))],
+        "depends_on": [norm_ref(r, project) for r in _as_list(fm.get("depends_on"))],
+        "legacy_header": legacy,
+        "body": body,
+    }
+    return node
+
+
+def _as_list(v):
+    if v is None or v == "":
+        return []
+    return v if isinstance(v, list) else [v]
+
+
+SKIP_DIRS = {".git", "node_modules", "archive", ".venv", "venv", "__pycache__", "dist"}
+
+
+def walk_nodes(root, project_filter=None):
+    nodes = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS and not d.startswith(".")]
+        if os.path.basename(dirpath) == "decisions" and os.path.basename(os.path.dirname(dirpath)) == "docs":
+            for fn in sorted(filenames):
+                if fn.lower().endswith(".md") and fn.lower() != "readme.md":
+                    n = parse_node(os.path.join(dirpath, fn), root)
+                    if project_filter and not n["project"].startswith(project_filter.rstrip("/")):
+                        continue
+                    nodes.append(n)
+    return nodes
+
+
+# ----------------------------------------------------------------------------
+# derivation
+# ----------------------------------------------------------------------------
+def derive(nodes):
+    by_id = {n["id"]: n for n in nodes}
+    # supersedes ⇄ superseded_by: either side may be the one recorded
+    for n in nodes:
+        if n["supersedes"] and n["supersedes"] in by_id:
+            old = by_id[n["supersedes"]]
+            old["superseded_by"] = old["superseded_by"] or n["id"]
+            if old["status"] not in DEAD:
+                old["status"] = "superseded"
+                old["status_derived"] = True
+        if n["superseded_by"] and n["superseded_by"] in by_id:
+            new = by_id[n["superseded_by"]]
+            new["supersedes"] = new["supersedes"] or n["id"]
+    # edges
+    edges = []
+    for n in nodes:
+        for r in n["satisfies"]:
+            edges.append({"from": n["id"], "to": r, "type": "satisfies"})
+        for r in n["depends_on"]:
+            edges.append({"from": n["id"], "to": r, "type": "depends_on"})
+        if n["supersedes"]:
+            edges.append({"from": n["id"], "to": n["supersedes"], "type": "supersedes"})
+        if n["resolves"]:
+            edges.append({"from": n["id"], "to": n["resolves"], "type": "resolves"})
+    # parent for the tree: first satisfies/resolves/depends_on target that exists
+    for n in nodes:
+        parent = None
+        for cand in ([n["resolves"]] if n["resolves"] else []) + n["satisfies"] + n["depends_on"]:
+            if cand in by_id:
+                parent = cand
+                break
+        n["parent"] = parent
+    # dead: own status, or every dependency dead (a branch extinguished upstream)
+    changed = True
+    for n in nodes:
+        n["dead"] = n["status"] in DEAD
+    while changed:
+        changed = False
+        for n in nodes:
+            if n["dead"]:
+                continue
+            deps = [by_id[d] for d in n["depends_on"] if d in by_id]
+            if deps and all(d["dead"] for d in deps):
+                n["dead"], n["dead_reason"], changed = True, f"depends on dead {', '.join(d['id'] for d in deps)}", True
+    # requirement/constraint rollup: satisfied if any live outcome resolves it or a live decision
+    # with terminal status satisfies it; the closing node gets recorded.
+    for n in nodes:
+        if n["kind"] in ("requirement", "constraint"):
+            closers = [
+                m for m in nodes
+                if not m["dead"] and (
+                    (m["resolves"] == n["id"] and m["kind"] == "outcome")
+                    or (n["id"] in m["satisfies"] and m["status"] in TERMINAL)
+                )
+            ]
+            n["closed_by"] = [m["id"] for m in closers]
+            live = [m for m in nodes if n["id"] in m["satisfies"] or m["resolves"] == n["id"]]
+            n["rollup"] = {
+                "total": len(live),
+                "dead": sum(1 for m in live if m["dead"]),
+                "live": sum(1 for m in live if not m["dead"]),
+            }
+    # dangling refs
+    known = set(by_id)
+    for e in edges:
+        e["dangling"] = e["to"] not in known
+    return nodes, edges
+
+
+# ----------------------------------------------------------------------------
+# git history (best effort; never required)
+# ----------------------------------------------------------------------------
+def _git(args, cwd):
+    try:
+        return subprocess.run(
+            ["git", *args], cwd=cwd, capture_output=True, text=True, check=False, timeout=20
+        ).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+
+
+def add_git_history(nodes, root):
+    for n in nodes:
+        abspath = os.path.join(root, n["path"])
+        cwd = os.path.dirname(abspath)
+        top = _git(["rev-parse", "--show-toplevel"], cwd).strip()
+        if not top:
+            n["history"] = []
+            continue
+        rel = os.path.relpath(abspath, top)
+        cwd = top  # pathspecs resolve against the cwd, not the toplevel
+        log = _git(["log", "--format=%H%x09%aI%x09%s", "--reverse", "--", rel], cwd)
+        history, last_status = [], None
+        for line in log.splitlines():
+            sha, when, subj = (line.split("\t", 2) + ["", ""])[:3]
+            shown = _git(["show", f"{sha}:{rel}"], cwd)
+            fm, body = parse_frontmatter(shown)
+            st = (fm.get("status") or "").lower()
+            if not st:
+                hm = HDR_STATUS_RE.search(body[:800])
+                st = hm.group(1).strip().lower() if hm else "?"
+            if SUP_BY_RE.search(st):
+                st = "superseded"
+            if st != last_status:
+                history.append({"commit": sha[:7], "date": when, "status": st, "subject": subj})
+                last_status = st
+        n["history"] = history
+        if not n["date"] and history:
+            n["date"] = history[0]["date"]
+            n["date_derived"] = "git"
+    return nodes
+
+
+def build_graph(root, project=None, with_git=True):
+    nodes = walk_nodes(root, project)
+    nodes, edges = derive(nodes)
+    if with_git:
+        add_git_history(nodes, root)
+    for n in nodes:
+        body = re.sub(r"^#\s.*$", "", n["body"], count=1, flags=re.M)
+        body = re.sub(r"^##\s.*$", "", body, flags=re.M)
+        n["excerpt"] = " ".join(body.split())[:200]
+    projects = sorted({n["project"] for n in nodes})
+    return {"root": root, "generated": _now_iso(), "projects": projects, "nodes": nodes, "edges": edges}
+
+
+def _now_iso():
+    return datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
+
+
+# ----------------------------------------------------------------------------
+# commands
+# ----------------------------------------------------------------------------
+def cmd_scan(args):
+    root = find_root(args.root)
+    nodes, _ = derive(walk_nodes(root, args.project))
+    if not nodes:
+        sys.exit(f"no docs/decisions/*.md under {root}")
+    w = max(len(n["id"]) for n in nodes)
+    for n in nodes:
+        flag = " †" if n["dead"] else ""
+        legacy = "  (header-only, no frontmatter)" if n["legacy_header"] else ""
+        print(f"{n['id']:<{w}}  {n['kind']:<11} {n['status']:<11} {n['date'] or '-':<25} {n['title']}{flag}{legacy}")
+
+
+def cmd_graph(args):
+    root = find_root(args.root)
+    g = build_graph(root, args.project, with_git=not args.no_git)
+    if not args.bodies:
+        for n in g["nodes"]:
+            n.pop("body", None)
+    json.dump(g, sys.stdout, indent=None if args.compact else 2, ensure_ascii=False)
+    print()
+
+
+def next_number(ddir):
+    nums = [int(m.group(1)) for fn in os.listdir(ddir) for m in [NUM_RE.match(fn)] if m]
+    return max(nums, default=0) + 1
+
+
+def slugify(title):
+    s = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    return s[:60] or "node"
+
+
+def cmd_new(args):
+    kind = args.kind.lower()
+    if kind not in KINDS:
+        sys.exit(f"kind must be one of {', '.join(KINDS)}")
+    pdir = os.path.realpath(args.project_dir)
+    ddir = os.path.join(pdir, "docs", "decisions")
+    os.makedirs(ddir, exist_ok=True)
+    num = f"{next_number(ddir):04d}"
+    path = os.path.join(ddir, f"{num}-{slugify(args.title)}.md")
+    status = args.status or DEFAULT_STATUS[kind]
+    lines = ["---", f"kind: {kind}", f"status: {status}", f"date: {_now_iso()}"]
+    if args.supersedes:
+        lines.append(f"supersedes: {args.supersedes.zfill(4)}")
+    if args.satisfies:
+        lines.append("satisfies: [" + ", ".join(s.zfill(4) if s.isdigit() else s for s in args.satisfies) + "]")
+    if args.depends_on:
+        lines.append("depends_on: [" + ", ".join(s.zfill(4) if s.isdigit() else s for s in args.depends_on) + "]")
+    if args.resolves:
+        lines.append(f"resolves: {args.resolves.zfill(4)}")
+    if args.source:
+        lines.append(f"source: {args.source}")
+    lines.append("---")
+    sections = {
+        "requirement": ["## What", "", "", "## Why", "", "", "## Done when", "", ""],
+        "constraint": ["## What", "", "", "## Why", "", "", "## Satisfied when", "", ""],
+        "decision": ["## Context", "", "", "## Options", "", "- ", "", "## Decision", "", "", "## Consequences", "", ""],
+        "outcome": ["## Measurement", "", "", "## Result", "", ""],
+    }[kind]
+    text = "\n".join(lines) + f"\n\n# {num} — {args.title}\n\n" + "\n".join(sections) + "\n"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    print(path)
+    if args.supersedes:
+        old = [fn for fn in os.listdir(ddir) if fn.startswith(args.supersedes.zfill(4))]
+        if old:
+            flip_superseded(os.path.join(ddir, old[0]), num)
+            print(f"{os.path.join(ddir, old[0])}: status → superseded, superseded_by: {num}")
+        else:
+            print(f"warning: {args.supersedes} not found in {ddir}; old entry not flipped", file=sys.stderr)
+
+
+def flip_superseded(path, by_num):
+    """The one edit an old entry ever receives: its status and who replaced it."""
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    fm, body = parse_frontmatter(text)
+    if fm:
+        head = FM_RE.match(text).group(1)
+        head = re.sub(r"^status:.*$", "status: superseded", head, flags=re.M)
+        if "superseded_by:" not in head:
+            head += f"\nsuperseded_by: {by_num}"
+        text = f"---\n{head}\n---\n{body}"
+    else:
+        text = HDR_STATUS_RE.sub(f"**Status:** superseded by {by_num}", text, count=1)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
+def cmd_serve(args):
+    from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+    from urllib.parse import parse_qs, urlparse
+
+    root = find_root(args.root)
+    dist = os.path.join(HERE, "ui", "dist")
+    if not os.path.isfile(os.path.join(dist, "index.html")):
+        print(f"ui not built: run  (cd {os.path.join(HERE, 'ui')} && npm install && npm run build)", file=sys.stderr)
+        print("API still served.", file=sys.stderr)
+
+    class H(SimpleHTTPRequestHandler):
+        def __init__(self, *a, **kw):
+            super().__init__(*a, directory=dist, **kw)
+
+        def log_message(self, fmt, *a):
+            if args.verbose:
+                super().log_message(fmt, *a)
+
+        def _json(self, obj, code=200):
+            data = json.dumps(obj, ensure_ascii=False).encode()
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+        def do_GET(self):
+            u = urlparse(self.path)
+            q = parse_qs(u.query)
+            if u.path == "/api/graph":
+                g = build_graph(root, q.get("project", [None])[0], with_git=q.get("git", ["1"])[0] != "0")
+                for n in g["nodes"]:
+                    n.pop("body", None)
+                return self._json(g)
+            if u.path == "/api/node":
+                nid = q.get("id", [""])[0]
+                for n in walk_nodes(root):
+                    if n["id"] == nid:
+                        return self._json(n)
+                return self._json({"error": "not found"}, 404)
+            if u.path == "/api/search":
+                return self._json(search(root, q.get("q", [""])[0], q.get("project", [None])[0]))
+            if u.path.startswith("/api/"):
+                return self._json({"error": "unknown"}, 404)
+            if not os.path.isfile(os.path.join(dist, u.path.lstrip("/") or "index.html")):
+                self.path = "/index.html"
+            return super().do_GET()
+
+    srv = ThreadingHTTPServer(("127.0.0.1", args.port), H)
+    print(f"scope-creep: http://127.0.0.1:{args.port}/  root={root}")
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+
+def search(root, query, project=None):
+    """Semantic via doc-indexer if present (its index, its embeddings); literal fallback.
+    Returns node ids with a score, in rank order."""
+    query = query.strip()
+    if not query:
+        return {"mode": "none", "hits": []}
+    nodes, _ = derive(walk_nodes(root, project))
+    by_path = {os.path.realpath(os.path.join(root, n["path"])): n for n in nodes}
+    di = shutil.which("doc-indexer")
+    if di:
+        cmd = [di, "search", query, "-n", "40", "--include-superseded", "--dir", root]
+        try:
+            out = subprocess.run(cmd, capture_output=True, text=True, timeout=60).stdout
+        except (OSError, subprocess.TimeoutExpired):
+            out = ""
+        hits, seen = [], set()
+        for line in out.splitlines():
+            m = re.match(r"^(\d\.\d+)\s+(?:\[[^\]]*\]\s+)?(/\S+?):(\d+)-(\d+)", line)
+            if not m:
+                continue
+            p = os.path.realpath(m.group(2))
+            n = by_path.get(p)
+            if n and n["id"] not in seen:
+                seen.add(n["id"])
+                hits.append({"id": n["id"], "score": float(m.group(1)), "lines": [int(m.group(3)), int(m.group(4))]})
+        if hits or out:
+            return {"mode": "semantic", "hits": hits}
+    ql = query.lower()
+    hits = []
+    for n in nodes:
+        hay = (n["title"] + "\n" + n["body"]).lower()
+        c = hay.count(ql)
+        if c:
+            hits.append({"id": n["id"], "score": min(1.0, 0.3 + 0.1 * c)})
+    hits.sort(key=lambda h: -h["score"])
+    return {"mode": "literal", "hits": hits}
+
+
+def main():
+    p = argparse.ArgumentParser(prog="scope-creep", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("scan"); s.add_argument("root", nargs="?"); s.add_argument("--project"); s.set_defaults(fn=cmd_scan)
+    g = sub.add_parser("graph"); g.add_argument("root", nargs="?"); g.add_argument("--project")
+    g.add_argument("--no-git", action="store_true"); g.add_argument("--bodies", action="store_true")
+    g.add_argument("--compact", action="store_true"); g.set_defaults(fn=cmd_graph)
+    n = sub.add_parser("new"); n.add_argument("project_dir"); n.add_argument("kind"); n.add_argument("title")
+    n.add_argument("--satisfies", nargs="*", default=[]); n.add_argument("--depends-on", nargs="*", default=[])
+    n.add_argument("--supersedes"); n.add_argument("--resolves"); n.add_argument("--source"); n.add_argument("--status")
+    n.set_defaults(fn=cmd_new)
+    v = sub.add_parser("serve"); v.add_argument("root", nargs="?"); v.add_argument("--port", type=int, default=8765)
+    v.add_argument("--verbose", action="store_true"); v.set_defaults(fn=cmd_serve)
+    args = p.parse_args()
+    args.fn(args)
+
+
+if __name__ == "__main__":
+    main()

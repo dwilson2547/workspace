@@ -179,7 +179,8 @@ docs/                  ← workspace scope: true of the workspace itself or the 
 
 <project>/docs/        ← project scope: specific to one project
   issues/              ← YYYY_MM_DD_<slug>.md   (issue-documentation skill writes here)
-  decisions/           ← architectural decisions, why-not records
+  decisions/           ← decisions, requirements, constraints, outcomes: one node per file,
+                          frontmatter per meta/scope-creep/docs/node-schema.md
   patterns/  notes/
 ```
 

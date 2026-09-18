@@ -26,10 +26,11 @@ reference example. Claims outside tables get inline markers: `⚠ unverified` fo
 checked, `(planned)` for decisions not yet executed.
 
 A choice between hardware options is a `docs/decisions/NNNN-<slug>.md` entry in the craft's folder
-(`CONVENTIONS.md` §5), with a `**Status:** accepted | superseded by NNNN` header line. A changed
-plan is a new entry that supersedes the old one; the old entry is never edited. `doc-indexer
-search` drops superseded entries by default and tags the rest. Example chain:
-`drones/dh600/docs/decisions/`.
+(`CONVENTIONS.md` §5) with the frontmatter in `meta/scope-creep/docs/node-schema.md` (`kind`,
+`status`, `date` with time, `supersedes`, `satisfies`). A changed plan is a new entry that
+supersedes the old one; the old entry gets `status: superseded` and nothing else. `doc-indexer
+search` drops superseded entries by default and tags the rest; `scope-creep serve` draws the
+tree. Example chain: `drones/dh600/docs/decisions/`.
 
 Only three things move a claim to ✅: a measurement, a config dump, or the user saying so. Editing
 the surrounding prose is not evidence.

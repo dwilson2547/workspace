@@ -1,11 +1,17 @@
-# 0001 — RC relayed through the HM30 (RP3 at the ground station)
+---
+kind: decision
+status: superseded
+date: 2026-07-26T18:50:56-04:00
+superseded_by: 0002
+satisfies: [0004]
+source: b049983
+---
 
-**Status:** superseded by 0002 · **Date:** 2026-07-26 · recorded retroactively 2026-09-17 from
-commit `b049983`
+# 0001 — RC relayed through the HM30 (RP3 at the ground station)
 
 ## Context
 
-The SIYI HM30 air unit outputs 16 ch S.Bus, and SIYI's compatibility note says any receiver that
+Recorded retroactively on 2026-09-17 from commit `b049983`. The SIYI HM30 air unit outputs 16 ch S.Bus, and SIYI's compatibility note says any receiver that
 outputs S.Bus works into the ground unit. The build had one RC input to fill and a gimbal to
 control.
 

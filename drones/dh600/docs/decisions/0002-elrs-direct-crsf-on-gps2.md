@@ -1,11 +1,18 @@
-# 0002 — ELRS direct on the aircraft, CRSF into GPS2
+---
+kind: decision
+status: superseded
+date: 2026-07-26T20:14:21-04:00
+supersedes: 0001
+superseded_by: 0003
+satisfies: [0004]
+source: bd5ef70
+---
 
-**Status:** superseded by 0003 · **Date:** 2026-07-26 · recorded retroactively 2026-09-17 from
-commit `bd5ef70`
+# 0002 — ELRS direct on the aircraft, CRSF into GPS2
 
 ## Context
 
-[0001](0001-rc-relay-through-hm30.md) tied control range to the video link. Putting the RP3 on the
+Recorded retroactively on 2026-09-17 from commit `bd5ef70`. [0001](0001-rc-relay-through-hm30.md) tied control range to the video link. Putting the RP3 on the
 aircraft decouples them. The question became which FC port takes it.
 
 ## Options

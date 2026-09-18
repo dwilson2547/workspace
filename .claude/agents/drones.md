@@ -37,9 +37,11 @@ Full table and open exceptions: `drones/docs/topics/ardupilot-build-standard.md`
 - Conclusions Daniel brings back from a web discussion are recorded as a dated plan entry, not
   as as-built.
 - Build-log entries are history: annotate them as superseded, never rewrite them.
-- A choice between options is a `docs/decisions/NNNN-<slug>.md` entry in the craft's folder, with
-  a `**Status:**` header. A changed plan is a new entry marked `superseded by`; never edit the old
-  one. The README cites the entry number where it states the outcome.
+- A choice between options is a `docs/decisions/NNNN-<slug>.md` entry in the craft's folder
+  (`scope-creep new <craft-dir> decision "<title>" --satisfies NNNN`, schema in
+  `meta/scope-creep/docs/node-schema.md`). A changed plan is a new entry with `--supersedes`;
+  the old one's body is never edited. The README cites the entry number where it states the
+  outcome.
 - When you correct an invented or stale value, say so in the commit message.
 
 ## On live hardware

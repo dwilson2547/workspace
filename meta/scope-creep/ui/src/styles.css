@@ -1,0 +1,70 @@
+:root {
+  --bg: #0b0f14;
+  --bg2: #111821;
+  --panel: #141c26;
+  --line: #24303d;
+  --text: #d7dde5;
+  --muted: #7f8b99;
+  --accepted: #4ade80;
+  --done: #60a5fa;
+  --open: #9aa5b1;
+  --rejected: #f87171;
+  --superseded: #b45252;
+  --hit: #fbbf24;
+  --requirement: #c084fc;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font: 13px/1.4 -apple-system, "Segoe UI", Inter, Roboto, sans-serif; }
+.app { display: grid; grid-template-rows: 48px 1fr; grid-template-columns: 1fr 380px; height: 100%; }
+.app.nopanel { grid-template-columns: 1fr; }
+.toolbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 0 14px;
+  border-bottom: 1px solid var(--line); background: var(--bg2); }
+.toolbar h1 { font-size: 15px; margin: 0 8px 0 0; font-weight: 600; letter-spacing: 0.02em; }
+.toolbar input, .toolbar select { background: var(--panel); border: 1px solid var(--line); color: var(--text);
+  padding: 6px 10px; border-radius: 6px; font: inherit; }
+.toolbar input { width: 320px; }
+.chips { display: flex; gap: 4px; }
+.chip { border: 1px solid var(--line); background: transparent; color: var(--muted); padding: 4px 10px;
+  border-radius: 999px; cursor: pointer; font: inherit; }
+.chip.on { background: var(--panel); color: var(--text); border-color: var(--muted); }
+.mode { color: var(--muted); font-size: 12px; }
+.legend { margin-left: auto; display: flex; gap: 12px; color: var(--muted); font-size: 12px; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.stage { position: relative; overflow: hidden; }
+.stage svg { width: 100%; height: 100%; display: block; cursor: grab; }
+.stage svg:active { cursor: grabbing; }
+.hint { position: absolute; left: 12px; bottom: 10px; color: var(--muted); font-size: 12px; pointer-events: none; }
+.node { cursor: pointer; }
+.node text { fill: var(--text); font-size: 12px; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; }
+.node .kind { fill: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; }
+.node .excerpt { fill: var(--muted); font-size: 10px; }
+.node.dead { opacity: 0.35; filter: saturate(0.2); }
+.node.dim { opacity: 0.12; }
+.node.selected .glyph { stroke: #fff; stroke-width: 2.5px; }
+.node.hit .glyph { stroke: var(--hit); stroke-width: 2.5px; filter: drop-shadow(0 0 6px var(--hit)); }
+.link { fill: none; stroke: var(--line); stroke-width: 1.5px; }
+.link.dead { opacity: 0.3; }
+.link.dim { opacity: 0.1; }
+.link.supersedes { stroke: #f59e0b; stroke-dasharray: 5 4; opacity: 0.8; }
+.axis text { fill: var(--muted); font-size: 11px; }
+.axis line, .axis path { stroke: var(--line); }
+.project-label { fill: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; }
+.rollup { fill: var(--text); font-size: 11px; }
+.panel { border-left: 1px solid var(--line); background: var(--panel); overflow: auto; padding: 16px 18px; }
+.panel h2 { font-size: 16px; margin: 0 0 6px; }
+.panel .meta { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+.panel .meta b { color: var(--text); font-weight: 500; }
+.panel .close { float: right; background: none; border: 0; color: var(--muted); font-size: 18px; cursor: pointer; }
+.panel .body { border-top: 1px solid var(--line); padding-top: 10px; }
+.panel .body h1 { display: none; }
+.panel .body h2 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 0 6px; }
+.panel .body p, .panel .body li { font-size: 13px; }
+.panel .body code { background: var(--bg2); padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+.panel .body table { border-collapse: collapse; font-size: 12px; }
+.panel .body td, .panel .body th { border: 1px solid var(--line); padding: 3px 6px; }
+.panel .body a { color: var(--done); }
+.panel .links a, .panel .hist li { cursor: pointer; color: var(--done); }
+.panel ul { padding-left: 18px; margin: 4px 0; }
+.status { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; color: #000; font-weight: 600; }
+.empty { padding: 40px; color: var(--muted); }
