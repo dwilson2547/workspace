@@ -18,7 +18,7 @@ code) — everything here is Markdown for tracking hardware, specs, spares, and 
 | **BetaFPV Pavo Femto** | 75mm micro cinewhoop (BNF) | flying | DJI O4 HD, ELRS | [`pavo-femto/`](pavo-femto/README.md) | [parts](pavo-femto/inventory.md) |
 | **Holybro X500 V2** | 500mm PX4/ArduPilot development quad | bench config done, not flown | GPS autonomy (Pixhawk 6C / M10); **VLP-16 lidar payload** | [`x500/`](x500/README.md) | [parts](x500/inventory.md) |
 | **CineLog 3.5 ToF** | 3.5" ducted indoor autonomy | **wired except the ESP32** | ToF ring + optical flow + **ESP32-S3** companion; **HDZero**, ELRS | [`cinelog35-tof/`](cinelog35-tof/README.md) | [parts](cinelog35-tof/inventory.md) |
-| **DH600** | 600mm folding long-endurance cinematic platform | **all parts on hand; blocked on a custom top plate** | SIYI HM30 HD link + A8 mini gimbal (Pixhawk 6C / PM07) | [`dh600/`](dh600/README.md) | [parts](dh600/inventory.md) |
+| **DH600** | 600mm folding long-endurance cinematic platform | **flying; in tuning (2026-09-17)** — A8 mini held off until tuned | SIYI HM30 HD link + A8 mini gimbal (Pixhawk 6C / PM07) | [`dh600/`](dh600/README.md) | [parts](dh600/inventory.md) |
 | **"Angel30"** | 3" 4S freestyle (Angel30 frame, 149 mm) | **flying** | **HDZero** Freestyle V2 + Nano90 cam (cam being replaced); ELRS | [`freestyle-3in/`](freestyle-3in/README.md) | [parts](freestyle-3in/inventory.md) |
 | **V2 Carnage 4.5"** | 4.5" light class (Sub250gFPV design) | frame + FC ordered | **HDZero** — Gamma AIO (ELRS built in) + spare 14 mm cam; VTX to buy | [`carnage-45/`](carnage-45/README.md) | [parts](carnage-45/inventory.md) |
 | **Reliant V2 (F121)** | 4" **Y6**, long range (6 motors, 3 arms) | **built** — ⛔ awaiting a replacement VTX | **HDZero** Whoop V2 + Nano V3; ELRS | [`f121-reliant-v2/`](f121-reliant-v2/README.md) | [parts](f121-reliant-v2/inventory.md) |
@@ -124,5 +124,11 @@ not one big shared pool.
   **binding phrase**
 - [`docs/topics/mission-planner-linux.md`](docs/topics/mission-planner-linux.md) — **Mission Planner
   ground station** install/setup on Ubuntu (Mono, XWayland launcher, serial access, SITL)
+- [`docs/topics/hardware-docs.md`](docs/topics/hardware-docs.md) — **verified ✅ / planned ⬜ status
+  convention** for any wiring/channel/config table an agent might configure from; required reading
+  before editing a craft's build docs
+- [`docs/topics/ardupilot-build-standard.md`](docs/topics/ardupilot-build-standard.md) — **shared
+  ArduPilot radio/channel setup** (modes on RC6, arm on RC5, inverted pitch) — copy this table,
+  never re-derive or assume ArduPilot defaults
 - Domain-wide notes: [`docs/notes/`](docs/notes/README.md) (atomic facts via `meta/bin/wsnote`)
 - Long-form guides: [`docs/topics/`](docs/topics/)
