@@ -169,7 +169,9 @@ This interacts with two existing decisions:
 
 ## RC architecture
 
-**ELRS direct to the aircraft. The HM30 carries video and telemetry only.**
+**ELRS direct to the aircraft. The HM30 carries video and telemetry only.** Decided in
+[`docs/decisions/0002`](docs/decisions/0002-elrs-direct-crsf-on-gps2.md); the port it landed on
+is [`0003`](docs/decisions/0003-elrs-on-telem1-as-built.md).
 
 ```text
 TX16S ──ELRS 2.4GHz──> RP3 (on aircraft) ──CRSF──> Pixhawk 6C TELEM1 ✅
@@ -659,7 +661,8 @@ extreme.
 **Three UARTs wired, two spare.** The full-size 6C gives 5 usable UARTs
 (TELEM1/2/3 + GPS1/2) plus a dedicated RC input and a dedicated S.Bus output. TELEM1, TELEM2 and
 GPS1 are wired; TELEM3 and GPS2 are free. If HM30 telemetry and the gimbal both go on the FC they
-take both, leaving only RC IN.
+take both, leaving only RC IN. Decision record with the rejected and open items:
+[`docs/decisions/0003`](docs/decisions/0003-elrs-on-telem1-as-built.md).
 
 `SERIALx` indices are derived from the ArduPilot `Pixhawk6C/hwdef.dat` `SERIAL_ORDER`
 (`OTG1 UART7 UART5 USART1 UART8 USART2 USART3 OTG2`) — **not** from the port silkscreen, which does
@@ -892,7 +895,8 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
   the **S.Bus Y cable is dropped**. RP3 moves to GPS2 as CRSF; RC IN now unused.
   > ⚠ **Superseded 2026-09-17.** The RP3 was wired to **TELEM1**, not GPS2. This entry records
   > the decision as made on 2026-07-26 and is kept for history — it is not current fact. See the
-  > [serial port wiring](#serial-port-wiring-pixhawk-6c-full-size) table.
+  > [serial port wiring](#serial-port-wiring-pixhawk-6c-full-size) table and
+  > [`docs/decisions/0002`](docs/decisions/0002-elrs-direct-crsf-on-gps2.md) → `0003`.
 - **2026-07-26** — Checked the range budget after asking whether the control link would out-range the
   camera. It's the other way round and that's the safe ordering: 2.4 GHz sees ~7.7 dB less path loss
   than 5.8 GHz, and the HM30's 1080p60 bitrate needs far more SNR than RC does, so **video fails first

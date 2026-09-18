@@ -25,6 +25,12 @@ opens only this file — the serial table in [`../../dh600/README.md`](../../dh6
 reference example. Claims outside tables get inline markers: `⚠ unverified` for anything not yet
 checked, `(planned)` for decisions not yet executed.
 
+A choice between hardware options is a `docs/decisions/NNNN-<slug>.md` entry in the craft's folder
+(`CONVENTIONS.md` §5), with a `**Status:** accepted | superseded by NNNN` header line. A changed
+plan is a new entry that supersedes the old one; the old entry is never edited. `doc-indexer
+search` drops superseded entries by default and tags the rest. Example chain:
+`drones/dh600/docs/decisions/`.
+
 Only three things move a claim to ✅: a measurement, a config dump, or the user saying so. Editing
 the surrounding prose is not evidence.
 
