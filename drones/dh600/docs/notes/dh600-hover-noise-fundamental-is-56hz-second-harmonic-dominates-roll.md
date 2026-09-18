@@ -1,0 +1,30 @@
+---
+title: DH600 hover noise fundamental is ~56 Hz; the 2nd harmonic at ~116 Hz dominates the roll gyro
+date: 2026-09-18
+tags: ardupilot,harmonic-notch,fft,log-analysis,vibration,dh600
+source: ~/.local/share/Mission Planner/logs/QUADROTOR/1/2026-09-18 18-32-42.bin
+---
+
+Measured from the 2026-09-18 baseline hover (log `2026-09-18 18-32-42.bin`, 172 s of PosHold at
+ThO 0.164, 2.5–2.8 m, 23.6 V, 12.8 A). Raw gyro logged with `INS_RAW_LOG_OPT=9`, no notch,
+`INS_GYRO_FILTER=20`. Welch PSD, 8192-point, on the primary gyro pre-filter stream (GYR I=0;
+I=2 is the post-filter copy on this two-IMU board).
+
+Motor fundamental is a pair of peaks at **53.6 and 57.8 Hz** on all three axes: four motors at
+slightly different speeds, matching RCOU 1400/1414/1413/1433 µs. **The 2nd harmonic cluster at
+108–121 Hz carries six times the fundamental's energy on roll** (band 80–100 vs 38–52 Hz in the
+first pass; 116 Hz is the single largest peak on X at 4.8e-2 against 8e-3 at the fundamental).
+3rd harmonic at 169 Hz is minor. Any notch here must include harmonic 2.
+
+Sample-rate trap: `SampleUS` deltas are batched (5th percentile 18 µs, median 619 µs), so a
+median-delta rate estimate gives 1616 Hz and scales every peak by 0.8. Use count over span, which
+gives 2014 Hz and agrees with `IMU.GHz`. 13 gaps over 2.5× median in 172 s, max 4.9 ms: the H7
+kept up.
+
+Other baselines from the same window: VIBE 5.8/8.3/7.1 mean, peaks under 18, no clips. D-term RMS
+roll 0.0074, pitch 0.0079 (compare after the notch flight). Hover learn moved 0.186 → 0.167.
+
+Answers the min-throttle question of 2026-09-18: hover RCOU sits at 1400–1433 µs against a
+`MOT_SPIN_MIN` floor of 1180 µs, lowest sample 1338 µs. `MOT_THST_HOVER` is thrust demand
+before the expo curve, not output; there is 220 µs of descent authority below hover and the floor
+stays where it is.
