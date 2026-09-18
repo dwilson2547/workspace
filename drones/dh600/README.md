@@ -172,9 +172,10 @@ This interacts with two existing decisions:
 **ELRS direct to the aircraft. The HM30 carries video and telemetry only.**
 
 ```text
-TX16S ──ELRS 2.4GHz──> RP3 (on aircraft) ──CRSF──> Pixhawk 6C ──MAVLink──> A8 mini gimbal
-A8 mini ──Ethernet──> HM30 air unit ──5.8GHz──> ground unit (video + telemetry)
-                      HM30 air unit ──MAVLink──> TELEM1
+TX16S ──ELRS 2.4GHz──> RP3 (on aircraft) ──CRSF──> Pixhawk 6C TELEM1 ✅
+                                                    Pixhawk 6C ──MAVLink──> A8 mini gimbal   ⬜ not fitted
+A8 mini ──Ethernet──> HM30 air unit ──5.8GHz──> ground unit (video + telemetry)   ⬜ not bound
+                      HM30 air unit ──MAVLink──> FC UART   ⬜ not wired (TELEM3 / GPS2 free; TELEM1 is the ELRS port)
 ```
 
 Rationale: routing flight control through the video link is the wrong trade. SIYI publishes 150 ms for
@@ -189,9 +190,12 @@ and HM30 air time on top of each other adds delay for no benefit. Direct ELRS gi
 Cost is ~20 g for the RP3 on the airframe and one antenna mount. There is **no RF conflict** — ELRS at
 2.4 GHz and HM30 at 5.8 GHz coexist cleanly.
 
-**The gimbal does not depend on the HM30 S.Bus.** On ArduPilot with the native SIYI driver over TELEM3,
-gimbal pitch/yaw are RC6/RC7 arriving via ELRS and passed through as MAVLink mount commands. The SIYI
-**S.Bus Y cable is therefore not needed** — one fewer cable than routing RC through the HM30.
+**The gimbal does not depend on the HM30 S.Bus.** ⬜ Planned, A8 mini not fitted: with ArduPilot's
+native SIYI driver on a free UART, gimbal pitch/yaw arrive on spare RC channels via ELRS and pass
+through as MAVLink mount commands. **RC6 is the flight-mode channel on this build** (fleet standard,
+`FLTMODE_CH=6`), so the mount channels will be RC7/RC8 or higher; `RC7_OPTION`/`RC8_OPTION` are `0` in
+`dh600.param` today. The SIYI **S.Bus Y cable is not needed** — one fewer cable than routing RC through
+the HM30.
 
 ### Rejected: RC through the HM30 ("RC relay")
 
@@ -652,9 +656,10 @@ extreme.
 
 ## Serial port wiring (Pixhawk 6C, full size)
 
-**Two UARTs are spare.** The full-size 6C gives 5 usable UARTs
-(TELEM1/2/3 + GPS1/2) plus a dedicated RC input and a dedicated S.Bus output. All five UARTs are
-committed once the HM30 and gimbal go on; only RC IN is left.
+**Three UARTs wired, two spare.** The full-size 6C gives 5 usable UARTs
+(TELEM1/2/3 + GPS1/2) plus a dedicated RC input and a dedicated S.Bus output. TELEM1, TELEM2 and
+GPS1 are wired; TELEM3 and GPS2 are free. If HM30 telemetry and the gimbal both go on the FC they
+take both, leaving only RC IN.
 
 `SERIALx` indices are derived from the ArduPilot `Pixhawk6C/hwdef.dat` `SERIAL_ORDER`
 (`OTG1 UART7 UART5 USART1 UART8 USART2 USART3 OTG2`) — **not** from the port silkscreen, which does

@@ -13,21 +13,36 @@ During DH600 tuning (2026-09-17), the agent consulted mid-build kept raising non
 conflicts — e.g. "you can't use channel 5 for flight modes, that's pegged for the video system" —
 for a video system that was not yet online, or even finally wired. Tracing it back: earlier doc
 edits by an agent had assigned RC channels and serial ports to accessories (video system,
-gimbal functions) that were never discussed, decided, or wired. The docs asserted these
-assignments with the same confidence as the verified rows, so every later session — human or
-agent — treated them as constraints. Not the first time agents have invented specs to fill out a
+gimbal functions) that were never wired. The docs asserted these assignments with the same
+confidence as the verified rows, so every later session — human or agent — treated them as
+constraints. Not the first time agents have invented specs to fill out a
 form; the DH600 cleanup (`f78e308`…`3258646`) is just the most expensive instance.
 
 ---
 
 ## Root cause
 
-### Docs had no "unknown" state
+### A plan written in the present tense outlived the plan
 
-The build docs contained slots for port and channel assignments with no marker for "not yet
-decided". Faced with a vacuum, an agent filled it with a plausible generic ArduPilot layout —
-GPS2 for the receiver, spare channels for accessories — and wrote it down as fact. Nothing in the
-doc distinguished "measured on the bench" from "sounds right".
+`git log -S GPS2` shows the receiver-on-GPS2 claim was not a random guess. It entered on
+2026-07-26 (`b049983`, `bd5ef70`) as a reasoned design decision: at that point the HM30's S.Bus was
+going to occupy RC IN, so ELRS went to GPS2 as CRSF. The HM30-carries-RC plan was dropped the same
+day; the GPS2 assignment stayed, written as "ELRS on GPS2" rather than "plan: ELRS → GPS2". Seven
+weeks later the receiver was wired to TELEM1 and the doc was never reconciled. Any agent reading
+the head of the README in September saw a present-tense fact and re-asserted it (`4274d47`).
+
+### The design doc was drafted from the ArduPilot wiki, not from the fleet's param file
+
+The July doc reserved RC6/RC7 for gimbal pitch/yaw, following the ArduPilot mount examples. The
+X500's param dump already had `FLTMODE_CH=6` — flight modes on RC6 — and the DH600 was going to
+copy the X500's radio model. The gimbal assignment conflicted with the fleet standard on the day
+it was written; nobody diffed the plan against an existing craft's params.
+
+### Docs had no "unknown" or "planned" state
+
+Nothing in the doc distinguished "measured on the bench" from "decided on paper" from "sounds
+right". Once written, all three read the same, so the only way to tell them apart was git history
+— which mid-build sessions do not read.
 
 ### Standards governed placement, not provenance
 
