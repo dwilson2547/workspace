@@ -10,12 +10,13 @@ domain: drones
 agility. Largest craft in the domain and the first with a proper gimbal payload and a long-range
 HD video + control link.
 
-Status: **flying; in tuning (2026-09-18).** Maiden flown, roll axis autotuned, harmonic notch
-measured and verified ([decision 0005](docs/decisions/0005-throttle-based-notch-no-rpm-source.md)). Top plate is made
+Status: **flying; tuned (2026-09-18).** Maiden flown, harmonic notch measured and verified
+([decision 0005](docs/decisions/0005-throttle-based-notch-no-rpm-source.md)), all three axes
+autotuned with it active. Top plate is made
 and fitted, and **all accessories are mounted except the A8 mini itself**, which is deliberately
 left off test flights rather than risk an $800 camera on an untuned airframe. The aircraft is
-therefore within ~95 g of final AUW, so tuning done now carries over. Remaining work is tuning:
-re-run roll autotune with the notch active (pitch and yaw done 2026-09-18). ArduPilot Copter 4.7.1, configuration captured in
+therefore within ~95 g of final AUW, so the tune carries over. Remaining before the camera
+flies: fit the A8 mini, CompassMot, and a hover check at the final weight. ArduPilot Copter 4.7.1, configuration captured in
 [`dh600.param`](dh600.param). Superseded, kept for history: the build was previously blocked on a
 [custom top plate and gimbal mount](#custom-fabrication--top-plate-and-gimbal-mount). Specs below
 were settled during planning — motors, props, power path, RC architecture, autopilot and gimbal
@@ -758,8 +759,9 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
   [decision 0005](docs/decisions/0005-throttle-based-notch-no-rpm-source.md) and the
   [notes](docs/notes/README.md). Same evening, pitch and yaw autotuned with the notch active, each
   axis in 2–3 minutes where the un-notched roll tune took ten: pitch rate P/I 0.097, D 0.0045,
-  angle P 7.16; yaw rate P 0.272, I 0.027, angle P 3.11. Angle P and accel max saved on both.
-  Next: roll again, since its tune predates the notch.
+  angle P 7.16; yaw rate P 0.272, I 0.027, angle P 3.11; then roll again since its tune predated
+  the notch: rate P 0.058 → 0.076, D 0.0023 → 0.0033, angle P 6.18 → 8.09. Angle P and accel
+  max saved on all three. Tuning complete.
 - **2026-09-17** — **Electrical bring-up done; the blocker is now purely mechanical.** Flashed
   ArduPilot Copter 4.7.1 stable and configured everything that does not require the FC to be
   mounted. What is left before a maiden is the top plate, then two calibrations.

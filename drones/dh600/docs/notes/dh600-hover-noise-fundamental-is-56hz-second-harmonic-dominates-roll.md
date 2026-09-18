@@ -58,3 +58,14 @@ Both tunes wrote angle P and accel max as well as the rate PID, so the save-only
 failure of the X500 did not recur. Roll still carries the pre-notch tune (rate P 0.058,
 D 0.0023, angle P 6.18) and is next. Flight logs for the two autotune flights are still on the
 SD card as of this entry.
+
+## Roll autotune with the notch active (2026-09-18 19:32)
+
+    AutoTune: Roll Angle P:8.086, Max Accel:60244
+    AutoTune: Roll Rate: P:0.075, I:0.075, D:0.0032
+
+Against the un-notched roll tune of two days earlier: rate P 0.058 → 0.076, D 0.0023 → 0.0033,
+angle P 6.18 → 8.09. Every gain rose once the D path was clean, the same direction the X500
+showed when its notch went in. All three axes now tuned under the same filter configuration.
+Final set: roll 0.076 / 0.0033 / 8.09, pitch 0.097 / 0.0045 / 7.16, yaw 0.272 / 0 / 3.11
+(rate P / rate D / angle P). Hover learn 0.183.
