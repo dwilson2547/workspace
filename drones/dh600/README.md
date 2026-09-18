@@ -15,7 +15,7 @@ measured and verified ([decision 0005](docs/decisions/0005-throttle-based-notch-
 and fitted, and **all accessories are mounted except the A8 mini itself**, which is deliberately
 left off test flights rather than risk an $800 camera on an untuned airframe. The aircraft is
 therefore within ~95 g of final AUW, so tuning done now carries over. Remaining work is tuning:
-autotune pitch and yaw with the notch active, then roll again. ArduPilot Copter 4.7.1, configuration captured in
+re-run roll autotune with the notch active (pitch and yaw done 2026-09-18). ArduPilot Copter 4.7.1, configuration captured in
 [`dh600.param`](dh600.param). Superseded, kept for history: the build was previously blocked on a
 [custom top plate and gimbal mount](#custom-fabrication--top-plate-and-gimbal-mount). Specs below
 were settled during planning — motors, props, power path, RC architecture, autopilot and gimbal
@@ -756,7 +756,10 @@ only, never verified. Do not configure against a ⬜ row without eyes on the boa
   centre tracking throttle to 0.07 Hz. Also settled from the first log: hover motor outputs sit at
   1400–1433 µs against the 1180 µs `MOT_SPIN_MIN` floor, so the floor stays. Details:
   [decision 0005](docs/decisions/0005-throttle-based-notch-no-rpm-source.md) and the
-  [notes](docs/notes/README.md). Next: autotune pitch and yaw, then roll again.
+  [notes](docs/notes/README.md). Same evening, pitch and yaw autotuned with the notch active, each
+  axis in 2–3 minutes where the un-notched roll tune took ten: pitch rate P/I 0.097, D 0.0045,
+  angle P 7.16; yaw rate P 0.272, I 0.027, angle P 3.11. Angle P and accel max saved on both.
+  Next: roll again, since its tune predates the notch.
 - **2026-09-17** — **Electrical bring-up done; the blocker is now purely mechanical.** Flashed
   ArduPilot Copter 4.7.1 stable and configured everything that does not require the FC to be
   mounted. What is left before a maiden is the top plate, then two calibrations.

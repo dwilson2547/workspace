@@ -48,3 +48,13 @@ before comparing; the −73 % held either way but the peaks did not.
 
 Whole axis in 2–3 minutes against roughly ten per axis on the X500 and on the DH600 roll tune
 two days earlier, both flown without a notch. Log not yet analysed; values as printed. Yaw next.
+
+## Yaw autotune with the notch active (2026-09-18, from the param dump after landing)
+
+    ATC_RAT_YAW_P 0.272  I 0.027  D 0  FLTE 1 (was 2.5)
+    ATC_ANG_YAW_P 3.106  ATC_ACC_Y_MAX 183
+
+Both tunes wrote angle P and accel max as well as the rate PID, so the save-only-the-rate
+failure of the X500 did not recur. Roll still carries the pre-notch tune (rate P 0.058,
+D 0.0023, angle P 6.18) and is next. Flight logs for the two autotune flights are still on the
+SD card as of this entry.
