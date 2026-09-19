@@ -10,9 +10,10 @@ sensor suite and a microcontroller companion, aimed at **assisted or fully auton
 indoor flight** — position hold and obstacle avoidance without GPS. This is the first from-parts
 build in the domain (the X500/Pavo craft are kits/BNFs).
 
-Status: **assembled and wired except the ESP32 (2026-08-17).** All sensors, both I²C muxes and the
-HDZero VTX are in and connected. The **only remaining hardware is the ESP32-S3** — wire it to the
-sensor stack and to the FC — after which it's ArduPilot configuration for the ESP32 and the MTF-01.
+Status: **fully assembled (reported 2026-09-18); ESP32 not yet flashed, not yet autotuned.** All
+sensors, both I²C muxes, the HDZero VTX and the ESP32-S3 are in and wired. Hardware is done. What
+remains is software and tuning: program the ESP32, configure ArduPilot to take input from the ESP32
+and the MTF-01, then autotune.
 
 ⚠ **It has not been powered up since the modifications.** That first power-up is a milestone in its
 own right, not a formality — see [first power-up](#-first-power-up-after-rework).
@@ -312,9 +313,10 @@ step:
 - [x] **ESP32 proximity firmware written** — [`firmware/cl35_proximity`](firmware/cl35_proximity/),
       builds clean, untested on hardware. Boots into a scan mode that produces the
       channel→direction map.
-- [ ] **ESP32-S3 wired to the sensor stack** ← the last hardware job
-- [ ] **ESP32-S3 wired to the FC** (UART, MAVLink)
-- [ ] **First power-up since the rework** — see the cautions above
+- [x] **ESP32-S3 wired to the sensor stack** — reported 2026-09-18
+- [x] **ESP32-S3 wired to the FC** (UART, MAVLink) — reported 2026-09-18
+- [ ] **ESP32-S3 flashed** with `firmware/cl35_proximity` ← next
+- [ ] **First power-up since the rework** — see the cautions above (⚠ not stated either way as of 2026-09-18)
 - [ ] **ArduPilot configured for the ESP32** (`PRX1_TYPE = 2`, serial protocol/baud, distinct sysid)
 - [ ] **ArduPilot configured for the MTF-01** (`FLOW_TYPE`, `RNGFND1_*`, and the `mav_id` gotcha)
 - [ ] `OSD_TYPE` → **5** so the HDZero canvas actually draws
@@ -336,6 +338,10 @@ in [`ardupilot_setup.md`](ardupilot_setup.md#remaining-work).
 
 ## Build log
 
+- **2026-09-18** — **Fully assembled.** The ESP32-S3 went in during the Indianapolis stay, so the
+  hardware list is closed. Not done for lack of time: flashing the ESP32, the ArduPilot side for the
+  ESP32 and the MTF-01, and AUTOTUNE. Those three are the whole remaining list. Whether the airframe
+  has been powered since the rework was not stated.
 - **2026-09-07** — **Sensor count and geometry corrected across the docs.** The array is **9 sensors —
   8 in a horizontal ring + 1 facing up**, not the 11 previously recorded here, in `inventory.md` and
   in `ardupilot_setup.md`; downward is the MTF-01's lidar, which had been double-counted as a ring
