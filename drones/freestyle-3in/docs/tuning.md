@@ -11,6 +11,9 @@ filter change has been made and is not yet verified on 4S.
 Betaflight **4.5.2**, SPEEDYBEEF405AIOV2. All four PID profiles are empty — PIDs and rates are stock
 apart from `thr_mid = 35`. Rates are **Actual** (`rates_type 3`), `rates 67` → full stick ≈ 670 °/s.
 
+⬜ **Planned: raise max rate to ~850 °/s.** Reported 2026-09-18: 670 °/s "feels a bit slow for a
+freestyle." Not yet set on the board or flown — see [below](#planned-raise-max-rate-2026-09-18).
+
 | | value | note |
 |---|---|---|
 | `dshot_bidir` | ON | RPM filtering live, 3 harmonics |
@@ -42,6 +45,39 @@ Noise feeding the D path is what inadequate filtering looks like, and it isn't h
 **The D-term filter loosening is unverified.** It was flown only on 3S, where lower RPM moves all
 the noise frequencies down. D-term in quiet flight came out comparable to before (roll 5.84 vs 6.30),
 so nothing looks wrong — but it is not a fair comparison and should not be treated as settled.
+
+## Planned: raise max rate (2026-09-18)
+
+Stock is 670 °/s at full stick, reported as feeling slow for freestyle. Not yet applied — this
+records the target and the reasoning, to be set in Betaflight Configurator's **Rates** tab and
+confirmed there before flying.
+
+In **Actual** rates (`rates_type 3`), the `rate` parameter sets max-stick angular velocity
+directly and independently of `rc_rate`/center sensitivity: max rate (°/s) = `rate` × 10. That's
+why `rates 67` gives ≈670 °/s. Leaving `rc_rate` and `rc_expo` untouched and only raising `rate`
+keeps small-stick precision the same and adds authority only at the top of the stick — the right
+lever for "slow at full deflection," not "twitchy near center."
+
+**Target: `rate = 85` (roll/pitch/yaw) → ≈850 °/s**, a ~27% increase. Mid-pack for a 3" freestyle
+quad — enough to feel noticeably snappier without leaving the tracking margin this airframe has
+already shown. Applies to all three axes uniformly, matching how the stock config was flown (no
+per-axis split in the "config as flown" table above).
+
+⚠ Provisional pending two things the current data can't settle:
+
+- **Exact CLI field name** for the Actual-mode rate parameter varies across recent Betaflight
+  versions (`roll_srate`/`pitch_srate`/`yaw_srate` in some, folded into `rates` in others). Set it
+  from the Configurator's Rates tab, which shows the live max-rate number regardless of the
+  underlying field name, rather than typing a CLI command from this doc.
+- **Not re-verified at the new rate.** The tracking-gain and step-response numbers above (unity
+  gain, 5–6% overshoot) were measured up to ~600–640 °/s, comfortably under the current 670 °/s
+  ceiling but with less margin under a 850 °/s one. The PID tune itself isn't changing, so nothing
+  here suggests a problem — but a quick blackbox log after the change, same method as
+  [`blackbox-analysis.md`](../../docs/topics/blackbox-analysis.md), would confirm tracking still
+  holds at the new top end before calling it settled.
+
+Once flashed and flown, update the "Config as flown" table above with the new value and move this
+section's status from planned to verified.
 
 ## Open questions
 
