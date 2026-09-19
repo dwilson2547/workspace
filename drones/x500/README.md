@@ -22,9 +22,9 @@ As purchased: **PX4 Development Kit — X500 v2**, Pixhawk 6C / M10 GPS / 915 MH
 | Flight controller | **Pixhawk 6C** | |
 | GPS / compass | **M10** | |
 | Telemetry | **915 MHz** radio | on **TELEM2** |
-| RC receiver | RadioMaster RP3 ELRS (CRSF) | on **TELEM1**; bind phrase `dwdrones` ([rx setup](../docs/topics/elrs/rx-x500-rp3.md) · [pairing](../docs/topics/elrs/pairing-x500.md)); wired, **wiring not yet verified** (see ⚠ below) |
+| RC receiver | RadioMaster RP3 ELRS (CRSF) | on **TELEM1**; bind phrase `dwdrones` ([rx setup](../docs/topics/elrs/rx-x500-rp3.md) · [pairing](../docs/topics/elrs/pairing-x500.md)); wiring verified, CRSF live |
 | Battery | OVONIC 4S 14.8V 4500mAh 50C (XT60) ×2 | ~18 min hover, no payload |
-| Autopilot stack | **PX4** (dev kit) | ArduPilot also flashable |
+| Autopilot stack | **ArduPilot Copter 4.7.0** | flashed over the dev kit's PX4; config in [`x500.param`](x500.param) |
 
 Parts on hand & spares: [`inventory.md`](inventory.md).
 
@@ -78,22 +78,43 @@ that is the reference, don't re-derive it here.
 | TELEM1 | RadioMaster RP3 ELRS receiver (CRSF) | RC input |
 | TELEM2 | 915 MHz telemetry radio | ground-station link |
 
-> ⚠ **Verify the ELRS module wiring before buttoning up.** The RP3 TX/RX lines may be **swapped**
-> against the Pixhawk TELEM1 UART — CRSF needs FC-TX → RX-RX and FC-RX → RX-TX (crossed). Confirm the
-> pinout and that PX4 actually sees the receiver (link/CRSF frames on the port) before final
-> assembly. Details + check procedure: [rx-x500-rp3.md](../docs/topics/elrs/rx-x500-rp3.md).
+ELRS wiring on TELEM1 was verified during bench bring-up (CRSF live); the check procedure stays in
+[rx-x500-rp3.md](../docs/topics/elrs/rx-x500-rp3.md).
 
 ## Status
 
+**Flying; tuned on all three axes (2026-09-14).** Harmonic notch measured and verified 2026-09-11
+(throttle-scaled, 84 Hz fundamental, no RPM source), then roll, pitch and yaw autotuned with it
+active. Full record, including the footgun checklist, in the
+[notes](docs/notes/x500-hover-noise-fundamental-is-84hz-in-flight-fft-locks-on-.md).
+
+| axis | rate P / I | rate D | angle P | accel max |
+|---|---|---|---|---|
+| roll | 0.108 | 0.0036 | 10.07 | 1055 |
+| pitch | 0.109 | 0.0036 | 9.59 | 1052 |
+| yaw | 0.503 / 0.050 | 0 (FLTE 1.02) | 2.79 | 170 |
+
+Yaw authority is low (angle P and accel max well under the 4.5 / 270 defaults); that is mostly
+2216 KV920 on 1045 props, and nothing saturated during the yaw tune.
+
+**Open: the ~70 µs CW/CCW motor split.** The FC holds a constant yaw trim (CW pair runs ~70 µs
+harder in every flight), traced to a dragging CCW motor with M2 (rear left) the suspect. Hand-spin
+ruled out gross bearing drag; the ESC is the leading suspect and the M1↔M2 ESC swap test has not
+been run. Parts-blocked. **Plan (2026-09-18): replace the M2 motor/ESC, then re-run the autotune.**
+The current tune is valid as flown until then.
+
 - [x] Assembled
-- [x] Flight controller + firmware flashed (ArduCopter stable)
+- [x] Flight controller + firmware flashed (ArduCopter 4.7.0)
 - [x] ~~Verify RP3 ELRS TX/RX wiring on TELEM1~~ — resolved; CRSF live on TELEM1
 - [x] Radio / RC link bound (RP3 ELRS), calibration re-run and **saved** 2026-08-02
 - [x] Compass calibrated on the bench; switch map applied (arm CH5 / mode CH6 / beeper CH7)
 - [ ] Battery monitor calibrated against a meter (`BATT_CAPACITY` still 3300, packs are 4500)
 - [ ] Throttle failsafe bench-tested
-- [ ] GPS lock outdoors + compass re-check away from the bench
-- [ ] First hover / maiden flight
+- [x] GPS lock outdoors — PosHold flown 2026-09-11
+- [x] First hover / maiden flight — earliest flights on record are 2026-09-11 (⚠ exact maiden date not logged)
+- [x] Harmonic notch verified 2026-09-11 (roll D-term RMS −39 %)
+- [x] Autotune: roll 2026-09-11 (saved by hand), pitch and yaw 2026-09-14
+- [ ] M2 motor/ESC replaced, autotune re-run
 
 Full bench-configuration record, including what is still outstanding:
 [`web_bot_dump.md`](web_bot_dump.md).
@@ -112,6 +133,21 @@ Full bench-configuration record, including what is still outstanding:
 
 _Add dated entries as you go (assembly notes, PID tweaks, incidents, mods)._
 
+- **2026-09-14** — **Pitch and yaw autotuned; X500 tuning closed out.** Pitch rate P/I 0.109,
+  D 0.0036, angle P 9.59; yaw rate P 0.503, angle P 2.79, accel max 170, error filter 2 → 1.02 Hz.
+  Pitch saved only the rate PID (angle P and accel max set by hand from the message stream, confirmed
+  on the board); yaw saved everything. Yaw was flown despite the motor split because a static trim
+  is absorbed by the I term; twitch peak was 1715 µs against a 1950 µs ceiling, so the gains are
+  valid as flown. Roll and pitch agree within 1 % on every rate term. Notes and the domain-level
+  [autotune save gotcha](../docs/notes/ardupilot-autotune-can-report-success-and-save-only-the-rate.md).
+  Focus moves to DH600 and cinelog35-tof; the M2 motor/ESC swap and a re-tune wait on parts.
+- **2026-09-11** — **First flights on record, notch measured and verified, roll tuned.** Hover
+  fundamental 84 Hz (in-flight FFT had locked on the 3rd harmonic); throttle-scaled notch
+  FREQ 84 / REF 0.31 / BW 40 / harmonics 7 cut roll D-term RMS 39 %. Roll autotune reached
+  Success (rate P 0.108, D 0.0036, angle P 10.07) but was lost by leaving AutoTune before
+  disarm, then set by hand from the message stream. Same logs showed the CW pair running
+  ~70 µs harder than the CCW pair in every flight: a real yaw torque, M2 suspected, hand-spin
+  clean. Footgun checklist written.
 - **2026-08-17** — **Lidar payload settled: a single VLP-16 mount hanging below the airframe.**
   The **RoboSense Airy is dropped** — its price hasn't come down and import regulation makes it an
   awkward buy, so the decision is to fly the VLP-16 Lite already on hand rather than wait on a
