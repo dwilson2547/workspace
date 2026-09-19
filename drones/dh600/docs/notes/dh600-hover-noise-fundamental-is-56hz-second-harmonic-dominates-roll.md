@@ -69,3 +69,50 @@ angle P 6.18 → 8.09. Every gain rose once the D path was clean, the same direc
 showed when its notch went in. All three axes now tuned under the same filter configuration.
 Final set: roll 0.076 / 0.0033 / 8.09, pitch 0.097 / 0.0045 / 7.16, yaw 0.272 / 0 / 3.11
 (rate P / rate D / angle P). Hover learn 0.183.
+
+## Autotune logs checked (2026-09-18, logs `2026-09-18 19-12-03.bin` pitch+yaw, `19-29-24.bin` roll)
+
+Tune progress from `ATUN` and the `AutoTune:` message stream:
+
+| axis | twitches / time | D up → down | P up | angle P up | last-5 overshoot at target |
+|---|---|---|---|---|---|
+| pitch | 99 / 136 s | 34 → 13 | 21 | 26 | +0.9 −2.9 +2.8 −4.4 +4.0 % |
+| yaw | 117 / 184 s | 10 → 4 (filter, not D) | 88 | 8 | +0.7 +3.8 +4.3 +4.1 +4.1 % |
+| roll | 99 / 135 s | 30 → 17 | 27 | 20 | −2.1 0 +4.1 +2.8 +1.0 % |
+
+All three converged normally: every final angle-P twitch hit the 10° target within ±5 %. Saved
+angle P is 69 % of the last in-tune value on all three axes (10.31 → 7.16, 11.66 → 8.09,
+4.48 → 3.11), so the back-off is uniform; accel max saved equals the in-tune `ddt` on each axis.
+
+Pitch started from the 4.7 defaults (rate P 0.135, D 0.0036, angle P 4.5). AutoTune pulled rate P
+down to 0.069 during the D-up step because the default P overshot the rate target, peaked D at
+0.0077, then rebuilt P to 0.097 with D settling at 0.0045. One pilot-override pause at 208 s.
+
+Yaw is authority-limited, not mis-tuned: the 80 °/s rate target was never reached in the D steps
+(max 67.6 °/s, −17 to −20 % on every twitch), the error filter was driven to its 1 Hz floor
+(`ATC_RAT_YAW_FLTE` 2.5 → 1), and the measured accel max is 183 °/s² against the 270 default. 88 of
+the 117 twitches were the P-up step (rate P 0.18 → peak 0.363 → saved 0.272). Expected for a heavy
+600 on slow props; nothing to change.
+
+Battery across the evening: pitch/yaw log 24.27 → 22.90 V (min 22.04 V at the 42.7 A twitch
+peak), roll log started at 22.80 V and ended 22.51 V. The roll tune was flown on a low pack;
+hover learn rose 0.167 → 0.183 accordingly. Gains do not depend on this, the notch reference does
+(see the verified section: revisit `INS_HNTCH_REF` from a fresh-pack hover).
+
+Post-tune oscillation check, post-filter gyro (instance 2) band-passed 2–8 Hz, per-second RMS:
+
+- **New pitch gains, PosHold 542–558 s at 3.4 m:** 3–8 Hz band 2.7e-5, same as the pre-tune
+  baseline (2.4e-5); no spectral peak. Clean.
+- **Final gains on all axes, 401–418 s of the roll log:** only a 17 s Stabilize hop at 1.2–1.9 m
+  with continuous stick work (roll 40–70 µs, pitch up to 139 µs off centre). The 2–8 Hz RMS ran
+  1–5.5 °/s and tracked the stick deflection second by second; in the two seconds with sticks
+  near centre (405–406 s) it fell to 0.6–0.7 °/s, inside the pre-tune PosHold range of 0.3–0.9.
+  The post-yaw Stabilize flight with the old roll gains showed the same stick-driven pattern
+  (4–11 °/s when roll stick was 190–264 µs off centre, 0.4–0.9 when centred). No oscillation
+  signature, but two calm seconds is not a verification: **the final-gain check is a 30 s PosHold
+  hover at ~3 m**, which folds into the final-weight hover already on the list.
+
+Method trap: `RATE` and `PID*` are logged at 10 Hz outside AutoTune in this bitmask (260 rows in
+the 26 s pre-tune window; the 50 Hz overall average comes from AutoTune's fast logging). Any
+spectrum from them above 5 Hz is aliasing. Use the `GYR` stream for anything above 2 Hz, and treat
+the earlier D-term RMS figures as 10 Hz samples of the D output, valid as RMS, not as spectra.
