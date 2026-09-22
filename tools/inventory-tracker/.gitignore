@@ -11,3 +11,12 @@ venv/
 
 # Cached raw API responses (re-fetchable)
 .cache/
+
+# Fetched datasheet/manual PDFs — PROVISIONAL, pending TODO.md "Decide
+# datasheet/manual storage: in-repo vs git-lfs, once the cache grows".
+# Ignored rather than committed because this direction is reversible (delete
+# these two lines) while 43MB in superrepo history needs a rewrite to undo.
+# Note when deciding: NOT purely re-fetchable — Analog Devices blocks this IP,
+# and five TI parts only resolved via the Playwright fallback.
+store/docs/*.pdf
+store/manuals/*.pdf
