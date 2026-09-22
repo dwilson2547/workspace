@@ -1,0 +1,37 @@
+id: sn74hc165n
+type: component
+category: shift-registers
+description: IC SHIFT REGTR COMP 8BIT 16-PDIP
+manufacturer: Texas Instruments
+mpn: SN74HC165N
+vendor_pns:
+  digikey: 296-8251-5-ND
+qty: 25
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 25
+  unit_price: 0.9408
+params:
+  logic-type: Shift Register
+  output-type: Complementary
+  number-of-elements: '1'
+  number-of-bits-per-element: '8'
+  function: Parallel or Serial to Serial
+  voltage-supply: 2V ~ 6V
+  operating-temperature: -40°C ~ 125°C
+  mounting-type: Through Hole
+  package-case: 16-DIP (0.300", 7.62mm)
+  supplier-device-package: 16-PDIP
+docs:
+- kind: datasheet
+  url: https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hc165
+  source: digikey
+  path: store/docs/a4324979f4cf4c95.pdf
+  sha256: a4324979f4cf4c95c3c22bfff72207f634ec3589996aca2b9b04bf226ff97d75
+  bytes: 1570158
+enrichment:
+  source: digikey
+  dk_category_id: 712
+  dk_category: Shift Registers
+  provisional: true

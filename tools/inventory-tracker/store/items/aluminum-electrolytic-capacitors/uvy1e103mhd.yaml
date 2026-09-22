@@ -1,0 +1,41 @@
+id: uvy1e103mhd
+type: component
+category: aluminum-electrolytic-capacitors
+description: CAP ALUM 10000UF 20% 25V RADIAL
+manufacturer: Nichicon
+mpn: UVY1E103MHD
+vendor_pns:
+  digikey: 493-12467-ND
+qty: 20
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 20
+  unit_price: 1.994
+params:
+  capacitance: 10000 µF
+  tolerance: ±20%
+  voltage-rated: 25 V
+  lifetime-temp: 2000 Hrs @ 105°C
+  operating-temperature: -55°C ~ 105°C
+  polarization: Polar
+  applications: General Purpose
+  ripple-current-low-frequency: 2 A @ 120 Hz
+  ripple-current-high-frequency: 2.3 A @ 10 kHz
+  lead-spacing: 0.295" (7.50mm)
+  size-dimension: 0.709" Dia (18.00mm)
+  height-seated-max: 1.654" (42.00mm)
+  mounting-type: Through Hole
+  package-case: Radial, Can
+docs:
+- kind: datasheet
+  url: https://www.nichicon.co.jp/english/series_items/catalog_pdf/e-uvy.pdf
+  source: digikey
+  path: store/docs/bd1ec261b9f4690c.pdf
+  sha256: bd1ec261b9f4690ccd88bf6a4b1a138ace1470ee5663c010fa269f5368a4ce92
+  bytes: 602882
+enrichment:
+  source: digikey
+  dk_category_id: 58
+  dk_category: Aluminum Electrolytic Capacitors
+  provisional: true

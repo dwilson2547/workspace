@@ -1,0 +1,74 @@
+category: single-fets-mosfets
+provisional: true
+dk_category_id: 278
+label: Single FETs, MOSFETs
+identifying: []
+params:
+  fet-type:
+    type: string
+    dk_param_id: 606
+    label: FET Type
+  technology:
+    type: string
+    dk_param_id: 570
+    label: Technology
+  drain-to-source-voltage-vdss:
+    type: string
+    dk_param_id: 2068
+    label: Drain to Source Voltage (Vdss)
+  current-continuous-drain-id-25-c:
+    type: string
+    dk_param_id: 608
+    label: Current - Continuous Drain (Id) @ 25°C
+  drive-voltage-max-rds-on-min-rds-on:
+    type: string
+    dk_param_id: 1993
+    label: Drive Voltage (Max Rds On, Min Rds On)
+  rds-on-max-id-vgs:
+    type: string
+    dk_param_id: 612
+    label: Rds On (Max) @ Id, Vgs
+  vgs-th-max-id:
+    type: string
+    dk_param_id: 1236
+    label: Vgs(th) (Max) @ Id
+  vgs-max:
+    type: string
+    dk_param_id: 1994
+    label: Vgs (Max)
+  input-capacitance-ciss-max-vds:
+    type: string
+    dk_param_id: 2263
+    label: Input Capacitance (Ciss) (Max) @ Vds
+  fet-feature:
+    type: string
+    dk_param_id: 959
+    label: FET Feature
+  power-dissipation-max:
+    type: string
+    dk_param_id: 1174
+    label: Power Dissipation (Max)
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature
+  grade:
+    type: string
+    dk_param_id: 1977
+    label: Grade
+  qualification:
+    type: string
+    dk_param_id: 2700
+    label: Qualification
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  supplier-device-package:
+    type: string
+    dk_param_id: 1291
+    label: Supplier Device Package
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case

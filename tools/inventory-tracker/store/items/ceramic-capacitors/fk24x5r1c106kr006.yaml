@@ -1,0 +1,39 @@
+id: fk24x5r1c106kr006
+type: component
+category: ceramic-capacitors
+description: CAP CER 10UF 16V X5R RADIAL
+manufacturer: TDK
+mpn: FK24X5R1C106KR006
+vendor_pns:
+  digikey: 445-FK24X5R1C106KR006CT-ND
+qty: 50
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 50
+  unit_price: 0.222
+params:
+  capacitance: 10 µF
+  tolerance: ±10%
+  voltage-rated: 16V
+  temperature-coefficient: X5R
+  operating-temperature: -55°C ~ 85°C
+  applications: General Purpose
+  mounting-type: Through Hole
+  package-case: Radial
+  size-dimension: 0.177" L x 0.098" W (4.50mm x 2.50mm)
+  height-seated-max: 0.217" (5.50mm)
+  lead-spacing: 0.197" (5.00mm)
+  lead-style: Formed Leads - Kinked
+docs:
+- kind: datasheet
+  url: https://product.tdk.com/en/system/files/dam/doc/product/capacitor/ceramic/lead-mlcc/catalog/leadmlcc_conventional_fk_en.pdf
+  source: playwright
+  path: store/docs/84a510c55c1cea23.pdf
+  sha256: 84a510c55c1cea23486e408637bab16a81a399eb294c3a480c00cf612b570252
+  bytes: 206020
+enrichment:
+  source: digikey
+  dk_category_id: 60
+  dk_category: Ceramic Capacitors
+  provisional: true

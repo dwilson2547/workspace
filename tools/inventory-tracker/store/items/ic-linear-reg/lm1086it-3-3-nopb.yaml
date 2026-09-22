@@ -1,0 +1,33 @@
+id: lm1086it-3-3-nopb
+type: component
+category: ic-linear-reg
+description: IC REG LINEAR 3.3V 1.5A TO220-3
+manufacturer: Texas Instruments
+mpn: LM1086IT-3.3/NOPB
+vendor_pns:
+  digikey: LM1086IT-3.3/NOPB-ND
+qty: 10
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 10
+  unit_price: 1.755
+params:
+  supply_voltage_max: 27.0
+  output_voltage: 3.3
+  dropout: 1.5
+  output_current: 1.5
+  mounting: tht
+  package: TO-220-3
+docs:
+- kind: datasheet
+  url: https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Flm1086
+  source: digikey
+  path: store/docs/f5f0d0df5391a049.pdf
+  sha256: f5f0d0df5391a0498eff9c513c80ece1a9b3b5068600f0a27be6bd979a8a6eda
+  bytes: 2254858
+enrichment:
+  source: digikey
+  dk_category_id: 699
+  dk_category: Voltage Regulators - Linear, Low Drop Out (LDO) Regulators
+  provisional: false

@@ -1,0 +1,7 @@
+# Landing category for freshly-ingested parts before enrichment assigns a real
+# category + params. Concrete (items may use it) but carries no params and no
+# required fields, so parser stubs validate. Slice 3 reclassifies these into
+# resistor / capacitor / ic-* / etc. using the DigiKey API's category.
+category: unclassified
+identifying: []
+params: {}

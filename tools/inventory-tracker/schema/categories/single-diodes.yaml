@@ -1,0 +1,54 @@
+category: single-diodes
+provisional: true
+dk_category_id: 280
+label: Single Diodes
+identifying: []
+params:
+  technology:
+    type: string
+    dk_param_id: 570
+    label: Technology
+  voltage-dc-reverse-vr-max:
+    type: string
+    dk_param_id: 2071
+    label: Voltage - DC Reverse (Vr) (Max)
+  current-average-rectified-io:
+    type: string
+    dk_param_id: 914
+    label: Current - Average Rectified (Io)
+  voltage-forward-vf-max-if:
+    type: string
+    dk_param_id: 2261
+    label: Voltage - Forward (Vf) (Max) @ If
+  speed:
+    type: string
+    dk_param_id: 143
+    label: Speed
+  reverse-recovery-time-trr:
+    type: string
+    dk_param_id: 552
+    label: Reverse Recovery Time (trr)
+  current-reverse-leakage-vr:
+    type: string
+    dk_param_id: 2269
+    label: Current - Reverse Leakage @ Vr
+  capacitance-vr-f:
+    type: string
+    dk_param_id: 718
+    label: Capacitance @ Vr, F
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case
+  supplier-device-package:
+    type: string
+    dk_param_id: 1291
+    label: Supplier Device Package
+  operating-temperature-junction:
+    type: string
+    dk_param_id: 1686
+    label: Operating Temperature - Junction

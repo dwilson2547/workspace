@@ -1,0 +1,47 @@
+vendor: digikey
+po_number: '96159208'
+web_order_id: '365988014'
+customer: '15802440'
+order_date: '2025-12-02'
+currency: USD
+totals:
+  sales: 61.44
+  shipping: 6.99
+  tax: 3.69
+  total: 72.12
+source_pdf: SALESORDER_EMAIL96159208.pdf
+line_items:
+- line: 1
+  digikey_pn: 255-1001-5-ND
+  description: RELAY TELECOM DPDT 1A 5V
+  qty_ordered: 12
+  qty_backordered: 0
+  unit_price: 1.536
+  amount: 18.43
+  manufacturer: PANASONIC ELECTRIC WORKS
+  mpn: TQ2-5V
+  coo: JAPAN
+  tariff: null
+- line: 2
+  digikey_pn: 255-1008-5-ND
+  description: RELAY TELECOM DPDT 1A 12V
+  qty_ordered: 12
+  qty_backordered: 0
+  unit_price: 1.823
+  amount: 21.88
+  manufacturer: PANASONIC ELECTRIC WORKS
+  mpn: TQ2-L2-12V
+  coo: JAPAN
+  tariff: null
+- line: 3
+  digikey_pn: 255-1007-5-ND
+  description: RELAY TELECOM DPDT 1A 5V
+  qty_ordered: 12
+  qty_backordered: 0
+  unit_price: 1.761
+  amount: 21.13
+  manufacturer: PANASONIC ELECTRIC WORKS
+  mpn: TQ2-L2-5V
+  coo: JAPAN
+  tariff: null
+id: digikey-96159208

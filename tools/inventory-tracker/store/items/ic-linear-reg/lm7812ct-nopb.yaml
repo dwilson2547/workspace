@@ -1,0 +1,33 @@
+id: lm7812ct-nopb
+type: component
+category: ic-linear-reg
+description: IC REG LINEAR 12V 1A TO220-3
+manufacturer: Texas Instruments
+mpn: LM7812CT/NOPB
+vendor_pns:
+  digikey: 296-50628-ND
+qty: 10
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 10
+  unit_price: 1.325
+params:
+  supply_voltage_max: 35.0
+  output_voltage: 12.0
+  dropout: 2.0
+  output_current: 1.0
+  mounting: tht
+  package: TO-220-3
+docs:
+- kind: datasheet
+  url: https://www.ti.com/lit/ds/symlink/lm7800.pdf
+  source: digikey
+  path: store/docs/05e2795f3d729a87.pdf
+  sha256: 05e2795f3d729a877647070bdaedaecc8445f9137c13a4a9e25de19ecab53a9a
+  bytes: 2583683
+enrichment:
+  source: digikey
+  dk_category_id: 699
+  dk_category: Voltage Regulators - Linear, Low Drop Out (LDO) Regulators
+  provisional: false

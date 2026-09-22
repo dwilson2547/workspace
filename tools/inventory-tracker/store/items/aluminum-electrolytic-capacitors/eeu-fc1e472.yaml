@@ -1,0 +1,43 @@
+id: eeu-fc1e472
+type: component
+category: aluminum-electrolytic-capacitors
+description: CAP ALUM 4700UF 20% 25V RADIAL
+manufacturer: Panasonic Industry
+mpn: EEU-FC1E472
+vendor_pns:
+  digikey: P10289-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 1.523
+params:
+  capacitance: 4700 µF
+  tolerance: ±20%
+  voltage-rated: 25 V
+  lifetime-temp: 5000 Hrs @ 105°C
+  operating-temperature: -55°C ~ 105°C
+  polarization: Polar
+  ratings: AEC-Q200
+  applications: Automotive
+  ripple-current-low-frequency: 3.128 A @ 120 Hz
+  ripple-current-high-frequency: 3.68 A @ 100 kHz
+  impedance: 15 mOhms
+  lead-spacing: 0.295" (7.50mm)
+  size-dimension: 0.709" Dia (18.00mm)
+  height-seated-max: 1.398" (35.50mm)
+  mounting-type: Through Hole
+  package-case: Radial, Can
+docs:
+- kind: datasheet
+  url: https://industrial.panasonic.com/ww/products/pt/aluminum-cap-lead/models/EEUFC1E472
+  source: playwright
+  path: store/docs/42d91ae29ab6122d.pdf
+  sha256: 42d91ae29ab6122dfe20974abad2efd45d91a29337a73c5a5319616301b004f7
+  bytes: 1109513
+enrichment:
+  source: digikey
+  dk_category_id: 58
+  dk_category: Aluminum Electrolytic Capacitors
+  provisional: true

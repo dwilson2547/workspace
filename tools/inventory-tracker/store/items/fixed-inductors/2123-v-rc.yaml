@@ -1,0 +1,38 @@
+id: 2123-v-rc
+type: component
+category: fixed-inductors
+description: FIXED IND 820UH 1.4A 370 MOHM TH
+manufacturer: Bourns Inc.
+mpn: 2123-V-RC
+vendor_pns:
+  digikey: 2123-V-RC-ND
+qty: 4
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 4
+  unit_price: 2.53
+params:
+  type: Toroidal
+  inductance: 820 µH
+  tolerance: ±15%
+  current-rating-amps: 1.4 A
+  shielding: Unshielded
+  dc-resistance-dcr: 370mOhm Max
+  operating-temperature: -55°C ~ 105°C
+  inductance-frequency-test: 1 kHz
+  mounting-type: Through Hole
+  package-case: Radial, Vertical (Open)
+  size-dimension: 0.860" Dia x 0.450" W (21.84mm x 11.43mm)
+docs:
+- kind: datasheet
+  url: https://www.bourns.com/docs/Product-Datasheets/2100_series.pdf
+  source: digikey
+  path: store/docs/eb556ffd6b076dc9.pdf
+  sha256: eb556ffd6b076dc96effec678dc77e0980cef4da0047861e5d49a3b0eda24ba8
+  bytes: 124152
+enrichment:
+  source: digikey
+  dk_category_id: 71
+  dk_category: Fixed Inductors
+  provisional: true

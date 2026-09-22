@@ -1,0 +1,46 @@
+category: trimmer-potentiometers
+provisional: true
+dk_category_id: 80
+label: Trimmer Potentiometers
+identifying: []
+params:
+  resistance:
+    type: string
+    dk_param_id: 2085
+    label: Resistance
+  power-watts:
+    type: string
+    dk_param_id: 2
+    label: Power (Watts)
+  tolerance:
+    type: string
+    dk_param_id: 3
+    label: Tolerance
+  temperature-coefficient:
+    type: string
+    dk_param_id: 17
+    label: Temperature Coefficient
+  number-of-turns:
+    type: string
+    dk_param_id: 2218
+    label: Number of Turns
+  adjustment-type:
+    type: string
+    dk_param_id: 24
+    label: Adjustment Type
+  resistive-material:
+    type: string
+    dk_param_id: 1083
+    label: Resistive Material
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  termination-style:
+    type: string
+    dk_param_id: 258
+    label: Termination Style
+  size-dimension:
+    type: string
+    dk_param_id: 46
+    label: Size / Dimension

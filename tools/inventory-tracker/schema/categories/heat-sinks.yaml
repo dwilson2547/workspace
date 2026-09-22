@@ -1,0 +1,58 @@
+category: heat-sinks
+provisional: true
+dk_category_id: 219
+label: Heat Sinks
+identifying: []
+params:
+  type:
+    type: string
+    dk_param_id: 183
+    label: Type
+  package-cooled:
+    type: string
+    dk_param_id: 357
+    label: Package Cooled
+  attachment-method:
+    type: string
+    dk_param_id: 623
+    label: Attachment Method
+  shape:
+    type: string
+    dk_param_id: 98
+    label: Shape
+  length:
+    type: string
+    dk_param_id: 77
+    label: Length
+  width:
+    type: string
+    dk_param_id: 193
+    label: Width
+  diameter:
+    type: string
+    dk_param_id: 76
+    label: Diameter
+  fin-height:
+    type: string
+    dk_param_id: 1459
+    label: Fin Height
+  power-dissipation-temperature-rise:
+    type: string
+    dk_param_id: 624
+    label: Power Dissipation @ Temperature Rise
+  thermal-resistance-forced-air-flow:
+    type: string
+    dk_param_id: 625
+    label: Thermal Resistance @ Forced Air Flow
+  thermal-resistance-natural:
+    type: string
+    dk_param_id: 922
+    label: Thermal Resistance @ Natural
+  material:
+    type: string
+    dk_param_id: 70
+    label: Material
+  material-finish:
+    type: string
+    dk_param_id: 1460
+    label: Material Finish

@@ -1,0 +1,58 @@
+category: diode-arrays
+provisional: true
+dk_category_id: 286
+label: Diode Arrays
+identifying: []
+params:
+  diode-configuration:
+    type: string
+    dk_param_id: 971
+    label: Diode Configuration
+  technology:
+    type: string
+    dk_param_id: 570
+    label: Technology
+  voltage-dc-reverse-vr-max:
+    type: string
+    dk_param_id: 2071
+    label: Voltage - DC Reverse (Vr) (Max)
+  current-average-rectified-io-per-diode:
+    type: string
+    dk_param_id: 972
+    label: Current - Average Rectified (Io) (per Diode)
+  voltage-forward-vf-max-if:
+    type: string
+    dk_param_id: 2261
+    label: Voltage - Forward (Vf) (Max) @ If
+  speed:
+    type: string
+    dk_param_id: 143
+    label: Speed
+  current-reverse-leakage-vr:
+    type: string
+    dk_param_id: 2269
+    label: Current - Reverse Leakage @ Vr
+  operating-temperature-junction:
+    type: string
+    dk_param_id: 1686
+    label: Operating Temperature - Junction
+  grade:
+    type: string
+    dk_param_id: 1977
+    label: Grade
+  qualification:
+    type: string
+    dk_param_id: 2700
+    label: Qualification
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case
+  supplier-device-package:
+    type: string
+    dk_param_id: 1291
+    label: Supplier Device Package

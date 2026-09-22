@@ -1,0 +1,8 @@
+# Tools / equipment / benchtop gear. These are tracked as general inventory
+# records — the value is the purchase record and any associated manuals, not
+# parametrics — so `params` is intentionally empty. A scanned manual attaches via
+# the item's docs[] list with kind: manual (see docs/data-model.md), NOT as its
+# own item. Add category-specific fields here later only if you actually query them.
+category: tool
+identifying: []
+params: {}

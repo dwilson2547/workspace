@@ -1,0 +1,13 @@
+# Abstract base for any physical part that has a package / mounting style.
+# `abstract: true` means no item may declare category: physical directly — it
+# exists only to be `extends`-ed by concrete categories.
+category: physical
+abstract: true
+params:
+  package:
+    type: string
+    description: Package / case code, normalized upper-case (e.g. AXIAL, 0805, TO-220).
+  mounting:
+    type: enum
+    values: [tht, smd, chassis, panel]
+    description: Mounting style.

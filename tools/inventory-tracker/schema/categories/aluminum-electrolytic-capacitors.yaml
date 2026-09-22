@@ -1,0 +1,78 @@
+category: aluminum-electrolytic-capacitors
+provisional: true
+dk_category_id: 58
+label: Aluminum Electrolytic Capacitors
+identifying: []
+params:
+  capacitance:
+    type: string
+    dk_param_id: 2049
+    label: Capacitance
+  tolerance:
+    type: string
+    dk_param_id: 3
+    label: Tolerance
+  voltage-rated:
+    type: string
+    dk_param_id: 2079
+    label: Voltage - Rated
+  esr-equivalent-series-resistance:
+    type: string
+    dk_param_id: 724
+    label: ESR (Equivalent Series Resistance)
+  lifetime-temp:
+    type: string
+    dk_param_id: 725
+    label: Lifetime @ Temp.
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature
+  polarization:
+    type: string
+    dk_param_id: 52
+    label: Polarization
+  ratings:
+    type: string
+    dk_param_id: 707
+    label: Ratings
+  applications:
+    type: string
+    dk_param_id: 405
+    label: Applications
+  ripple-current-low-frequency:
+    type: string
+    dk_param_id: 2253
+    label: Ripple Current @ Low Frequency
+  ripple-current-high-frequency:
+    type: string
+    dk_param_id: 2260
+    label: Ripple Current @ High Frequency
+  lead-spacing:
+    type: string
+    dk_param_id: 508
+    label: Lead Spacing
+  size-dimension:
+    type: string
+    dk_param_id: 46
+    label: Size / Dimension
+  height-seated-max:
+    type: string
+    dk_param_id: 1500
+    label: Height - Seated (Max)
+  surface-mount-land-size:
+    type: string
+    dk_param_id: 884
+    label: Surface Mount Land Size
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case
+  impedance:
+    type: string
+    dk_param_id: 2080
+    label: Impedance

@@ -1,0 +1,42 @@
+id: eeu-fm1c392
+type: component
+category: aluminum-electrolytic-capacitors
+description: CAP ALUM 3900UF 20% 16V RADIAL
+manufacturer: Panasonic Industry
+mpn: EEU-FM1C392
+vendor_pns:
+  digikey: P12374-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 0.892
+params:
+  capacitance: 3900 µF
+  tolerance: ±20%
+  voltage-rated: 16 V
+  lifetime-temp: 7000 Hrs @ 105°C
+  operating-temperature: -40°C ~ 105°C
+  polarization: Polar
+  applications: General Purpose
+  ripple-current-low-frequency: 3.056 A @ 120 Hz
+  ripple-current-high-frequency: 3.82 A @ 100 kHz
+  impedance: 14 mOhms
+  lead-spacing: 0.295" (7.50mm)
+  size-dimension: 0.630" Dia (16.00mm)
+  height-seated-max: 1.063" (27.00mm)
+  mounting-type: Through Hole
+  package-case: Radial, Can
+docs:
+- kind: datasheet
+  url: https://industrial.panasonic.com/cdbs/www-data/pdf/RDF0000/ABA0000C1018.pdf
+  source: digikey
+  path: store/docs/e8e1ce5868e711c4.pdf
+  sha256: e8e1ce5868e711c48f64e18272d013a9bcecb1c577116f720c9c150e386a2549
+  bytes: 739214
+enrichment:
+  source: digikey
+  dk_category_id: 58
+  dk_category: Aluminum Electrolytic Capacitors
+  provisional: true

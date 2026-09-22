@@ -1,0 +1,9 @@
+# Abstract base for passive components (resistors, capacitors, inductors, ...).
+category: passive
+abstract: true
+extends: physical
+params:
+  temp_coeff:
+    type: number
+    unit: ppm_per_c
+    description: Temperature coefficient.

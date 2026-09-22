@@ -1,0 +1,42 @@
+category: inrush-current-limiters-icl
+provisional: true
+dk_category_id: 151
+label: Inrush Current Limiters (ICL)
+identifying: []
+params:
+  r-25-c:
+    type: string
+    dk_param_id: 2182
+    label: R @ 25°C
+  tolerance:
+    type: string
+    dk_param_id: 3
+    label: Tolerance
+  current-steady-state-max:
+    type: string
+    dk_param_id: 679
+    label: Current - Steady State Max
+  r-current:
+    type: string
+    dk_param_id: 2183
+    label: R @ Current
+  diameter:
+    type: string
+    dk_param_id: 76
+    label: Diameter
+  lead-spacing:
+    type: string
+    dk_param_id: 508
+    label: Lead Spacing
+  grade:
+    type: string
+    dk_param_id: 1977
+    label: Grade
+  qualification:
+    type: string
+    dk_param_id: 2700
+    label: Qualification
+  approval-agency:
+    type: string
+    dk_param_id: 660
+    label: Approval Agency

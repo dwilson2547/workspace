@@ -1,0 +1,46 @@
+category: single-zener-diodes
+provisional: true
+dk_category_id: 287
+label: Single Zener Diodes
+identifying: []
+params:
+  voltage-zener-nom-vz:
+    type: string
+    dk_param_id: 920
+    label: Voltage - Zener (Nom) (Vz)
+  tolerance:
+    type: string
+    dk_param_id: 3
+    label: Tolerance
+  power-max:
+    type: string
+    dk_param_id: 2109
+    label: Power - Max
+  impedance-max-zzt:
+    type: string
+    dk_param_id: 921
+    label: Impedance (Max) (Zzt)
+  current-reverse-leakage-vr:
+    type: string
+    dk_param_id: 2269
+    label: Current - Reverse Leakage @ Vr
+  voltage-forward-vf-max-if:
+    type: string
+    dk_param_id: 2261
+    label: Voltage - Forward (Vf) (Max) @ If
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case
+  supplier-device-package:
+    type: string
+    dk_param_id: 1291
+    label: Supplier Device Package

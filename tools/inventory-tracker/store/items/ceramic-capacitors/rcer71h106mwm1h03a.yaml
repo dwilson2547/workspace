@@ -1,0 +1,40 @@
+id: rcer71h106mwm1h03a
+type: component
+category: ceramic-capacitors
+description: CAP CER 10UF 50V X7R RADIAL
+manufacturer: Murata Electronics
+mpn: RCER71H106MWM1H03A
+vendor_pns:
+  digikey: 490-7518-1-ND
+qty: 20
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 20
+  unit_price: 1.178
+params:
+  capacitance: 10 µF
+  tolerance: ±20%
+  voltage-rated: 50V
+  temperature-coefficient: X7R
+  operating-temperature: -55°C ~ 125°C
+  ratings: AEC-Q200
+  applications: Automotive
+  mounting-type: Through Hole
+  package-case: Radial
+  size-dimension: 0.217" L x 0.157" W (5.50mm x 4.00mm)
+  height-seated-max: 0.295" (7.50mm)
+  lead-spacing: 0.197" (5.00mm)
+  lead-style: Formed Leads
+docs:
+- kind: datasheet
+  url: https://pim.murata.com/asset/pim4/ceramicCapacitorLead/RCE_X7R_X7S_25V-100V_E_PDF_CERAMICCAPACITORLEAD?lastModifiedDatetime=20250909130221
+  source: digikey
+  path: store/docs/86e235a17478d3f8.pdf
+  sha256: 86e235a17478d3f82aa6cdb1af41095feffc3fa027e3ec181650b2c2d24c80e8
+  bytes: 544466
+enrichment:
+  source: digikey
+  dk_category_id: 60
+  dk_category: Ceramic Capacitors
+  provisional: true

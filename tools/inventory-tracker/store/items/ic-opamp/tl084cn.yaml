@@ -1,0 +1,38 @@
+id: tl084cn
+type: component
+category: ic-opamp
+description: IC OPAMP JFET 4 CIRCUIT 14DIP
+manufacturer: Texas Instruments
+mpn: TL084CN
+vendor_pns:
+  digikey: 296-1784-5-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 0.611
+params:
+  amplifier_type: J-FET
+  circuits: 4
+  slew_rate: 13.0
+  gain_bandwidth: 3000000.0
+  input_bias: 3.0e-11
+  input_offset: 0.003
+  supply_current: 0.0014
+  supply_voltage_min: 10.0
+  supply_voltage_max: 30.0
+  mounting: tht
+  package: 14-DIP (0.300", 7.62mm)
+docs:
+- kind: datasheet
+  url: https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=http%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Ftl084
+  source: digikey
+  path: store/docs/29c5f3fb617744fb.pdf
+  sha256: 29c5f3fb617744fbb988432fecd9e52b20ddb2c339333d289317f6fe339b8e3f
+  bytes: 5554453
+enrichment:
+  source: digikey
+  dk_category_id: 687
+  dk_category: Instrumentation, Op Amps, Buffer Amps
+  provisional: false

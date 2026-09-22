@@ -1,0 +1,94 @@
+category: signal-relays-up-to-2-amps
+provisional: true
+dk_category_id: 189
+label: Signal Relays, Up to 2 Amps
+identifying: []
+params:
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  coil-voltage:
+    type: string
+    dk_param_id: 72
+    label: Coil Voltage
+  contact-form:
+    type: string
+    dk_param_id: 1409
+    label: Contact Form
+  contact-rating-current:
+    type: string
+    dk_param_id: 1410
+    label: Contact Rating (Current)
+  switching-voltage:
+    type: string
+    dk_param_id: 1411
+    label: Switching Voltage
+  load-max-switching:
+    type: string
+    dk_param_id: 2703
+    label: Load - Max Switching
+  coil-current:
+    type: string
+    dk_param_id: 671
+    label: Coil Current
+  coil-type:
+    type: string
+    dk_param_id: 675
+    label: Coil Type
+  features:
+    type: string
+    dk_param_id: 5
+    label: Features
+  termination-style:
+    type: string
+    dk_param_id: 258
+    label: Termination Style
+  seal-rating:
+    type: string
+    dk_param_id: 981
+    label: Seal Rating
+  coil-insulation:
+    type: string
+    dk_param_id: 2395
+    label: Coil Insulation
+  must-operate-voltage:
+    type: string
+    dk_param_id: 1413
+    label: Must Operate Voltage
+  must-release-voltage:
+    type: string
+    dk_param_id: 1412
+    label: Must Release Voltage
+  operate-time:
+    type: string
+    dk_param_id: 1414
+    label: Operate Time
+  release-time:
+    type: string
+    dk_param_id: 1415
+    label: Release Time
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature
+  contact-material:
+    type: string
+    dk_param_id: 1084
+    label: Contact Material
+  approval-agency:
+    type: string
+    dk_param_id: 660
+    label: Approval Agency
+  relay-type:
+    type: string
+    dk_param_id: 668
+    label: Relay Type
+  grade:
+    type: string
+    dk_param_id: 1977
+    label: Grade
+  qualification:
+    type: string
+    dk_param_id: 2700
+    label: Qualification

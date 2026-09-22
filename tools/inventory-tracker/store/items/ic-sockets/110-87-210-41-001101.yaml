@@ -1,0 +1,35 @@
+id: 110-87-210-41-001101
+type: component
+category: ic-sockets
+description: CONN IC DIP SOCKET 10POS GOLD
+manufacturer: Preci-Dip
+mpn: 110-87-210-41-001101
+vendor_pns:
+  digikey: 1212-1000-ND
+qty: 41
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 41
+  unit_price: 0.50073
+params:
+  type: DIP, 0.2" (5.08mm) Row Spacing
+  number-of-positions-or-pins-grid: 10 (2 x 5)
+  pitch-mating: 0.100" (2.54mm)
+  contact-finish-mating: Gold
+  contact-finish-thickness-mating: Flash
+  contact-material-mating: Beryllium Copper
+  mounting-type: Through Hole
+  features: Open Frame
+  termination: Solder
+  pitch-post: 0.100" (2.54mm)
+  contact-finish-post: Tin
+  contact-material-post: Brass
+  housing-material: Polycyclohexylenedimethylene Terephthalate (PCT), Polyester, Glass
+    Filled
+  operating-temperature: -55°C ~ 125°C
+enrichment:
+  source: digikey
+  dk_category_id: 409
+  dk_category: IC Sockets
+  provisional: true

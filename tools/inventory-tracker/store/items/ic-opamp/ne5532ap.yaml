@@ -1,0 +1,38 @@
+id: ne5532ap
+type: component
+category: ic-opamp
+description: IC OPAMP GP 2 CIRCUIT 8DIP
+manufacturer: Texas Instruments
+mpn: NE5532AP
+vendor_pns:
+  digikey: 296-7040-5-ND
+qty: 20
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 20
+  unit_price: 0.984
+params:
+  amplifier_type: Standard (General Purpose)
+  circuits: 2
+  slew_rate: 5.0
+  gain_bandwidth: 10000000.0
+  input_bias: 2.0000000000000002e-07
+  input_offset: 0.0005
+  supply_current: 0.008
+  supply_voltage_min: 10.0
+  supply_voltage_max: 30.0
+  mounting: tht
+  package: 8-DIP (0.300", 7.62mm)
+docs:
+- kind: datasheet
+  url: https://www.ti.com/lit/ds/symlink/ne5532.pdf?ts=1784120200154&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FNE5532
+  source: digikey
+  path: store/docs/a2f5071accc57bba.pdf
+  sha256: a2f5071accc57bba5d1bdc7ba7833e50ddc2610f76350666b9068d88dc43d264
+  bytes: 1080656
+enrichment:
+  source: digikey
+  dk_category_id: 687
+  dk_category: Instrumentation, Op Amps, Buffer Amps
+  provisional: false

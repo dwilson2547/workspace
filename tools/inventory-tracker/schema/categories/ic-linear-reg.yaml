@@ -1,0 +1,23 @@
+category: ic-linear-reg
+extends: ic
+identifying: [output_voltage, output_current, adjustable, topology, package]
+params:
+  output_voltage:
+    type: number
+    unit: volt
+    description: Fixed output voltage. Omit when adjustable (use output_voltage_min/max in notes).
+  output_current:
+    type: number
+    unit: ampere
+    description: Rated output current.
+  adjustable:
+    type: boolean
+    description: True for adjustable regulators (e.g. LT3081).
+  topology:
+    type: enum
+    values: [ldo, standard, switching]
+    description: Regulator topology.
+  dropout:
+    type: number
+    unit: volt
+    description: Dropout voltage at rated current.

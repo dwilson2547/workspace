@@ -1,0 +1,38 @@
+id: opa2134pa
+type: component
+category: ic-opamp
+description: IC AUDIO 2 CIRCUIT 8DIP
+manufacturer: Texas Instruments
+mpn: OPA2134PA
+vendor_pns:
+  digikey: OPA2134PA-ND
+qty: 4
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 4
+  unit_price: 7.42
+params:
+  amplifier_type: Audio
+  circuits: 2
+  slew_rate: 20.0
+  gain_bandwidth: 8000000.0
+  input_bias: 5.0e-12
+  input_offset: 0.0005
+  supply_current: 0.004
+  supply_voltage_min: 5.0
+  supply_voltage_max: 36.0
+  mounting: tht
+  package: 8-DIP (0.300", 7.62mm)
+docs:
+- kind: datasheet
+  url: https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fopa134
+  source: digikey
+  path: store/docs/30703874b3eff89b.pdf
+  sha256: 30703874b3eff89b06201e23a7f77178c9dcacd94e3dcd1fc2b67e418bc3cdbd
+  bytes: 1448367
+enrichment:
+  source: digikey
+  dk_category_id: 687
+  dk_category: Instrumentation, Op Amps, Buffer Amps
+  provisional: false

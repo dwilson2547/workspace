@@ -1,0 +1,20 @@
+category: resistor
+extends: passive
+# `identifying` params define part identity: used for dedup on ingest and as the
+# match key for `inv alt` (alternatives you already own). Inherited params
+# (package, mounting) are resolved from the extends chain.
+identifying: [resistance, tolerance, power, package, mounting]
+params:
+  resistance:
+    type: number
+    unit: ohm
+    required: true
+    description: Nominal resistance, canonical ohms (10k -> 10000).
+  tolerance:
+    type: number
+    unit: percent
+    description: Resistance tolerance (0.1 = 0.1%).
+  power:
+    type: number
+    unit: watt
+    description: Rated power (0.25 = 1/4W).

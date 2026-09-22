@@ -1,0 +1,37 @@
+id: sn74hc595n
+type: component
+category: shift-registers
+description: IC SR TRI-STATE 8BIT 16-PDIP
+manufacturer: Texas Instruments
+mpn: SN74HC595N
+vendor_pns:
+  digikey: 296-1600-5-ND
+qty: 25
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 25
+  unit_price: 1.0936
+params:
+  logic-type: Shift Register
+  output-type: Tri-State
+  number-of-elements: '1'
+  number-of-bits-per-element: '8'
+  function: Serial to Parallel, Serial
+  voltage-supply: 2V ~ 6V
+  operating-temperature: -40°C ~ 85°C
+  mounting-type: Through Hole
+  package-case: 16-DIP (0.300", 7.62mm)
+  supplier-device-package: 16-PDIP
+docs:
+- kind: datasheet
+  url: https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hc595
+  source: digikey
+  path: store/docs/0bd24136aa769a7b.pdf
+  sha256: 0bd24136aa769a7b653f1cf70b422882e0b7fc8519c4ce3b4a6bc9f4a3fff2e3
+  bytes: 2710685
+enrichment:
+  source: digikey
+  dk_category_id: 712
+  dk_category: Shift Registers
+  provisional: true

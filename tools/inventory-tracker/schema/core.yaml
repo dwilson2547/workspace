@@ -1,0 +1,30 @@
+# Common-core schema — fields present on EVERY inventory item, regardless of
+# category. The typed parametric block (`params`) is governed separately by the
+# per-category schemas in categories/. See docs/data-model.md for the rationale.
+
+# Coarse kind of item. `category` (below) selects the params schema; `type` is
+# the broad bucket used for filtering and views.
+item_types: [component, tool, consumable, accessory, equipment]
+
+# Allowed kinds for entries in an item's `docs[]` list. A tool's scanned manual
+# and a component's datasheet ride the same document model — only `kind` differs.
+doc_kinds: [datasheet, manual, guide, drawing, cert, other]
+
+# Core fields. `required: true` means every item must carry it.
+core_fields:
+  id:           { type: string,  required: true }   # stable slug, e.g. yageo-mfp-25brd52-10k
+  type:         { type: enum, values: [component, tool, consumable, accessory, equipment], required: true }
+  category:     { type: string,  required: true }    # must resolve to a non-abstract category schema
+  description:  { type: string }
+  manufacturer: { type: string }
+  mpn:          { type: string }                     # manufacturer part number
+  vendor_pns:   { type: map }                        # { digikey: 10KADCT-ND, amazon: B0... }
+  qty:          { type: number }                     # on-hand count
+  unit:         { type: string }                     # ea, m, roll, ... (default: ea)
+  location:     { type: string }                     # bin / shelf label
+  tags:         { type: list }
+  notes:        { type: string }
+  params:       { type: map }                        # validated against the category schema
+  docs:         { type: list }                       # [{ path, kind, sha256?, source? }]
+  projects:     { type: list }                       # cross-links to workspace projects
+  purchases:    { type: list }                       # [{ order?, vendor?, date, qty?, unit_price? }]

@@ -1,0 +1,39 @@
+id: 581002b02500g
+type: component
+category: heat-sinks
+description: HEATSINK TO-220 PWR BLK W/PINS
+manufacturer: Boyd Laconia, LLC
+mpn: 581002B02500G
+vendor_pns:
+  digikey: HS387-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 1.84
+params:
+  type: Board Level, Vertical
+  package-cooled: TO-220
+  attachment-method: Bolt On and PC Pin
+  shape: Rectangular, Fins
+  length: 1.000" (25.40mm)
+  width: 0.640" (16.26mm)
+  fin-height: 0.640" (16.26mm)
+  power-dissipation-temperature-rise: 2.5W @ 50°C
+  thermal-resistance-forced-air-flow: 4.00°C/W @ 500 LFM
+  thermal-resistance-natural: 17.40°C/W
+  material: Aluminum
+  material-finish: Black Anodized
+docs:
+- kind: datasheet
+  url: https://info.boydcorp.com/hubfs/Thermal/Air-Cooling/Boyd-Board-Level-Heatsinks-Catalog.pdf
+  source: digikey
+  path: store/docs/985d70eb8ab6a8c4.pdf
+  sha256: 985d70eb8ab6a8c445ce1eccba7cf25be5d1f4699406f002d9650b84cf12e469
+  bytes: 2732456
+enrichment:
+  source: digikey
+  dk_category_id: 219
+  dk_category: Heat Sinks
+  provisional: true

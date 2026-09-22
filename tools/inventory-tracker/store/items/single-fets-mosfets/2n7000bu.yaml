@@ -1,0 +1,41 @@
+id: 2n7000bu
+type: component
+category: single-fets-mosfets
+description: MOSFET N-CH 60V 200MA TO92-3
+manufacturer: onsemi
+mpn: 2N7000BU
+vendor_pns:
+  digikey: 2N7000BU-ND
+qty: 200
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 200
+  unit_price: 0.1953
+params:
+  fet-type: N-Channel
+  technology: MOSFET (Metal Oxide)
+  drain-to-source-voltage-vdss: 60 V
+  current-continuous-drain-id-25-c: 200mA (Tc)
+  drive-voltage-max-rds-on-min-rds-on: 4.5V, 10V
+  rds-on-max-id-vgs: 5Ohm @ 500mA, 10V
+  vgs-th-max-id: 3V @ 1mA
+  vgs-max: ±20V
+  input-capacitance-ciss-max-vds: 50 pF @ 25 V
+  power-dissipation-max: 400mW (Ta)
+  operating-temperature: -55°C ~ 150°C (TJ)
+  mounting-type: Through Hole
+  supplier-device-package: TO-92-3
+  package-case: TO-226-3, TO-92-3 (TO-226AA)
+docs:
+- kind: datasheet
+  url: https://www.onsemi.com/download/data-sheet/pdf/nds7002a-d.pdf
+  source: digikey
+  path: store/docs/3e5473c982fde8ed.pdf
+  sha256: 3e5473c982fde8edbc3c8a6b1193ffa58a052c4a363821d4e2990c53c6832674
+  bytes: 503473
+enrichment:
+  source: digikey
+  dk_category_id: 278
+  dk_category: Single FETs, MOSFETs
+  provisional: true

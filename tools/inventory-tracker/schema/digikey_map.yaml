@@ -1,0 +1,40 @@
+# Maps DigiKey taxonomy -> local curated schemas. CategoryIds not listed here are
+# auto-provisioned from the API parameter taxonomy (flagged provisional). Param
+# maps use DigiKey ParameterId (a stable integer) -> local param key, so a DigiKey
+# label rewording never breaks the mapping. Params not listed for a curated
+# category are intentionally dropped (the curator picked the fields).
+
+categories:
+  53: resistor          # Through Hole Resistors
+  699: ic-linear-reg    # Voltage Regulators - Linear, LDO
+  687: ic-opamp         # Instrumentation, Op Amps, Buffer Amps
+
+params:
+  resistor:
+    2085: resistance
+    3: tolerance
+    2: power
+    17: temp_coeff
+    16: package
+    69: mounting
+
+  ic-linear-reg:
+    1779: output_voltage       # Voltage - Output (Min/Fixed)
+    129: output_current        # Current - Output
+    573: supply_voltage_max    # Voltage - Input (Max)
+    2065: dropout              # Voltage Dropout (Max)
+    16: package
+    69: mounting
+
+  ic-opamp:
+    2094: circuits             # Number of Circuits
+    161: amplifier_type        # Amplifier Type
+    658: gain_bandwidth        # Gain Bandwidth Product
+    511: slew_rate             # Slew Rate
+    975: input_offset          # Voltage - Input Offset
+    974: input_bias            # Current - Input Bias
+    449: supply_current        # Current - Supply
+    2609: supply_voltage_min   # Voltage - Supply Span (Min)
+    2610: supply_voltage_max   # Voltage - Supply Span (Max)
+    16: package
+    69: mounting

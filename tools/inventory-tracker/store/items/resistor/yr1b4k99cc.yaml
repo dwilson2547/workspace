@@ -1,0 +1,32 @@
+id: yr1b4k99cc
+type: component
+category: resistor
+description: RES 4.99K OHM 0.1% 1/4W AXIAL
+manufacturer: TE Connectivity Passive Product
+mpn: YR1B4K99CC
+vendor_pns:
+  digikey: 1712-YR1B4K99CCCT-ND
+qty: 25
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 25
+  unit_price: 0.4552
+params:
+  resistance: 4990.0
+  tolerance: 0.1
+  power: 0.25
+  temp_coeff: 15.0
+  package: Axial
+docs:
+- kind: datasheet
+  url: https://www.te.com/commerce/DocumentDelivery/DDEController?Action=srchrtrv&DocNm=1676914&DocType=Customer+Drawing&DocLang=English
+  source: digikey
+  path: store/docs/e237decc84b7b70a.pdf
+  sha256: e237decc84b7b70a8546b79d11e652a146ec7d283e7b3fc73501cc47ee2a47d8
+  bytes: 60324
+enrichment:
+  source: digikey
+  dk_category_id: 53
+  dk_category: Through Hole Resistors
+  provisional: false

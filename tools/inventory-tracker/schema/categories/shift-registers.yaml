@@ -1,0 +1,46 @@
+category: shift-registers
+provisional: true
+dk_category_id: 712
+label: Shift Registers
+identifying: []
+params:
+  logic-type:
+    type: string
+    dk_param_id: 247
+    label: Logic Type
+  output-type:
+    type: string
+    dk_param_id: 41
+    label: Output Type
+  number-of-elements:
+    type: string
+    dk_param_id: 105
+    label: Number of Elements
+  number-of-bits-per-element:
+    type: string
+    dk_param_id: 2207
+    label: Number of Bits per Element
+  function:
+    type: string
+    dk_param_id: 110
+    label: Function
+  voltage-supply:
+    type: string
+    dk_param_id: 276
+    label: Voltage - Supply
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case
+  supplier-device-package:
+    type: string
+    dk_param_id: 1291
+    label: Supplier Device Package

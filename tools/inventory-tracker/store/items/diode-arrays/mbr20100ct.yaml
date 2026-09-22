@@ -1,0 +1,38 @@
+id: mbr20100ct
+type: component
+category: diode-arrays
+description: DIODE ARR SCHOT 100V 20A TO220AB
+manufacturer: Taiwan Semiconductor Corporation
+mpn: MBR20100CT
+vendor_pns:
+  digikey: 1801-MBR20100CT-ND
+qty: 12
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 12
+  unit_price: 1.69
+params:
+  diode-configuration: 1 Pair Common Cathode
+  technology: Schottky
+  voltage-dc-reverse-vr-max: 100 V
+  current-average-rectified-io-per-diode: 20A
+  voltage-forward-vf-max-if: 950 mV @ 20 A
+  speed: Fast Recovery =< 500ns, > 200mA (Io)
+  current-reverse-leakage-vr: 100 µA @ 100 V
+  operating-temperature-junction: -55°C ~ 150°C
+  mounting-type: Through Hole
+  package-case: TO-220-3
+  supplier-device-package: TO-220AB
+docs:
+- kind: datasheet
+  url: https://services.taiwansemi.com/storage/resources/datasheet/MBR2035CT SERIES_M2104.pdf
+  source: playwright
+  path: store/docs/d10a289158631f01.pdf
+  sha256: d10a289158631f01a2f8316aa80cf89b43589d8afa0160d305cfbc8d2e2c0c15
+  bytes: 572247
+enrichment:
+  source: digikey
+  dk_category_id: 286
+  dk_category: Diode Arrays
+  provisional: true

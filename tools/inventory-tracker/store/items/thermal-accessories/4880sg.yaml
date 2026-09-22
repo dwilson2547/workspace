@@ -1,0 +1,29 @@
+id: 4880sg
+type: component
+category: thermal-accessories
+description: THERMASIL3 THERMAL PAD TO-220
+manufacturer: Boyd Laconia, LLC
+mpn: 4880SG
+vendor_pns:
+  digikey: 4880SG-ND
+qty: 20
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 20
+  unit_price: 2.428
+params:
+  accessory-type: Mounting Kit
+  for-use-with-related-products: TO-220 Heat Sinks
+docs:
+- kind: datasheet
+  url: https://info.boydcorp.com/hubfs/Thermal/Air-Cooling/Boyd-Board-Level-Heatsinks-Catalog.pdf
+  source: digikey
+  path: store/docs/985d70eb8ab6a8c4.pdf
+  sha256: 985d70eb8ab6a8c445ce1eccba7cf25be5d1f4699406f002d9650b84cf12e469
+  bytes: 2732456
+enrichment:
+  source: digikey
+  dk_category_id: 224
+  dk_category: Thermal Accessories
+  provisional: true

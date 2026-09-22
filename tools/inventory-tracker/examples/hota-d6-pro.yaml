@@ -1,0 +1,20 @@
+# A tool — same envelope, empty params, value is the purchase record + manual.
+id: hota-d6-pro
+type: tool
+category: tool
+description: HOTA D6 Pro dual-channel smart charger, 15A / 200W AC
+manufacturer: HOTA
+vendor_pns:
+  amazon: B0FLXJY5M3
+qty: 1
+location: bench
+params: {}
+docs:
+  - path: manuals/hota-d6-pro.pdf
+    kind: manual
+projects: [drones]
+purchases:
+  - vendor: amazon
+    date: 2026-06-14
+    qty: 1
+    unit_price: 59.99

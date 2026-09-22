@@ -1,0 +1,39 @@
+id: k104k15x7rf5tl2
+type: component
+category: ceramic-capacitors
+description: CAP CER 0.1UF 50V X7R RADIAL
+manufacturer: Vishay Beyschlag/Draloric/BC Components
+mpn: K104K15X7RF5TL2
+vendor_pns:
+  digikey: BC1084CT-ND
+qty: 50
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 50
+  unit_price: 0.1034
+params:
+  capacitance: 0.1 µF
+  tolerance: ±10%
+  voltage-rated: 50V
+  temperature-coefficient: X7R
+  operating-temperature: -55°C ~ 125°C
+  applications: General Purpose
+  mounting-type: Through Hole
+  package-case: Radial
+  size-dimension: 0.157" L x 0.102" W (4.00mm x 2.60mm)
+  height-seated-max: 0.220" (5.60mm)
+  lead-spacing: 0.098" (2.50mm)
+  lead-style: Straight
+docs:
+- kind: datasheet
+  url: https://www.vishay.com/docs/45171/kseries.pdf
+  source: digikey
+  path: store/docs/555cf6e7062fe1de.pdf
+  sha256: 555cf6e7062fe1de1962ee38c5b8cfcff0c9cab469d563599ec6505b70485457
+  bytes: 141522
+enrichment:
+  source: digikey
+  dk_category_id: 60
+  dk_category: Ceramic Capacitors
+  provisional: true

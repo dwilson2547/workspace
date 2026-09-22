@@ -1,0 +1,21 @@
+# Abstract base for integrated circuits.
+category: ic
+abstract: true
+extends: physical
+params:
+  supply_voltage_min:
+    type: number
+    unit: volt
+    description: Minimum supply / input voltage.
+  supply_voltage_max:
+    type: number
+    unit: volt
+    description: Maximum supply / input voltage.
+  temp_min:
+    type: number
+    unit: celsius
+    description: Minimum operating temperature.
+  temp_max:
+    type: number
+    unit: celsius
+    description: Maximum operating temperature.

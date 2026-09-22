@@ -1,0 +1,40 @@
+id: a-08-lc-tt
+type: component
+category: ic-sockets
+description: CONN IC DIP SOCKET 8POS TIN
+manufacturer: Assmann WSW Components
+mpn: A 08-LC-TT
+vendor_pns:
+  digikey: AE9986-ND
+qty: 150
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 150
+  unit_price: 0.11217
+params:
+  type: DIP, 0.3" (7.62mm) Row Spacing
+  number-of-positions-or-pins-grid: 8 (2 x 4)
+  pitch-mating: 0.100" (2.54mm)
+  contact-finish-mating: Tin
+  contact-material-mating: Phosphor Bronze
+  mounting-type: Through Hole
+  features: Open Frame
+  termination: Solder
+  pitch-post: 0.100" (2.54mm)
+  contact-finish-post: Tin
+  contact-material-post: Phosphor Bronze
+  housing-material: Polybutylene Terephthalate (PBT)
+  operating-temperature: -55°C ~ 85°C
+docs:
+- kind: datasheet
+  url: https://www.assmann-wsw.com/uploads/datasheets/ASS_0810_CO.pdf
+  source: digikey
+  path: store/docs/b79c2d42d41a00c1.pdf
+  sha256: b79c2d42d41a00c158f6b2157a6201a272f352b6d7e1e9f194a4ca213f8b2e7c
+  bytes: 315589
+enrichment:
+  source: digikey
+  dk_category_id: 409
+  dk_category: IC Sockets
+  provisional: true

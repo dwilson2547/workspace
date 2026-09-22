@@ -1,0 +1,44 @@
+id: tq2-5v
+type: component
+category: signal-relays-up-to-2-amps
+description: RELAY TELECOM DPDT 1A 5V
+manufacturer: Panasonic Electric Works
+mpn: TQ2-5V
+vendor_pns:
+  digikey: 255-1001-5-ND
+qty: 12
+purchases:
+- order: digikey-96159208
+  date: '2025-12-02'
+  qty: 12
+  unit_price: 1.536
+params:
+  mounting-type: Through Hole
+  coil-voltage: 5VDC
+  contact-form: DPDT (2 Form C)
+  contact-rating-current: 1 A
+  switching-voltage: 125VAC, 110VDC - Max
+  load-max-switching: 125VA, 110W
+  coil-current: 28.1 mA
+  coil-type: Non Latching
+  termination-style: PC Pin
+  must-operate-voltage: 3.75 VDC
+  must-release-voltage: 0.5 VDC
+  operate-time: 3 ms
+  release-time: 3 ms
+  operating-temperature: -40°C ~ 70°C
+  contact-material: Silver (Ag), Gold (Au)
+  approval-agency: CSA, UR
+  relay-type: Telecom
+docs:
+- kind: datasheet
+  url: //mm.digikey.com/Volume0/opasdata/d220001/medias/docus/7330/mech_eng_tq.pdf
+  source: digikey
+  path: store/docs/77c8c77c0036759a.pdf
+  sha256: 77c8c77c0036759ae750809c39d0520218805949ff0971c2beee80017bfec838
+  bytes: 567054
+enrichment:
+  source: digikey
+  dk_category_id: 189
+  dk_category: Signal Relays, Up to 2 Amps
+  provisional: true

@@ -1,0 +1,38 @@
+id: tl072cp
+type: component
+category: ic-opamp
+description: IC OPAMP JFET 2 CIRCUIT 8DIP
+manufacturer: Texas Instruments
+mpn: TL072CP
+vendor_pns:
+  digikey: 296-1775-5-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 0.749
+params:
+  amplifier_type: J-FET
+  circuits: 2
+  slew_rate: 13.0
+  gain_bandwidth: 5250000.0
+  input_bias: 6.5e-11
+  input_offset: 0.003
+  supply_current: 0.0014
+  supply_voltage_min: 10.0
+  supply_voltage_max: 30.0
+  mounting: tht
+  package: 8-DIP (0.300", 7.62mm)
+docs:
+- kind: datasheet
+  url: https://www.ti.com/lit/ds/symlink/tl071.pdf?HQS=dis-dk-null-digikeymode-dsf-pf-null-wwe&ts=1721694323530
+  source: digikey
+  path: store/docs/3d22c5cf1cfafae0.pdf
+  sha256: 3d22c5cf1cfafae082763406bba57521f6ba0fc362a8ba90d1c6c88eef776f03
+  bytes: 6081107
+enrichment:
+  source: digikey
+  dk_category_id: 687
+  dk_category: Instrumentation, Op Amps, Buffer Amps
+  provisional: false

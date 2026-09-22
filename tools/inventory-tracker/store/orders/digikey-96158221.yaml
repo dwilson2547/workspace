@@ -1,0 +1,301 @@
+vendor: digikey
+po_number: '96158221'
+web_order_id: '365904405'
+customer: '15802440'
+order_date: '2025-12-02'
+currency: USD
+totals:
+  sales: 527.38
+  tariff: 12.27
+  shipping: 6.99
+  tax: 32.38
+  total: 579.02
+source_pdf: SALESORDER_EMAIL96158221.pdf
+line_items:
+- line: 1
+  digikey_pn: 497-1454-5-ND
+  description: IC REG LINEAR 15V 1.5A TO220
+  qty_ordered: 50
+  qty_backordered: 0
+  unit_price: 0.3146
+  amount: 15.73
+  manufacturer: STMICROELECTRONICS
+  mpn: L7815CV
+  coo: SINGAPORE
+  tariff: null
+- line: 2
+  digikey_pn: 497-1478-5-ND
+  description: IC REG LINEAR -15V 1.5A TO220
+  qty_ordered: 50
+  qty_backordered: 0
+  unit_price: 0.3716
+  amount: 18.58
+  manufacturer: STMICROELECTRONICS
+  mpn: L7915CV
+  coo: CHINA
+  tariff: null
+- line: 3
+  digikey_pn: OPA2134PA-ND
+  description: IC AUDIO 2 CIRCUIT 8DIP
+  qty_ordered: 4
+  qty_backordered: 0
+  unit_price: 7.42
+  amount: 29.68
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: OPA2134PA
+  coo: USA
+  tariff: null
+- line: 4
+  digikey_pn: 296-7040-5-ND
+  description: IC OPAMP GP 2 CIRCUIT 8DIP
+  qty_ordered: 20
+  qty_backordered: 0
+  unit_price: 0.984
+  amount: 19.68
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: NE5532AP
+  coo: MEXICO
+  tariff: null
+- line: 5
+  digikey_pn: 296-1775-5-ND
+  description: IC OPAMP JFET 2 CIRCUIT 8DIP
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 0.749
+  amount: 7.49
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: TL072CP
+  coo: USA
+  tariff: null
+- line: 6
+  digikey_pn: 296-1784-5-ND
+  description: IC OPAMP JFET 4 CIRCUIT 14DIP
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 0.611
+  amount: 6.11
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: TL084CN
+  coo: USA
+  tariff: null
+- line: 7
+  digikey_pn: 10KADCT-ND
+  description: RES 10K OHM 0.1% 1/4W AXIAL
+  qty_ordered: 50
+  qty_backordered: 0
+  unit_price: 0.2908
+  amount: 14.54
+  manufacturer: YAGEO
+  mpn: MFP-25BRD52-10K
+  coo: CHINA
+  tariff: 3.34
+- line: 8
+  digikey_pn: BC1084CT-ND
+  description: CAP CER 0.1UF 50V X7R RADIAL
+  qty_ordered: 50
+  qty_backordered: 0
+  unit_price: 0.1034
+  amount: 5.17
+  manufacturer: VISHAY BC COMPONENTS
+  mpn: K104K15X7RF5TL2
+  coo: CHINA
+  tariff: 0.52
+- line: 9
+  digikey_pn: 445-FK24X5R1C106KR006CT-ND
+  description: CAP CER 10UF 16V X5R RADIAL
+  qty_ordered: 50
+  qty_backordered: 0
+  unit_price: 0.222
+  amount: 11.1
+  manufacturer: TDK CORPORATION
+  mpn: FK24X5R1C106KR006
+  coo: CHINA
+  tariff: 1.11
+- line: 10
+  digikey_pn: 505-LT3081ET7#PBF-ND
+  description: IC REG LIN POS ADJ 1.5A TO220-7
+  qty_ordered: 4
+  qty_backordered: 0
+  unit_price: 9.42
+  amount: 37.68
+  manufacturer: ANALOG DEVICES INC
+  mpn: LT3081ET7#PBF
+  coo: MALAYSIA
+  tariff: null
+- line: 11
+  digikey_pn: 2123-V-RC-ND
+  description: FIXED IND 820UH 1.4A 370 MOHM TH
+  qty_ordered: 4
+  qty_backordered: 0
+  unit_price: 2.53
+  amount: 10.12
+  manufacturer: BOURNS INC
+  mpn: 2123-V-RC
+  coo: HONDURAS
+  tariff: null
+- line: 12
+  digikey_pn: 1N5333BRLGOSCT-ND
+  description: DIODE ZENER 3.3V 5W AXIAL
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 0.235
+  amount: 2.35
+  manufacturer: ONSEMI
+  mpn: 1N5333BRLG
+  coo: CHINA
+  tariff: 0.71
+- line: 13
+  digikey_pn: 570-SL122R505-ND
+  description: ICL 2.5 OHM 25% 5A 13MM
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 0.698
+  amount: 6.98
+  manufacturer: VISHAY AMETHERM
+  mpn: SL12 2R505
+  coo: USA
+  tariff: null
+- line: 14
+  digikey_pn: P10289-ND
+  description: CAP ALUM 4700UF 20% 25V RADIAL
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 1.523
+  amount: 15.23
+  manufacturer: PANASONIC ELECTRONIC COMPONENTS
+  mpn: EEU-FC1E472
+  coo: MALAYSIA
+  tariff: null
+- line: 15
+  digikey_pn: P12374-ND
+  description: CAP ALUM 3900UF 20% 16V RADIAL
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 0.892
+  amount: 8.92
+  manufacturer: PANASONIC ELECTRONIC COMPONENTS
+  mpn: EEU-FM1C392
+  coo: MALAYSIA
+  tariff: null
+- line: 16
+  digikey_pn: 1801-MBR20100CT-ND
+  description: DIODE ARR SCHOT 100V 20A TO220AB
+  qty_ordered: 12
+  qty_backordered: 0
+  unit_price: 1.69
+  amount: 20.28
+  manufacturer: TAIWAN SEMICONDUCTOR CORPORATION
+  mpn: MBR20100CT
+  coo: CHINA
+  tariff: 4.06
+- line: 17
+  digikey_pn: 493-12467-ND
+  description: CAP ALUM 10000UF 20% 25V RADIAL
+  qty_ordered: 20
+  qty_backordered: 0
+  unit_price: 1.994
+  amount: 39.88
+  manufacturer: NICHICON
+  mpn: UVY1E103MHD
+  coo: MALAYSIA
+  tariff: null
+- line: 18
+  digikey_pn: 493-7298-ND
+  description: CAP ALUM 12000UF 20% 35V SNAP TH
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 2.709
+  amount: 27.09
+  manufacturer: NICHICON
+  mpn: LLS1V123MELB
+  coo: MALAYSIA
+  tariff: null
+- line: 19
+  digikey_pn: EF1105-ND
+  description: CAP FILM 1UF 10% 100VDC RADIAL
+  qty_ordered: 20
+  qty_backordered: 0
+  unit_price: 0.576
+  amount: 11.52
+  manufacturer: PANASONIC ELECTRONIC COMPONENTS
+  mpn: ECQ-E1105KF
+  coo: CHINA
+  tariff: 2.53
+- line: 20
+  digikey_pn: 399-12459-ND
+  description: CAP FILM 47UF 10% 63VDC RADIAL
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 8.588
+  amount: 85.88
+  manufacturer: KEMET
+  mpn: R60DR54705050K
+  coo: MACEDONIA
+  tariff: null
+- line: 21
+  digikey_pn: 1712-YR1B4K99CCCT-ND
+  description: RES 4.99K OHM 0.1% 1/4W AXIAL
+  qty_ordered: 25
+  qty_backordered: 0
+  unit_price: 0.4552
+  amount: 11.38
+  manufacturer: TE CONNECTIVITY PASSIVE PRODUCT
+  mpn: YR1B4K99CC
+  coo: INDIA
+  tariff: null
+- line: 22
+  digikey_pn: 3362P-203LF-ND
+  description: TRIMMER 20K OHM 0.5W PC PIN TOP
+  qty_ordered: 25
+  qty_backordered: 0
+  unit_price: 0.714
+  amount: 17.85
+  manufacturer: BOURNS INC
+  mpn: 3362P-1-203LF
+  coo: COSTA RICA
+  tariff: null
+- line: 23
+  digikey_pn: HS115-ND
+  description: HEATSINK TO-220 2.5W LOW PROFILE
+  qty_ordered: 50
+  qty_backordered: 0
+  unit_price: 0.2724
+  amount: 13.62
+  manufacturer: BOYD LACONIA, LLC
+  mpn: 507302B00000G
+  coo: CHINA
+  tariff: null
+- line: 24
+  digikey_pn: 4880SG-ND
+  description: THERMASIL3 THERMAL PAD TO-220
+  qty_ordered: 20
+  qty_backordered: 0
+  unit_price: 2.428
+  amount: 48.56
+  manufacturer: BOYD LACONIA, LLC
+  mpn: 4880SG
+  coo: CHINA
+  tariff: null
+- line: 25
+  digikey_pn: HS387-ND
+  description: HEATSINK TO-220 PWR BLK W/PINS
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 1.84
+  amount: 18.4
+  manufacturer: BOYD LACONIA, LLC
+  mpn: 581002B02500G
+  coo: CHINA
+  tariff: null
+- line: 26
+  digikey_pn: 490-7518-1-ND
+  description: CAP CER 10UF 50V X7R RADIAL
+  qty_ordered: 20
+  qty_backordered: 0
+  unit_price: 1.178
+  amount: 23.56
+  manufacturer: MURATA ELECTRONICS
+  mpn: RCER71H106MWM1H03A
+  coo: JAPAN
+  tariff: null
+id: digikey-96158221

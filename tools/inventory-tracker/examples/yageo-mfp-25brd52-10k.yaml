@@ -1,0 +1,23 @@
+# Invoice 96158221, line 7 — a passive component with a rich params block.
+id: yageo-mfp-25brd52-10k
+type: component
+category: resistor
+description: RES 10K OHM 0.1% 1/4W AXIAL
+manufacturer: YAGEO
+mpn: MFP-25BRD52-10K
+vendor_pns:
+  digikey: 10KADCT-ND
+qty: 50
+location: bin-a3
+params:
+  resistance: 10000
+  tolerance: 0.1
+  power: 0.25
+  package: AXIAL
+  mounting: tht
+projects: [audio-psu]
+purchases:
+  - order: digikey-96158221
+    date: 2025-12-02
+    qty: 50
+    unit_price: 0.2908

@@ -1,0 +1,41 @@
+id: eca-1hm332
+type: component
+category: aluminum-electrolytic-capacitors
+description: CAP ALUM 3300UF 20% 50V RADIAL
+manufacturer: Panasonic Industry
+mpn: ECA-1HM332
+vendor_pns:
+  digikey: P5188-ND
+qty: 25
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 25
+  unit_price: 1.429
+params:
+  capacitance: 3300 µF
+  tolerance: ±20%
+  voltage-rated: 50 V
+  lifetime-temp: 2000 Hrs @ 85°C
+  operating-temperature: -40°C ~ 85°C
+  polarization: Polar
+  applications: General Purpose
+  ripple-current-low-frequency: 1.5 A @ 120 Hz
+  ripple-current-high-frequency: 2.55 A @ 10 kHz
+  lead-spacing: 0.295" (7.50mm)
+  size-dimension: 0.709" Dia (18.00mm)
+  height-seated-max: 1.476" (37.50mm)
+  mounting-type: Through Hole
+  package-case: Radial, Can
+docs:
+- kind: datasheet
+  url: //mm.digikey.com/Volume0/opasdata/d220001/medias/docus/2452/ECA-xxM%20Series%2CTypeA.pdf
+  source: digikey
+  path: store/docs/b64c6186118bfa6e.pdf
+  sha256: b64c6186118bfa6e5a304f91af15f67518ed733ec7502e3914da7696f673186c
+  bytes: 85738
+enrichment:
+  source: digikey
+  dk_category_id: 58
+  dk_category: Aluminum Electrolytic Capacitors
+  provisional: true

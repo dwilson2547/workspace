@@ -1,0 +1,13 @@
+# Rebuildable SQLite index (regenerate with `inv reindex`)
+inventory.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Cached raw API responses (re-fetchable)
+.cache/

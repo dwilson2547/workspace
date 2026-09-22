@@ -1,0 +1,34 @@
+id: sl12-2r505
+type: component
+category: inrush-current-limiters-icl
+description: ICL 2.5 OHM 25% 5A 13MM
+manufacturer: Vishay Ametherm
+mpn: SL12 2R505
+vendor_pns:
+  digikey: 570-SL122R505-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 0.698
+params:
+  r-25-c: 2.5 Ohms
+  tolerance: ±25%
+  current-steady-state-max: 5 A
+  r-current: 100 mOhms
+  diameter: 0.512" (13.00mm)
+  lead-spacing: 0.307" (7.80mm)
+  approval-agency: UL
+docs:
+- kind: datasheet
+  url: https://www.ametherm.com/datasheetspdf/SL122R505.pdf
+  source: digikey
+  path: store/docs/781fac7abae8d10c.pdf
+  sha256: 781fac7abae8d10c38136b4673a7affac56d9d353784aafbae0021909f48f265
+  bytes: 25799
+enrichment:
+  source: digikey
+  dk_category_id: 151
+  dk_category: Inrush Current Limiters (ICL)
+  provisional: true

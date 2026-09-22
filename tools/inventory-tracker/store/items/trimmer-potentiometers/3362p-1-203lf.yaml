@@ -1,0 +1,37 @@
+id: 3362p-1-203lf
+type: component
+category: trimmer-potentiometers
+description: TRIMMER 20K OHM 0.5W PC PIN TOP
+manufacturer: Bourns Inc.
+mpn: 3362P-1-203LF
+vendor_pns:
+  digikey: 3362P-203LF-ND
+qty: 25
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 25
+  unit_price: 0.714
+params:
+  resistance: 20 kOhms
+  power-watts: 0.5W, 1/2W
+  tolerance: ±10%
+  temperature-coefficient: ±100ppm/°C
+  number-of-turns: '1.0'
+  adjustment-type: Top Adjustment
+  resistive-material: Cermet
+  mounting-type: Through Hole
+  termination-style: PC Pins
+  size-dimension: Rectangular - 0.275" x 0.260" Face (6.99mm x 6.60mm)
+docs:
+- kind: datasheet
+  url: https://www.bourns.com/docs/Product-Datasheets/3362.pdf
+  source: digikey
+  path: store/docs/6f357bcbeddd27c6.pdf
+  sha256: 6f357bcbeddd27c62f6e98db13596aaf7fe2c4315554fde5e0cc4061a51f0de3
+  bytes: 506701
+enrichment:
+  source: digikey
+  dk_category_id: 80
+  dk_category: Trimmer Potentiometers
+  provisional: true

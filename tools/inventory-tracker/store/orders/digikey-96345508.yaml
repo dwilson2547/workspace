@@ -1,0 +1,136 @@
+vendor: digikey
+po_number: '96345508'
+web_order_id: '366399701'
+customer: '15802440'
+order_date: '2025-12-11'
+currency: USD
+totals:
+  sales: 233.45
+  tariff: 17.65
+  shipping: 6.99
+  tax: 15.07
+  total: 273.16
+source_pdf: SALESORDER_EMAIL96345508.pdf
+line_items:
+- line: 1
+  digikey_pn: P5188-ND
+  description: CAP ALUM 3300UF 20% 50V RADIAL
+  qty_ordered: 25
+  qty_backordered: 0
+  unit_price: 1.429
+  amount: 35.73
+  manufacturer: PANASONIC ELECTRONIC COMPONENTS
+  mpn: ECA-1HM332
+  coo: null
+  tariff: null
+- line: 2
+  digikey_pn: 296-8251-5-ND
+  description: IC SHIFT REGTR COMP 8BIT 16-PDIP
+  qty_ordered: 25
+  qty_backordered: 0
+  unit_price: 0.9408
+  amount: 23.52
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: SN74HC165N
+  coo: null
+  tariff: null
+- line: 3
+  digikey_pn: 296-1600-5-ND
+  description: IC SR TRI-STATE 8BIT 16-PDIP
+  qty_ordered: 25
+  qty_backordered: 0
+  unit_price: 1.0936
+  amount: 27.34
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: SN74HC595N
+  coo: null
+  tariff: null
+- line: 4
+  digikey_pn: 2057-ICS-316-T-ND
+  description: IC SOCKET, DIP, 16P 2.54MM PITCH
+  qty_ordered: 150
+  qty_backordered: 0
+  unit_price: 0.10167
+  amount: 15.25
+  manufacturer: ADAM TECH
+  mpn: ICS-316-T
+  coo: null
+  tariff: 2.59
+- line: 5
+  digikey_pn: AE9986-ND
+  description: CONN IC DIP SOCKET 8POS TIN
+  qty_ordered: 150
+  qty_backordered: 0
+  unit_price: 0.11217
+  amount: 16.83
+  manufacturer: ASSMANN WSW COMPONENTS
+  mpn: A 08-LC-TT
+  coo: null
+  tariff: null
+- line: 6
+  digikey_pn: 1212-1000-ND
+  description: CONN IC DIP SOCKET 10POS GOLD
+  qty_ordered: 41
+  qty_backordered: 0
+  unit_price: 0.50073
+  amount: 20.53
+  manufacturer: PRECI-DIP SA
+  mpn: 110-87-210-41-001101
+  coo: null
+  tariff: null
+- line: 7
+  digikey_pn: 1N4148FSCT-ND
+  description: DIODE STANDARD 100V 200MA DO35
+  qty_ordered: 500
+  qty_backordered: 0
+  unit_price: 0.02228
+  amount: 11.14
+  manufacturer: ONSEMI
+  mpn: 1N4148TR
+  coo: null
+  tariff: 3.34
+- line: 8
+  digikey_pn: 2N7000BU-ND
+  description: MOSFET N-CH 60V 200MA TO92-3
+  qty_ordered: 200
+  qty_backordered: 0
+  unit_price: 0.1953
+  amount: 39.06
+  manufacturer: ONSEMI
+  mpn: 2N7000BU
+  coo: null
+  tariff: 11.72
+- line: 9
+  digikey_pn: 296-50628-ND
+  description: IC REG LINEAR 12V 1A TO220-3
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 1.325
+  amount: 13.25
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: LM7812CT/NOPB
+  coo: null
+  tariff: null
+- line: 10
+  digikey_pn: 296-47192-ND
+  description: IC REG LINEAR 5V 1.5A TO220-3
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 1.325
+  amount: 13.25
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: LM7805CT/NOPB
+  coo: null
+  tariff: null
+- line: 11
+  digikey_pn: LM1086IT-3.3/NOPB-ND
+  description: IC REG LINEAR 3.3V 1.5A TO220-3
+  qty_ordered: 10
+  qty_backordered: 0
+  unit_price: 1.755
+  amount: 17.55
+  manufacturer: TEXAS INSTRUMENTS
+  mpn: LM1086IT-3.3/NOPB
+  coo: null
+  tariff: null
+id: digikey-96345508

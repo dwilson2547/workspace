@@ -1,0 +1,78 @@
+category: fixed-inductors
+provisional: true
+dk_category_id: 71
+label: Fixed Inductors
+identifying: []
+params:
+  type:
+    type: string
+    dk_param_id: 183
+    label: Type
+  material-core:
+    type: string
+    dk_param_id: 1221
+    label: Material - Core
+  inductance:
+    type: string
+    dk_param_id: 2087
+    label: Inductance
+  tolerance:
+    type: string
+    dk_param_id: 3
+    label: Tolerance
+  current-rating-amps:
+    type: string
+    dk_param_id: 2088
+    label: Current Rating (Amps)
+  current-saturation-isat:
+    type: string
+    dk_param_id: 1219
+    label: Current - Saturation (Isat)
+  shielding:
+    type: string
+    dk_param_id: 80
+    label: Shielding
+  dc-resistance-dcr:
+    type: string
+    dk_param_id: 314
+    label: DC Resistance (DCR)
+  q-freq:
+    type: string
+    dk_param_id: 705
+    label: Q @ Freq
+  frequency-self-resonant:
+    type: string
+    dk_param_id: 706
+    label: Frequency - Self Resonant
+  ratings:
+    type: string
+    dk_param_id: 707
+    label: Ratings
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature
+  inductance-frequency-test:
+    type: string
+    dk_param_id: 1222
+    label: Inductance Frequency - Test
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case
+  supplier-device-package:
+    type: string
+    dk_param_id: 1291
+    label: Supplier Device Package
+  size-dimension:
+    type: string
+    dk_param_id: 46
+    label: Size / Dimension
+  height-seated-max:
+    type: string
+    dk_param_id: 1500
+    label: Height - Seated (Max)

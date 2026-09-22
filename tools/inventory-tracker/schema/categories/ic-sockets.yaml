@@ -1,0 +1,66 @@
+category: ic-sockets
+provisional: true
+dk_category_id: 409
+label: IC Sockets
+identifying: []
+params:
+  type:
+    type: string
+    dk_param_id: 183
+    label: Type
+  number-of-positions-or-pins-grid:
+    type: string
+    dk_param_id: 571
+    label: Number of Positions or Pins (Grid)
+  pitch-mating:
+    type: string
+    dk_param_id: 1790
+    label: Pitch - Mating
+  contact-finish-mating:
+    type: string
+    dk_param_id: 1791
+    label: Contact Finish - Mating
+  contact-finish-thickness-mating:
+    type: string
+    dk_param_id: 1792
+    label: Contact Finish Thickness - Mating
+  contact-material-mating:
+    type: string
+    dk_param_id: 1793
+    label: Contact Material - Mating
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  features:
+    type: string
+    dk_param_id: 5
+    label: Features
+  termination:
+    type: string
+    dk_param_id: 589
+    label: Termination
+  pitch-post:
+    type: string
+    dk_param_id: 1794
+    label: Pitch - Post
+  contact-finish-post:
+    type: string
+    dk_param_id: 1795
+    label: Contact Finish - Post
+  contact-finish-thickness-post:
+    type: string
+    dk_param_id: 1796
+    label: Contact Finish Thickness - Post
+  contact-material-post:
+    type: string
+    dk_param_id: 1797
+    label: Contact Material - Post
+  housing-material:
+    type: string
+    dk_param_id: 1330
+    label: Housing Material
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature

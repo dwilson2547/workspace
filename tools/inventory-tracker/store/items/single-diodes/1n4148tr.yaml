@@ -1,0 +1,39 @@
+id: 1n4148tr
+type: component
+category: single-diodes
+description: DIODE STANDARD 100V 200MA DO35
+manufacturer: onsemi
+mpn: 1N4148TR
+vendor_pns:
+  digikey: 1N4148FSCT-ND
+qty: 500
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 500
+  unit_price: 0.02228
+params:
+  technology: Standard
+  voltage-dc-reverse-vr-max: 100 V
+  current-average-rectified-io: 200mA
+  voltage-forward-vf-max-if: 1 V @ 10 mA
+  speed: Small Signal =< 200mA (Io), Any Speed
+  reverse-recovery-time-trr: 4 ns
+  current-reverse-leakage-vr: 5 µA @ 75 V
+  capacitance-vr-f: 4pF @ 0V, 1MHz
+  mounting-type: Through Hole
+  package-case: DO-204AH, DO-35, Axial
+  supplier-device-package: DO-35
+  operating-temperature-junction: -55°C ~ 175°C
+docs:
+- kind: datasheet
+  url: https://www.onsemi.com/pub/Collateral/1N914-D.PDF
+  source: digikey
+  path: store/docs/666d7e28d99b6ac3.pdf
+  sha256: 666d7e28d99b6ac38d4bc4ccfbcbaffc475d12ea6538e59acde0ce5efab7884e
+  bytes: 331714
+enrichment:
+  source: digikey
+  dk_category_id: 280
+  dk_category: Single Diodes
+  provisional: true

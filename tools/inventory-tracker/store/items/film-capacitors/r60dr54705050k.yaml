@@ -1,0 +1,40 @@
+id: r60dr54705050k
+type: component
+category: film-capacitors
+description: CAP FILM 47UF 10% 63VDC RADIAL
+manufacturer: KEMET
+mpn: R60DR54705050K
+vendor_pns:
+  digikey: 399-12459-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 8.588
+params:
+  capacitance: 47 µF
+  tolerance: ±10%
+  voltage-rating-ac: 40V
+  voltage-rating-dc: 63V
+  dielectric-material: Polyester, Polyethylene Terephthalate (PET), Metallized
+  operating-temperature: -55°C ~ 105°C
+  mounting-type: Through Hole
+  package-case: Radial
+  size-dimension: 1.260" L x 0.866" W (32.00mm x 22.00mm)
+  height-seated-max: 1.461" (37.10mm)
+  termination: PC Pins
+  lead-spacing: 1.083" (27.50mm)
+  applications: General Purpose
+docs:
+- kind: datasheet
+  url: https://yageogroup.com/content/datasheet/asset/file/KEM_F3103_R60
+  source: digikey
+  path: store/docs/832395ca5cb91447.pdf
+  sha256: 832395ca5cb91447279046134df2d650f53fc2513811594811dd753f34a53c5c
+  bytes: 5462449
+enrichment:
+  source: digikey
+  dk_category_id: 62
+  dk_category: Film Capacitors
+  provisional: true

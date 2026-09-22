@@ -1,0 +1,32 @@
+id: mfp-25brd52-10k
+type: component
+category: resistor
+description: RES 10K OHM 0.1% 1/4W AXIAL
+manufacturer: YAGEO
+mpn: MFP-25BRD52-10K
+vendor_pns:
+  digikey: 10KADCT-ND
+qty: 50
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 50
+  unit_price: 0.2908
+params:
+  resistance: 10000.0
+  tolerance: 0.1
+  power: 0.25
+  temp_coeff: 25.0
+  package: Axial
+docs:
+- kind: datasheet
+  url: https://yageogroup.com/content/datasheet/asset/file/YAGEO-MFP_DATASHEET
+  source: digikey
+  path: store/docs/b1f326fa20a270fe.pdf
+  sha256: b1f326fa20a270fe10d9ac320ee4068124cfac2f47784f3890b09cfa2147d2a3
+  bytes: 590518
+enrichment:
+  source: digikey
+  dk_category_id: 53
+  dk_category: Through Hole Resistors
+  provisional: false

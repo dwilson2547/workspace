@@ -1,0 +1,39 @@
+id: ecq-e1105kf
+type: component
+category: film-capacitors
+description: CAP FILM 1UF 10% 100VDC RADIAL
+manufacturer: Panasonic Industry
+mpn: ECQ-E1105KF
+vendor_pns:
+  digikey: EF1105-ND
+qty: 20
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 20
+  unit_price: 0.576
+params:
+  capacitance: 1 µF
+  tolerance: ±10%
+  voltage-rating-dc: 100V
+  dielectric-material: Polyester, Metallized
+  operating-temperature: -40°C ~ 105°C
+  mounting-type: Through Hole
+  package-case: Radial
+  size-dimension: 0.472" L x 0.264" W (12.00mm x 6.70mm)
+  height-seated-max: 0.591" (15.00mm)
+  termination: PC Pins
+  lead-spacing: 0.394" (10.00mm)
+  applications: General Purpose
+docs:
+- kind: datasheet
+  url: https://industrial.panasonic.com/cdbs/www-data/pdf/RDI0000/ABD0000C179.pdf
+  source: digikey
+  path: store/docs/6a6d3b954ce75ee4.pdf
+  sha256: 6a6d3b954ce75ee49267b7166705e0cff4b65a2e3a5c49251c8acec2bd8dfab6
+  bytes: 1264882
+enrichment:
+  source: digikey
+  dk_category_id: 62
+  dk_category: Film Capacitors
+  provisional: true

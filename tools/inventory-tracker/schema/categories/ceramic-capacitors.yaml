@@ -1,0 +1,70 @@
+category: ceramic-capacitors
+provisional: true
+dk_category_id: 60
+label: Ceramic Capacitors
+identifying: []
+params:
+  capacitance:
+    type: string
+    dk_param_id: 2049
+    label: Capacitance
+  tolerance:
+    type: string
+    dk_param_id: 3
+    label: Tolerance
+  voltage-rated:
+    type: string
+    dk_param_id: 14
+    label: Voltage - Rated
+  temperature-coefficient:
+    type: string
+    dk_param_id: 17
+    label: Temperature Coefficient
+  operating-temperature:
+    type: string
+    dk_param_id: 252
+    label: Operating Temperature
+  features:
+    type: string
+    dk_param_id: 5
+    label: Features
+  ratings:
+    type: string
+    dk_param_id: 707
+    label: Ratings
+  applications:
+    type: string
+    dk_param_id: 405
+    label: Applications
+  failure-rate:
+    type: string
+    dk_param_id: 1531
+    label: Failure Rate
+  mounting-type:
+    type: string
+    dk_param_id: 69
+    label: Mounting Type
+  package-case:
+    type: string
+    dk_param_id: 16
+    label: Package / Case
+  size-dimension:
+    type: string
+    dk_param_id: 46
+    label: Size / Dimension
+  height-seated-max:
+    type: string
+    dk_param_id: 1500
+    label: Height - Seated (Max)
+  thickness-max:
+    type: string
+    dk_param_id: 1501
+    label: Thickness (Max)
+  lead-spacing:
+    type: string
+    dk_param_id: 508
+    label: Lead Spacing
+  lead-style:
+    type: string
+    dk_param_id: 4
+    label: Lead Style

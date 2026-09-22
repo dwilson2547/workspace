@@ -1,0 +1,33 @@
+id: l7915cv
+type: component
+category: ic-linear-reg
+description: IC REG LINEAR -15V 1.5A TO220
+manufacturer: STMicroelectronics
+mpn: L7915CV
+vendor_pns:
+  digikey: 497-1478-5-ND
+qty: 50
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 50
+  unit_price: 0.3716
+params:
+  supply_voltage_max: -35.0
+  output_voltage: -15.0
+  dropout: 1.1
+  output_current: 1.5
+  mounting: tht
+  package: TO-220-3
+docs:
+- kind: datasheet
+  url: //mm.digikey.com/Volume0/opasdata/d220001/medias/docus/1053/L79xxC_Rev21_May2012.pdf
+  source: digikey
+  path: store/docs/68ee756997bb737a.pdf
+  sha256: 68ee756997bb737a378bd4420e02282ac600a3c432b41c89144273441113bc25
+  bytes: 471179
+enrichment:
+  source: digikey
+  dk_category_id: 699
+  dk_category: Voltage Regulators - Linear, Low Drop Out (LDO) Regulators
+  provisional: false

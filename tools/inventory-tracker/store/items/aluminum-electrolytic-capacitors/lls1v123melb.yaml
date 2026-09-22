@@ -1,0 +1,41 @@
+id: lls1v123melb
+type: component
+category: aluminum-electrolytic-capacitors
+description: CAP ALUM 12000UF 20% 35V SNAP TH
+manufacturer: Nichicon
+mpn: LLS1V123MELB
+vendor_pns:
+  digikey: 493-7298-ND
+qty: 10
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 10
+  unit_price: 2.709
+params:
+  capacitance: 12000 µF
+  tolerance: ±20%
+  voltage-rated: 35 V
+  lifetime-temp: 3000 Hrs @ 85°C
+  operating-temperature: -40°C ~ 85°C
+  polarization: Polar
+  applications: General Purpose
+  ripple-current-low-frequency: 4.14 A @ 120 Hz
+  ripple-current-high-frequency: 4.761 A @ 50 kHz
+  lead-spacing: 0.394" (10.00mm)
+  size-dimension: 1.181" Dia (30.00mm)
+  height-seated-max: 1.457" (37.00mm)
+  mounting-type: Through Hole
+  package-case: Radial, Can - Snap-In
+docs:
+- kind: datasheet
+  url: https://www.nichicon.co.jp/english/series_items/catalog_pdf/e-lls.pdf
+  source: digikey
+  path: store/docs/b42b5946a7e8f416.pdf
+  sha256: b42b5946a7e8f416008b0e3da33ba0141af31bf0c16a6ec1b464fa09b37ac30f
+  bytes: 661157
+enrichment:
+  source: digikey
+  dk_category_id: 58
+  dk_category: Aluminum Electrolytic Capacitors
+  provisional: true

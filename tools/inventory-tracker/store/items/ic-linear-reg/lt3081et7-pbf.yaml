@@ -1,0 +1,32 @@
+id: lt3081et7-pbf
+type: component
+category: ic-linear-reg
+description: IC REG LIN POS ADJ 1.5A TO220-7
+manufacturer: Analog Devices Inc.
+mpn: LT3081ET7#PBF
+vendor_pns:
+  digikey: 505-LT3081ET7#PBF-ND
+qty: 4
+purchases:
+- order: digikey-96158221
+  date: '2025-12-02'
+  qty: 4
+  unit_price: 9.42
+params:
+  supply_voltage_max: 36.0
+  output_voltage: 0.0
+  dropout: 1.5
+  output_current: 1.5
+  mounting: tht
+  package: TO-220-7 Formed Leads
+docs:
+- kind: datasheet
+  url: https://www.analog.com/media/en/technical-documentation/data-sheets/3081fc.pdf
+  source: digikey
+  fetch_status: blocked
+  note: analog.com blocks this IP (403); fetch from your own network
+enrichment:
+  source: digikey
+  dk_category_id: 699
+  dk_category: Voltage Regulators - Linear, Low Drop Out (LDO) Regulators
+  provisional: false

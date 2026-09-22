@@ -1,0 +1,30 @@
+category: ic-opamp
+extends: ic
+identifying: [amplifier_type, circuits, gain_bandwidth, package, mounting]
+params:
+  circuits:
+    type: integer
+    description: Number of amplifier circuits in the package.
+  amplifier_type:
+    type: string
+    description: e.g. J-FET, General Purpose, Audio, Instrumentation.
+  gain_bandwidth:
+    type: number
+    unit: hertz
+    description: Gain-bandwidth product.
+  slew_rate:
+    type: number
+    unit: v_per_us
+    description: Slew rate (V/µs).
+  input_offset:
+    type: number
+    unit: volt
+    description: Input offset voltage.
+  input_bias:
+    type: number
+    unit: ampere
+    description: Input bias current.
+  supply_current:
+    type: number
+    unit: ampere
+    description: Quiescent supply current.

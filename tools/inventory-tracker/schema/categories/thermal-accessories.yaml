@@ -1,0 +1,14 @@
+category: thermal-accessories
+provisional: true
+dk_category_id: 224
+label: Thermal Accessories
+identifying: []
+params:
+  accessory-type:
+    type: string
+    dk_param_id: 184
+    label: Accessory Type
+  for-use-with-related-products:
+    type: string
+    dk_param_id: 47
+    label: For Use With/Related Products

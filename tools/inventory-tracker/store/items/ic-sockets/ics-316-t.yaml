@@ -1,0 +1,40 @@
+id: ics-316-t
+type: component
+category: ic-sockets
+description: IC SOCKET, DIP, 16P 2.54MM PITCH
+manufacturer: Adam Tech
+mpn: ICS-316-T
+vendor_pns:
+  digikey: 2057-ICS-316-T-ND
+qty: 150
+purchases:
+- order: digikey-96345508
+  date: '2025-12-11'
+  qty: 150
+  unit_price: 0.10167
+params:
+  type: DIP, 0.3" (7.62mm) Row Spacing
+  number-of-positions-or-pins-grid: 16 (2 x 8)
+  pitch-mating: 0.100" (2.54mm)
+  contact-finish-mating: Tin
+  contact-material-mating: Phosphor Bronze
+  mounting-type: Through Hole
+  features: Open Frame
+  termination: Solder
+  pitch-post: 0.100" (2.54mm)
+  contact-finish-post: Tin
+  contact-material-post: Phosphor Bronze
+  housing-material: Polybutylene Terephthalate (PBT), Glass Filled
+  operating-temperature: -55°C ~ 105°C
+docs:
+- kind: datasheet
+  url: https://app.adam-tech.com/products/download/data_sheet/199582/ics-3xx-t-data-sheet.pdf
+  source: digikey
+  path: store/docs/55e6486fc06933dc.pdf
+  sha256: 55e6486fc06933dce5d3e3b77fcd4f95c2c482f0a05a8466c7c7a5cee3a72015
+  bytes: 68780
+enrichment:
+  source: digikey
+  dk_category_id: 409
+  dk_category: IC Sockets
+  provisional: true
