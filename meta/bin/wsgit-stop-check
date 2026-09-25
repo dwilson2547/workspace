@@ -34,6 +34,9 @@ report_one() {
 findings=$( report_one "$WS" "workspace" "--ignore-submodules=all"
             printf '%s\n' "$sm_list" | while read -r sm; do
               [ -n "$sm" ] && [ -e "$WS/$sm/.git" ] || continue
+              # private/ is never committed by an agent (githooks/private-guard),
+              # so reporting it here would only order the agent to break that rule.
+              case "$sm" in private/*) continue ;; esac
               report_one "$WS/$sm" "$sm"
             done )
 

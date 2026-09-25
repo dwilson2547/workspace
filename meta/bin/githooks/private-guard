@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Refuses git writes under private/ when run from a Claude Code session
+# (CLAUDECODE=1). The user's rule is absolute — never commit or push there — so
+# it is enforced here in code rather than left to an agent weighing it against
+# a hook or skill that says otherwise. Called by pre-commit and pre-push.
+# Deliberately has no override variable: the human commits by hand.
+
+[ "${CLAUDECODE:-}" = "1" ] || exit 0
+
+ws=$(cd "$(dirname "$(readlink -f "$0")")/../../.." && pwd)
+top=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+
+blocked=""
+case "$top/" in "$ws/private/"*) blocked="this repo is under private/" ;; esac
+
+# From the superrepo: staged paths (e.g. the private/private gitlink) count too.
+if [ -z "$blocked" ] && [ "$1" = "commit" ] && [ "$top" = "$ws" ] \
+   && git diff --cached --name-only | grep -q '^private/'; then
+  blocked="staged changes touch private/"
+fi
+
+[ -z "$blocked" ] && exit 0
+printf '\033[31mBLOCKED:\033[0m agent %s refused — %s.\n' "$1" "$blocked" >&2
+printf '  Never commit or push in private/ from an agent session. Leave it for the user.\n' >&2
+exit 1

@@ -6,6 +6,10 @@
 # Override for a single commit:  WSGIT_SKIP=1 git commit ...
 # Rationale: CONVENTIONS.md §9.
 
+# 0. private/ is off-limits to agents — checked before WSGIT_SKIP so no hook or
+#    prompt can talk an agent past it. Committing by hand is unaffected.
+"$(dirname "$(readlink -f "$0")")/private-guard" commit || exit 1
+
 [ -n "$WSGIT_SKIP" ] && exit 0
 
 RED=$'\033[31m'; YEL=$'\033[33m'; OFF=$'\033[0m'
