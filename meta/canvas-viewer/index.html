@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Canvas Viewer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body{margin:0;height:100%;font:14px system-ui,sans-serif;background:#1e1e1e;color:#ddd;overflow:hidden}
+#bar{position:fixed;top:0;left:0;right:0;height:38px;display:flex;gap:8px;align-items:center;padding:0 10px;background:#2b2b2b;z-index:2}
+#bar button,#bar select{background:#3a3a3a;color:#ddd;border:1px solid #555;border-radius:4px;padding:4px 8px;cursor:pointer}
+#bar span{opacity:.7}
+#c{position:fixed;top:38px;left:0;width:100%;height:calc(100% - 38px);display:block;cursor:grab}
+#hint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.5;font-size:18px;pointer-events:none}
+</style></head><body>
+<div id="bar">
+<button id="open">Open .canvas</button><input id="file" type="file" accept=".canvas,.json" hidden>
+<button id="fit">Fit</button>
+<span>Export scale</span><select id="scale"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>6</option></select>
+<button id="png">PNG</button><button id="pdf">PDF</button><button id="json">Save .canvas</button>
+<span id="name"></span>
+</div>
+<canvas id="c"></canvas><div id="hint">Open or drop a .canvas file</div>
+<script>
+const PRESET={1:'#fb464c',2:'#e9973f',3:'#e0de71',4:'#44cf6e',5:'#53dfdd',6:'#a882ff'};
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let data=null,fname='canvas',view={x:0,y:0,k:1},drag=null,dpr=window.devicePixelRatio||1;
+const $=id=>document.getElementById(id);
+
+function resize(){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr;draw()}
+addEventListener('resize',resize);
+
+function load(text,name){
+  try{data=JSON.parse(text)}catch(e){alert('Invalid JSON: '+e.message);return}
+  data.nodes=data.nodes||[];data.edges=data.edges||[];
+  fname=(name||'canvas').replace(/\.(canvas|json)$/,'');$('name').textContent=name||'';
+  $('hint').style.display='none';fit();
+}
+function colorOf(c,def){if(!c)return def;return PRESET[c]||c}
+const nodeById=()=>Object.fromEntries(data.nodes.map(n=>[n.id,n]));
+
+function bounds(){
+  let a=1e18,b=1e18,c=-1e18,d=-1e18;
+  for(const n of data.nodes){a=Math.min(a,n.x);b=Math.min(b,n.y);c=Math.max(c,n.x+n.width);d=Math.max(d,n.y+n.height)}
+  if(a>c)return{x:0,y:0,w:1,h:1};
+  return{x:a,y:b,w:c-a,h:d-b};
+}
+function fit(){
+  if(!data)return;const B=bounds(),W=cv.clientWidth,H=cv.clientHeight,m=40;
+  view.k=Math.min((W-2*m)/B.w,(H-2*m)/B.h,2);
+  view.x=(W-B.w*view.k)/2-B.x*view.k;view.y=(H-B.h*view.k)/2-B.y*view.k;draw();
+}
+
+function wrap(g,text,maxW){
+  const out=[];
+  for(const para of String(text).split('\n')){
+    let line='';
+    for(const w of para.split(/(\s+)/)){
+      if(g.measureText(line+w).width>maxW&&line){out.push(line);line=w.trimStart()}else line+=w;
+    }
+    out.push(line);
+  }
+  return out;
+}
+function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+
+function drawText(g,txt,n,pad){
+  const maxW=n.width-2*pad;let y=n.y+pad,fs=16;
+  g.save();g.beginPath();g.rect(n.x,n.y,n.width,n.height);g.clip();g.textBaseline='top';g.fillStyle='#ddd';
+  for(const raw of String(txt).split('\n')){
+    let t=raw,font=fs,bold=false,x=n.x+pad;
+    const h=t.match(/^(#{1,6})\s+(.*)/);
+    if(h){font=fs*(2.2-0.2*h[1].length);bold=true;t=h[2]}
+    const li=t.match(/^\s*[-*]\s+(.*)/);if(li){t='• '+li[1]}
+    t=t.replace(/\*\*(.+?)\*\*/g,'$1').replace(/`([^`]+)`/g,'$1').replace(/\[\[([^\]]+)\]\]/g,'$1').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1');
+    g.font=(bold?'bold ':'')+font+'px system-ui,sans-serif';
+    for(const l of wrap(g,t,maxW)){g.fillText(l,x,y);y+=font*1.4}
+  }
+  g.restore();
+}
+
+function render(g,opt){
+  const nodes=data.nodes,map=nodeById(),sel=opt&&opt.noSel?null:null;
+  // groups first
+  const order=[...nodes.filter(n=>n.type==='group'),...nodes.filter(n=>n.type!=='group')];
+  for(const n of order){
+    const col=colorOf(n.color,null);
+    g.lineWidth=2;
+    if(n.type==='group'){
+      rrect(g,n.x,n.y,n.width,n.height,12);g.fillStyle=(col||'#888')+'22';g.fill();g.strokeStyle=col||'#777';g.stroke();
+      if(n.label){g.font='bold 18px system-ui,sans-serif';g.fillStyle=col||'#bbb';g.textBaseline='bottom';g.fillText(n.label,n.x+8,n.y-6)}
+      continue;
+    }
+    rrect(g,n.x,n.y,n.width,n.height,8);g.fillStyle=col?col+'33':'#262626';g.fill();
+    g.strokeStyle=col||'#777';g.stroke();
+    if(n.type==='text')drawText(g,n.text||'',n,12);
+    else if(n.type==='file')drawText(g,'📄 '+(n.file||'')+(n.subpath||''),n,12);
+    else if(n.type==='link')drawText(g,'🔗 '+(n.url||''),n,12);
+  }
+  for(const e of data.edges){
+    const a=map[e.fromNode],b=map[e.toNode];if(!a||!b)continue;
+    const col=colorOf(e.color,'#999');
+    const p=anchor(a,e.fromSide,b),q=anchor(b,e.toSide,a);
+    const arrowTo=e.toEnd!=='none',arrowFrom=e.fromEnd==='arrow';
+    const d=Math.max(40,Math.hypot(q.x-p.x,q.y-p.y)/3);
+    const c1={x:p.x+p.dx*d,y:p.y+p.dy*d},c2={x:q.x+q.dx*d,y:q.y+q.dy*d};
+    g.strokeStyle=col;g.fillStyle=col;g.lineWidth=2;
+    g.beginPath();g.moveTo(p.x,p.y);g.bezierCurveTo(c1.x,c1.y,c2.x,c2.y,q.x,q.y);g.stroke();
+    if(arrowTo)head(g,q,c2);
+    if(arrowFrom)head(g,p,c1);
+    if(e.label){
+      const t=.5,mx=(p.x+3*c1.x+3*c2.x+q.x)/8,my=(p.y+3*c1.y+3*c2.y+q.y)/8;
+      g.font='14px system-ui,sans-serif';g.textBaseline='middle';g.textAlign='center';
+      const w=g.measureText(e.label).width+10;g.fillStyle='#1e1e1e';g.fillRect(mx-w/2,my-11,w,22);
+      g.fillStyle=col==='#999'?'#ddd':col;g.fillText(e.label,mx,my);g.textAlign='start';
+    }
+  }
+}
+function anchor(n,side,other){
+  if(!side){const dx=other.x+other.width/2-(n.x+n.width/2),dy=other.y+other.height/2-(n.y+n.height/2);
+    side=Math.abs(dx)*n.height>Math.abs(dy)*n.width?(dx>0?'right':'left'):(dy>0?'bottom':'top')}
+  const cx=n.x+n.width/2,cy=n.y+n.height/2;
+  return{top:{x:cx,y:n.y,dx:0,dy:-1},bottom:{x:cx,y:n.y+n.height,dx:0,dy:1},left:{x:n.x,y:cy,dx:-1,dy:0},right:{x:n.x+n.width,y:cy,dx:1,dy:0}}[side];
+}
+function head(g,tip,from){
+  const ang=Math.atan2(tip.y-from.y,tip.x-from.x),s=12;
+  g.beginPath();g.moveTo(tip.x,tip.y);
+  g.lineTo(tip.x-s*Math.cos(ang-.4),tip.y-s*Math.sin(ang-.4));
+  g.lineTo(tip.x-s*Math.cos(ang+.4),tip.y-s*Math.sin(ang+.4));g.closePath();g.fill();
+}
+
+function draw(){
+  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#1e1e1e';ctx.fillRect(0,0,cv.width,cv.height);
+  if(!data)return;
+  ctx.setTransform(dpr*view.k,0,0,dpr*view.k,dpr*view.x,dpr*view.y);render(ctx);
+}
+
+// hit testing / interaction
+const toWorld=(px,py)=>({x:(px-view.x)/view.k,y:(py-view.y)/view.k});
+function hit(w){
+  for(let i=data.nodes.length-1;i>=0;i--){const n=data.nodes[i];
+    if(n.type!=='group'&&w.x>=n.x&&w.x<=n.x+n.width&&w.y>=n.y&&w.y<=n.y+n.height)return n}
+  for(let i=data.nodes.length-1;i>=0;i--){const n=data.nodes[i];
+    if(n.type==='group'&&w.x>=n.x&&w.x<=n.x+n.width&&w.y>=n.y&&w.y<=n.y+n.height)return n}
+  return null;
+}
+function inside(g,n){return n!==g&&n.x>=g.x&&n.y>=g.y&&n.x+n.width<=g.x+g.width&&n.y+n.height<=g.y+g.height}
+cv.addEventListener('pointerdown',e=>{
+  if(!data)return;cv.setPointerCapture(e.pointerId);
+  const r=cv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,n=hit(toWorld(px,py));
+  if(n){const items=n.type==='group'?[n,...data.nodes.filter(m=>inside(n,m))]:[n];
+    drag={mode:'node',px,py,items:items.map(m=>({m,x:m.x,y:m.y}))}}
+  else drag={mode:'pan',px,py,vx:view.x,vy:view.y};
+  cv.style.cursor='grabbing';
+});
+cv.addEventListener('pointermove',e=>{
+  if(!drag)return;const r=cv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
+  if(drag.mode==='pan'){view.x=drag.vx+px-drag.px;view.y=drag.vy+py-drag.py}
+  else for(const i of drag.items){i.m.x=i.x+(px-drag.px)/view.k;i.m.y=i.y+(py-drag.py)/view.k}
+  draw();
+});
+cv.addEventListener('pointerup',()=>{drag=null;cv.style.cursor='grab'});
+function zoomAt(px,py,f){const k=Math.min(8,Math.max(.02,view.k*f));f=k/view.k;
+  view.x=px-(px-view.x)*f;view.y=py-(py-view.y)*f;view.k=k;draw()}
+cv.addEventListener('wheel',e=>{
+  e.preventDefault();const r=cv.getBoundingClientRect();
+  if(e.ctrlKey||e.metaKey)zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*.01));
+  else{view.x-=e.deltaX;view.y-=e.deltaY;draw()}
+},{passive:false});
+addEventListener('keydown',e=>{
+  if(e.key==='f'||e.key==='F')fit();
+  if(e.key==='+'||e.key==='=')zoomAt(cv.clientWidth/2,cv.clientHeight/2,1.2);
+  if(e.key==='-')zoomAt(cv.clientWidth/2,cv.clientHeight/2,1/1.2);
+});
+
+// files
+$('open').onclick=()=>$('file').click();
+$('file').onchange=async e=>{const f=e.target.files[0];if(f)load(await f.text(),f.name);e.target.value=''};
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('drop',async e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)load(await f.text(),f.name)});
+$('fit').onclick=fit;
+
+// export
+function offscreen(){
+  const B=bounds(),pad=40,w=B.w+2*pad,h=B.h+2*pad;
+  let s=+$('scale').value;const MAX=16000;s=Math.min(s,MAX/w,MAX/h);
+  const c=document.createElement('canvas');c.width=Math.ceil(w*s);c.height=Math.ceil(h*s);
+  const g=c.getContext('2d');g.fillStyle='#1e1e1e';g.fillRect(0,0,c.width,c.height);
+  g.setTransform(s,0,0,s,(pad-B.x)*s,(pad-B.y)*s);render(g);
+  return{c,w,h};
+}
+function save(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+$('png').onclick=()=>{if(!data)return;offscreen().c.toBlob(b=>save(b,fname+'.png'),'image/png')};
+$('json').onclick=()=>{if(data)save(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),fname+'.canvas')};
+$('pdf').onclick=()=>{
+  if(!data)return;const {c,w,h}=offscreen();
+  c.toBlob(async b=>{
+    const jpg=new Uint8Array(await b.arrayBuffer());
+    save(makePdf(jpg,c.width,c.height,w,h),fname+'.pdf');
+  },'image/jpeg',.95);
+};
+function makePdf(jpg,pw,ph,w,h){
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const add=x=>{const u=typeof x==='string'?enc.encode(x):x;parts.push(u);len+=u.length};
+  const obj=(i,body)=>{offs[i]=len;add(i+' 0 obj\n');add(body);add('\nendobj\n')};
+  add('%PDF-1.4\n');
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${w.toFixed(2)} ${h.toFixed(2)}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`);
+  offs[4]=len;add(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${pw} /Height ${ph} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`);add(jpg);add('\nendstream\nendobj\n');
+  const cs=`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} 0 0 cm /Im0 Do Q`;
+  obj(5,`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`);
+  const xr=len;add('xref\n0 6\n0000000000 65535 f \n');
+  for(let i=1;i<=5;i++)add(String(offs[i]).padStart(10,'0')+' 00000 n \n');
+  add(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`);
+  return new Blob(parts,{type:'application/pdf'});
+}
+
+resize();
+const src=new URLSearchParams(location.search).get('src');
+if(src)fetch(src).then(r=>r.text()).then(t=>load(t,src.split('/').pop())).catch(e=>alert(e));
+</script></body></html>
