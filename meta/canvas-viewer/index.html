@@ -7,20 +7,23 @@ html,body{margin:0;height:100%;font:14px system-ui,sans-serif;background:#1e1e1e
 #bar button,#bar select{background:#3a3a3a;color:#ddd;border:1px solid #555;border-radius:4px;padding:4px 8px;cursor:pointer}
 #bar span{opacity:.7}
 #c{position:fixed;top:38px;left:0;width:100%;height:calc(100% - 38px);display:block;cursor:grab}
+#ed{position:fixed;z-index:3;display:none;box-sizing:border-box;background:#262626;color:#ddd;border:2px solid #7aa2ff;border-radius:6px;font:16px system-ui,sans-serif;resize:none;padding:4px}
 #hint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.5;font-size:18px;pointer-events:none}
 </style></head><body>
 <div id="bar">
 <button id="open">Open .canvas</button><input id="file" type="file" accept=".canvas,.json" hidden>
 <button id="fit">Fit</button>
+<button id="addt">+ Text</button><button id="addg">+ Group</button><button id="del">Delete</button>
+<select id="col" title="Colour of selection"><option value="">colour</option><option value="-">none</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
 <span>Export scale</span><select id="scale"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>6</option></select>
 <button id="png">PNG</button><button id="pdf">PDF</button><button id="json">Save .canvas</button>
 <span id="name"></span>
 </div>
-<canvas id="c"></canvas><div id="hint">Open or drop a .canvas file</div>
+<textarea id="ed"></textarea><canvas id="c"></canvas><div id="hint">Open or drop a .canvas file</div>
 <script>
 const PRESET={1:'#fb464c',2:'#e9973f',3:'#e0de71',4:'#44cf6e',5:'#53dfdd',6:'#a882ff'};
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-let data=null,fname='canvas',view={x:0,y:0,k:1},drag=null,dpr=window.devicePixelRatio||1;
+let sel=null,data=null,fname='canvas',view={x:0,y:0,k:1},drag=null,dpr=window.devicePixelRatio||1;
 const $=id=>document.getElementById(id);
 
 function resize(){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr;draw()}
@@ -30,7 +33,7 @@ function load(text,name){
   try{data=JSON.parse(text)}catch(e){alert('Invalid JSON: '+e.message);return}
   data.nodes=data.nodes||[];data.edges=data.edges||[];
   fname=(name||'canvas').replace(/\.(canvas|json)$/,'');$('name').textContent=name||'';
-  $('hint').style.display='none';fit();
+  $('hint').style.display='none';sel=null;fit();
 }
 function colorOf(c,def){if(!c)return def;return PRESET[c]||c}
 const nodeById=()=>Object.fromEntries(data.nodes.map(n=>[n.id,n]));
@@ -76,7 +79,7 @@ function drawText(g,txt,n,pad){
 }
 
 function render(g,opt){
-  const nodes=data.nodes,map=nodeById(),sel=opt&&opt.noSel?null:null;
+  const nodes=data.nodes,map=nodeById();
   // groups first
   const order=[...nodes.filter(n=>n.type==='group'),...nodes.filter(n=>n.type!=='group')];
   for(const n of order){
@@ -96,10 +99,8 @@ function render(g,opt){
   for(const e of data.edges){
     const a=map[e.fromNode],b=map[e.toNode];if(!a||!b)continue;
     const col=colorOf(e.color,'#999');
-    const p=anchor(a,e.fromSide,b),q=anchor(b,e.toSide,a);
+    const {p,q,c1,c2}=edgeGeom(e,a,b);
     const arrowTo=e.toEnd!=='none',arrowFrom=e.fromEnd==='arrow';
-    const d=Math.max(40,Math.hypot(q.x-p.x,q.y-p.y)/3);
-    const c1={x:p.x+p.dx*d,y:p.y+p.dy*d},c2={x:q.x+q.dx*d,y:q.y+q.dy*d};
     g.strokeStyle=col;g.fillStyle=col;g.lineWidth=2;
     g.beginPath();g.moveTo(p.x,p.y);g.bezierCurveTo(c1.x,c1.y,c2.x,c2.y,q.x,q.y);g.stroke();
     if(arrowTo)head(g,q,c2);
@@ -112,6 +113,13 @@ function render(g,opt){
     }
   }
 }
+// Single place that defines edge shape (Obsidian's own edge code is closed source, so this is an approximation).
+function edgeGeom(e,a,b){
+  const p=anchor(a,e.fromSide,b),q=anchor(b,e.toSide,a);
+  const d=Math.max(40,Math.hypot(q.x-p.x,q.y-p.y)/3);
+  return{p,q,c1:{x:p.x+p.dx*d,y:p.y+p.dy*d},c2:{x:q.x+q.dx*d,y:q.y+q.dy*d}};
+}
+function bez(t,g){const u=1-t;return{x:u*u*u*g.p.x+3*u*u*t*g.c1.x+3*u*t*t*g.c2.x+t*t*t*g.q.x,y:u*u*u*g.p.y+3*u*u*t*g.c1.y+3*u*t*t*g.c2.y+t*t*t*g.q.y}}
 function anchor(n,side,other){
   if(!side){const dx=other.x+other.width/2-(n.x+n.width/2),dy=other.y+other.height/2-(n.y+n.height/2);
     side=Math.abs(dx)*n.height>Math.abs(dy)*n.width?(dx>0?'right':'left'):(dy>0?'bottom':'top')}
@@ -129,6 +137,11 @@ function draw(){
   ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#1e1e1e';ctx.fillRect(0,0,cv.width,cv.height);
   if(!data)return;
   ctx.setTransform(dpr*view.k,0,0,dpr*view.k,dpr*view.x,dpr*view.y);render(ctx);
+  if(sel){ctx.strokeStyle='#7aa2ff';ctx.fillStyle='#7aa2ff';ctx.lineWidth=3/view.k;
+    if(sel.kind==='node'){const n=sel.ref;rrect(ctx,n.x-4,n.y-4,n.width+8,n.height+8,10);ctx.stroke();
+      const h=HANDLE/view.k;ctx.fillRect(n.x+n.width-h/2,n.y+n.height-h/2,h,h)}
+    else{const m=nodeById(),a=m[sel.ref.fromNode],b=m[sel.ref.toNode];
+      if(a&&b){const g=edgeGeom(sel.ref,a,b);ctx.beginPath();ctx.moveTo(g.p.x,g.p.y);ctx.bezierCurveTo(g.c1.x,g.c1.y,g.c2.x,g.c2.y,g.q.x,g.q.y);ctx.stroke()}}}
 }
 
 // hit testing / interaction
@@ -140,18 +153,40 @@ function hit(w){
     if(n.type==='group'&&w.x>=n.x&&w.x<=n.x+n.width&&w.y>=n.y&&w.y<=n.y+n.height)return n}
   return null;
 }
+const HANDLE=10;
+function edgeHit(w){
+  const m=nodeById(),tol=8/view.k;
+  for(let i=data.edges.length-1;i>=0;i--){const e=data.edges[i],a=m[e.fromNode],b=m[e.toNode];if(!a||!b)continue;
+    const g=edgeGeom(e,a,b);
+    for(let k=0;k<=40;k++){const P=bez(k/40,g);if(Math.hypot(P.x-w.x,P.y-w.y)<tol)return e}}
+  return null;
+}
+function uid(){return Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>b.toString(16).padStart(2,'0')).join('')}
 function inside(g,n){return n!==g&&n.x>=g.x&&n.y>=g.y&&n.x+n.width<=g.x+g.width&&n.y+n.height<=g.y+g.height}
 cv.addEventListener('pointerdown',e=>{
   if(!data)return;cv.setPointerCapture(e.pointerId);
-  const r=cv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,n=hit(toWorld(px,py));
+  endEdit();
+  const r=cv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,w=toWorld(px,py),n=hit(w);
+  if(sel&&sel.kind==='node'&&!e.shiftKey){const s=sel.ref,h=HANDLE/view.k;
+    if(Math.abs(w.x-(s.x+s.width))<h&&Math.abs(w.y-(s.y+s.height))<h){
+      drag={mode:'resize',px,py,m:s,w:s.width,h:s.height};cv.style.cursor='nwse-resize';return}}
+  if(e.shiftKey&&sel&&sel.kind==='node'&&n&&n!==sel.ref){
+    const ed={id:uid(),fromNode:sel.ref.id,toNode:n.id};
+    const dx=n.x+n.width/2-(sel.ref.x+sel.ref.width/2),dy=n.y+n.height/2-(sel.ref.y+sel.ref.height/2);
+    const h=Math.abs(dx)*sel.ref.height>Math.abs(dy)*sel.ref.width;
+    ed.fromSide=h?(dx>0?'right':'left'):(dy>0?'bottom':'top');ed.toSide=h?(dx>0?'left':'right'):(dy>0?'top':'bottom');
+    data.edges.push(ed);sel={kind:'edge',ref:ed};drag=null;draw();return}
+  const ex=n?null:edgeHit(w);
+  sel=n?{kind:'node',ref:n}:ex?{kind:'edge',ref:ex}:null;
   if(n){const items=n.type==='group'?[n,...data.nodes.filter(m=>inside(n,m))]:[n];
     drag={mode:'node',px,py,items:items.map(m=>({m,x:m.x,y:m.y}))}}
-  else drag={mode:'pan',px,py,vx:view.x,vy:view.y};
-  cv.style.cursor='grabbing';
+  else if(!ex)drag={mode:'pan',px,py,vx:view.x,vy:view.y};
+  cv.style.cursor='grabbing';draw();
 });
 cv.addEventListener('pointermove',e=>{
   if(!drag)return;const r=cv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
   if(drag.mode==='pan'){view.x=drag.vx+px-drag.px;view.y=drag.vy+py-drag.py}
+  else if(drag.mode==='resize'){drag.m.width=Math.max(40,drag.w+(px-drag.px)/view.k);drag.m.height=Math.max(30,drag.h+(py-drag.py)/view.k)}
   else for(const i of drag.items){i.m.x=i.x+(px-drag.px)/view.k;i.m.y=i.y+(py-drag.py)/view.k}
   draw();
 });
@@ -164,10 +199,56 @@ cv.addEventListener('wheel',e=>{
   else{view.x-=e.deltaX;view.y-=e.deltaY;draw()}
 },{passive:false});
 addEventListener('keydown',e=>{
+  if((e.key==='Delete'||e.key==='Backspace')&&sel&&!editing){e.preventDefault();delSel();return}
+  if(e.key==='Enter'&&sel&&!editing){e.preventDefault();startEdit(sel);return}
+  if(e.key==='Escape'){sel=null;draw()}
   if(e.key==='f'||e.key==='F')fit();
   if(e.key==='+'||e.key==='=')zoomAt(cv.clientWidth/2,cv.clientHeight/2,1.2);
   if(e.key==='-')zoomAt(cv.clientWidth/2,cv.clientHeight/2,1/1.2);
 });
+
+// editing
+let editing=null;
+function startEdit(t){
+  if(!t)return;endEdit();const ed=$('ed');let val,set,box;
+  if(t.kind==='node'){const n=t.ref;
+    const f=n.type==='text'?'text':n.type==='group'?'label':n.type==='file'?'file':'url';
+    val=n[f]||'';set=v=>{n[f]=v};box={x:n.x,y:n.y,w:n.width,h:n.type==='group'?34:n.height}}
+  else{const m=nodeById(),a=m[t.ref.fromNode],b=m[t.ref.toNode];if(!a||!b)return;
+    const g=edgeGeom(t.ref,a,b),P=bez(.5,g);val=t.ref.label||'';set=v=>{if(v)t.ref.label=v;else delete t.ref.label};
+    box={x:P.x-80,y:P.y-14,w:160,h:28}}
+  const r=cv.getBoundingClientRect();
+  ed.style.left=r.left+view.x+box.x*view.k+'px';ed.style.top=r.top+view.y+box.y*view.k+'px';
+  ed.style.width=Math.max(80,box.w*view.k)+'px';ed.style.height=Math.max(28,box.h*view.k)+'px';
+  ed.value=val;ed.style.display='block';ed.focus();editing={set};
+}
+function endEdit(){if(!editing)return;editing.set($('ed').value);editing=null;$('ed').style.display='none';draw()}
+$('ed').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){editing=null;$('ed').style.display='none'}
+  else if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))endEdit()});
+$('ed').addEventListener('blur',endEdit);
+cv.addEventListener('dblclick',e=>{
+  if(!data)return;const r=cv.getBoundingClientRect(),w=toWorld(e.clientX-r.left,e.clientY-r.top),n=hit(w),ex=n?null:edgeHit(w);
+  if(n){sel={kind:'node',ref:n};draw();startEdit(sel)}
+  else if(ex){sel={kind:'edge',ref:ex};draw();startEdit(sel)}
+  else addNode('text',w.x-125,w.y-50);
+});
+function addNode(type,x,y){
+  if(!data)return;const n=type==='group'?{id:uid(),type,x:Math.round(x),y:Math.round(y),width:400,height:300,label:'Group'}
+    :{id:uid(),type:'text',x:Math.round(x),y:Math.round(y),width:250,height:100,text:'New note'};
+  if(type==='group')data.nodes.unshift(n);else data.nodes.push(n);
+  sel={kind:'node',ref:n};draw();startEdit(sel);
+}
+function center(){return toWorld(cv.clientWidth/2,cv.clientHeight/2)}
+function delSel(){
+  if(!data||!sel)return;
+  if(sel.kind==='node'){const id=sel.ref.id;data.nodes=data.nodes.filter(n=>n!==sel.ref);data.edges=data.edges.filter(e=>e.fromNode!==id&&e.toNode!==id)}
+  else data.edges=data.edges.filter(e=>e!==sel.ref);
+  sel=null;draw();
+}
+$('addt').onclick=()=>{const c=center();addNode('text',c.x-125,c.y-50)};
+$('addg').onclick=()=>{const c=center();addNode('group',c.x-200,c.y-150)};
+$('del').onclick=delSel;
+$('col').onchange=e=>{if(sel){const v=e.target.value;if(!v||v==='-')delete sel.ref.color;else sel.ref.color=v;draw()}e.target.value=''};
 
 // files
 $('open').onclick=()=>$('file').click();
