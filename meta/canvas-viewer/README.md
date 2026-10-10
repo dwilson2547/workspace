@@ -29,8 +29,12 @@ the exporter reduces the scale automatically). Embedded file nodes show their pa
 
 ## Deployment
 
-Served at http://canvas-viewer.local (homepage → Tools). `Dockerfile` wraps `index.html` in
-nginx-unprivileged; manifests are in `infra/cluster-config/canvas-viewer/`. To release:
+Served at http://canvas-viewer.local (homepage → Tools) and publicly at
+https://canvas-viewer.danwils.com. `Dockerfile` wraps `index.html` in nginx-unprivileged with
+`nginx.conf`, which sets a strict CSP: inline script/style only, no external resources, and
+`connect-src 'self'` so `?src=` can only load files from the same origin. Any change that adds a CDN
+script, font or remote fetch must widen the CSP too, or the browser will block it. Manifests are in
+`infra/cluster-config/canvas-viewer/`. To release:
 
 ```bash
 docker build -t dwilson2547/canvas-viewer:<ver> -t dwilson2547/canvas-viewer:latest .
