@@ -26,3 +26,15 @@ Edge curves are an approximation of Obsidian's (its renderer is closed source), 
 
 Limits: PDF is a raster page, not vector. Canvas size is capped by the browser (~16k px per side;
 the exporter reduces the scale automatically). Embedded file nodes show their path only.
+
+## Deployment
+
+Served at http://canvas-viewer.local (homepage → Tools). `Dockerfile` wraps `index.html` in
+nginx-unprivileged; manifests are in `infra/cluster-config/canvas-viewer/`. To release:
+
+```bash
+docker build -t dwilson2547/canvas-viewer:<ver> -t dwilson2547/canvas-viewer:latest .
+docker push dwilson2547/canvas-viewer:<ver> && docker push dwilson2547/canvas-viewer:latest
+```
+
+then bump the tag in `infra/cluster-config/canvas-viewer/deployment.yml` and push cluster-config.
