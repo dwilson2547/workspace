@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Workshop</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-tertiary: #1a2236;
+    --bg-editor: #0d1220;
+    --border: #1e2d4a;
+    --border-active: #3b82f6;
+    --text-primary: #e2e8f0;
+    --text-secondary: #8899b4;
+    --text-muted: #4a5f82;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.15);
+    --accent-hover: #2563eb;
+    --green: #22c55e;
+    --green-glow: rgba(34, 197, 94, 0.12);
+    --orange: #f59e0b;
+    --orange-glow: rgba(245, 158, 11, 0.12);
+    --red: #ef4444;
+    --red-glow: rgba(239, 68, 68, 0.12);
+    --purple: #a855f7;
+    --purple-glow: rgba(168, 85, 247, 0.12);
+    --cyan: #06b6d4;
+    --scrollbar-track: #0d1220;
+    --scrollbar-thumb: #1e2d4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a3f66; }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+
+  .app-title {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+  }
+
+  .app-title span {
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-left: 6px;
+    font-size: 13px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.3s;
+  }
+
+  .status-dot.valid { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.invalid { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .tool-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tool-group + .tool-group {
+    margin-left: 4px;
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+  }
+
+  .tool-group-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-right: 6px;
+    font-weight: 600;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .btn:hover {
+    background: var(--border);
+    color: var(--text-primary);
+    border-color: #2a3f66;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .btn.accent {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+  .btn.accent:hover { background: rgba(59,130,246,0.25); }
+
+  .btn.green {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-glow);
+  }
+  .btn.green:hover { background: rgba(34,197,94,0.22); }
+
+  .btn.orange {
+    border-color: var(--orange);
+    color: var(--orange);
+    background: var(--orange-glow);
+  }
+  .btn.orange:hover { background: rgba(245,158,11,0.22); }
+
+  .btn.purple {
+    border-color: var(--purple);
+    color: var(--purple);
+    background: var(--purple-glow);
+  }
+  .btn.purple:hover { background: rgba(168,85,247,0.22); }
+
+  /* Indent selector */
+  .indent-select {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+  }
+  .indent-select:focus { border-color: var(--accent); }
+
+  /* Main Content */
+  .main {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .editor-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .editor-panel + .editor-panel {
+    border-left: 1px solid var(--border);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .panel-btn {
+    padding: 3px 8px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .panel-btn:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
+
+  .editor-wrap {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+  }
+
+  .editor {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    border: none;
+    outline: none;
+    resize: none;
+    background: var(--bg-editor);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    tab-size: 2;
+    letter-spacing: 0.2px;
+  }
+
+  .editor::placeholder { color: var(--text-muted); }
+
+  .editor:focus {
+    box-shadow: inset 0 0 0 1px var(--border-active);
+  }
+
+  /* Toast */
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toast {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: toastIn 0.25s ease, toastOut 0.3s ease 2.5s forwards;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.success { border-color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+  .toast.info { border-color: var(--accent); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateY(-5px) scale(0.95); }
+  }
+
+  /* Error highlight in panel header */
+  .panel-header .error-msg {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 6px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .footer-left, .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .kbd {
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg-tertiary);
+    font-size: 10px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main { flex-direction: column; }
+    .editor-panel + .editor-panel { border-left: none; border-top: 1px solid var(--border); }
+    .toolbar { padding: 8px 12px; }
+    .header { padding: 12px 16px; }
+    .tool-group-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">{}</div>
+      <div class="app-title">JSON Workshop <span>v1.0</span></div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Empty</span>
+      </div>
+      <div class="status-item" id="sizeInfo">—</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="tool-group">
+      <span class="tool-group-label">Format</span>
+      <button class="btn accent" onclick="formatJSON()" title="Pretty print (Ctrl+Shift+F)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h14"/></svg>
+        Format
+      </button>
+      <button class="btn" onclick="minimizeJSON()" title="Minify">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16"/></svg>
+        Minimize
+      </button>
+      <select class="indent-select" id="indentSize" title="Indent size">
+        <option value="2">2 sp</option>
+        <option value="4">4 sp</option>
+        <option value="\t">Tab</option>
+      </select>
+    </div>
+
+    <div class="tool-group">
+      <span class="tool-group-label">Convert</span>
+      <button class="btn green" onclick="parseJSON()" title="Parse string → object">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4"/></svg>
+        Parse
+      </button>
+      <button class="btn green" onclick="stringifyJSON()" title="Object → JSON string">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 6H3M21 12H8M17 18H3"/></svg>
+        Stringify
+      </button>
+    </div>
+
+    <div class="tool-group">
+      <span class="tool-group-label">Sort</span>
+      <button class="btn orange" onclick="sortKeys()" title="Sort keys alphabetically">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7M3 12h5M3 18h3M16 6v14M16 20l-3-3m3 3l3-3"/></svg>
+        Keys A→Z
+      </button>
+      <button class="btn orange" onclick="sortKeysDesc()" title="Sort keys reverse">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h3M3 12h5M3 18h7M16 18V4M16 4l-3 3m3-3l3 3"/></svg>
+        Keys Z→A
+      </button>
+      <button class="btn purple" onclick="alignProperties()" title="Align matching properties across objects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18M9 3v18M15 3v18"/></svg>
+        Align Props
+      </button>
+    </div>
+
+    <div class="tool-group">
+      <span class="tool-group-label">Edit</span>
+      <button class="btn" onclick="copyOutput()" title="Copy output (Ctrl+Shift+C)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy
+      </button>
+      <button class="btn" onclick="clearAll()" title="Clear all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M5 6v14a2 2 0 002 2h10a2 2 0 002-2V6"/></svg>
+        Clear
+      </button>
+      <button class="btn" onclick="swapPanels()" title="Copy output to input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16l-4-4 4-4M17 8l4 4-4 4M3 12h18"/></svg>
+        Output → Input
+      </button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="editor-panel">
+      <div class="panel-header">
+        <span class="panel-label">Input</span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="document.getElementById('input').value=''; validateInput();">Clear</button>
+          <button class="panel-btn" onclick="pasteFromClipboard()">Paste</button>
+        </div>
+      </div>
+      <div class="editor-wrap">
+        <textarea class="editor" id="input" placeholder='Paste or type JSON here...&#10;&#10;{&#10;  "name": "example",&#10;  "value": 42&#10;}' spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <div class="editor-panel">
+      <div class="panel-header">
+        <span class="panel-label">Output</span>
+        <span class="error-msg" id="errorMsg"></span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="copyOutput()">Copy</button>
+        </div>
+      </div>
+      <div class="editor-wrap">
+        <textarea class="editor" id="output" placeholder="Result will appear here..." spellcheck="false" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">
+      <span><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Shift</kbd>+<kbd class="kbd">F</kbd> Format</span>
+      <span><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Shift</kbd>+<kbd class="kbd">C</kbd> Copy</span>
+    </div>
+    <div class="footer-right">
+      <span id="lineInfo">Ln 1, Col 1</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+const inputEl = document.getElementById('input');
+const outputEl = document.getElementById('output');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const sizeInfo = document.getElementById('sizeInfo');
+const errorMsg = document.getElementById('errorMsg');
+const lineInfo = document.getElementById('lineInfo');
+
+// ─── Helpers ───
+
+function getIndent() {
+  const v = document.getElementById('indentSize').value;
+  return v === '\\t' ? '\t' : parseInt(v);
+}
+
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = {
+    success: '✓',
+    error: '✗',
+    info: 'ℹ'
+  };
+  t.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function setOutput(val) {
+  outputEl.value = val;
+}
+
+function setError(msg) {
+  errorMsg.textContent = msg;
+}
+
+function clearError() {
+  errorMsg.textContent = '';
+}
+
+function getInput() {
+  return inputEl.value.trim();
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+// ─── Validation ───
+
+function validateInput() {
+  const raw = getInput();
+  if (!raw) {
+    statusDot.className = 'status-dot';
+    statusText.textContent = 'Empty';
+    sizeInfo.textContent = '—';
+    clearError();
+    return null;
+  }
+
+  sizeInfo.textContent = formatBytes(new Blob([raw]).size);
+
+  try {
+    const parsed = JSON.parse(raw);
+    statusDot.className = 'status-dot valid';
+    statusText.textContent = 'Valid JSON';
+    clearError();
+    return parsed;
+  } catch (e) {
+    statusDot.className = 'status-dot invalid';
+    statusText.textContent = 'Invalid';
+    setError(e.message.replace(/^JSON\.parse:\s*/, ''));
+    return undefined; // distinguish from null (empty)
+  }
+}
+
+inputEl.addEventListener('input', validateInput);
+
+// cursor position tracking
+inputEl.addEventListener('keyup', updateCursorInfo);
+inputEl.addEventListener('click', updateCursorInfo);
+
+function updateCursorInfo() {
+  const val = inputEl.value;
+  const pos = inputEl.selectionStart;
+  const lines = val.substring(0, pos).split('\n');
+  lineInfo.textContent = `Ln ${lines.length}, Col ${lines[lines.length - 1].length + 1}`;
+}
+
+// ─── Format / Minimize ───
+
+function formatJSON() {
+  const parsed = validateInput();
+  if (parsed === null) return showToast('Nothing to format', 'info');
+  if (parsed === undefined) return showToast('Invalid JSON — fix errors first', 'error');
+  clearError();
+  setOutput(JSON.stringify(parsed, null, getIndent()));
+  showToast('Formatted', 'success');
+}
+
+function minimizeJSON() {
+  const parsed = validateInput();
+  if (parsed === null) return showToast('Nothing to minimize', 'info');
+  if (parsed === undefined) return showToast('Invalid JSON — fix errors first', 'error');
+  clearError();
+  setOutput(JSON.stringify(parsed));
+  showToast('Minimized', 'success');
+}
+
+// ─── Parse / Stringify ───
+
+function parseJSON() {
+  const raw = getInput();
+  if (!raw) return showToast('Nothing to parse', 'info');
+  clearError();
+
+  try {
+    // Attempt to parse as a JSON string (i.e., a stringified JSON string)
+    const outer = JSON.parse(raw);
+    if (typeof outer === 'string') {
+      // It was a JSON string — now parse the inner value
+      try {
+        const inner = JSON.parse(outer);
+        setOutput(JSON.stringify(inner, null, getIndent()));
+        showToast('Parsed stringified JSON', 'success');
+      } catch {
+        // Inner content isn't JSON, just show it as a plain string
+        setOutput(outer);
+        showToast('Parsed string value', 'success');
+      }
+    } else {
+      // Already an object/array — just format it
+      setOutput(JSON.stringify(outer, null, getIndent()));
+      showToast('Already parsed — formatted output', 'info');
+    }
+  } catch (e) {
+    setError(e.message);
+    showToast('Failed to parse', 'error');
+  }
+}
+
+function stringifyJSON() {
+  const raw = getInput();
+  if (!raw) return showToast('Nothing to stringify', 'info');
+  clearError();
+
+  try {
+    const parsed = JSON.parse(raw);
+    // Double-stringify to produce a JSON string literal
+    setOutput(JSON.stringify(JSON.stringify(parsed)));
+    showToast('Stringified', 'success');
+  } catch (e) {
+    // If it's not valid JSON, just stringify the raw text
+    setOutput(JSON.stringify(raw));
+    showToast('Stringified as raw text', 'success');
+  }
+}
+
+// ─── Sort ───
+
+function sortObjectKeys(obj, comparator) {
+  if (Array.isArray(obj)) {
+    return obj.map(item => sortObjectKeys(item, comparator));
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const sorted = {};
+    const keys = Object.keys(obj).sort(comparator);
+    for (const k of keys) {
+      sorted[k] = sortObjectKeys(obj[k], comparator);
+    }
+    return sorted;
+  }
+  return obj;
+}
+
+function sortKeys() {
+  const parsed = validateInput();
+  if (parsed === null) return showToast('Nothing to sort', 'info');
+  if (parsed === undefined) return showToast('Invalid JSON — fix errors first', 'error');
+  clearError();
+  const sorted = sortObjectKeys(parsed, (a, b) => a.localeCompare(b));
+  setOutput(JSON.stringify(sorted, null, getIndent()));
+  showToast('Keys sorted A→Z', 'success');
+}
+
+function sortKeysDesc() {
+  const parsed = validateInput();
+  if (parsed === null) return showToast('Nothing to sort', 'info');
+  if (parsed === undefined) return showToast('Invalid JSON — fix errors first', 'error');
+  clearError();
+  const sorted = sortObjectKeys(parsed, (a, b) => b.localeCompare(a));
+  setOutput(JSON.stringify(sorted, null, getIndent()));
+  showToast('Keys sorted Z→A', 'success');
+}
+
+// ─── Align Properties ───
+// For arrays of objects, this reorders each object's keys so that
+// shared properties appear in a consistent order across all objects.
+// The key order is: all keys that appear in ANY object, sorted by
+// frequency (most common first), then alphabetically as tiebreaker.
+
+function alignProperties() {
+  const parsed = validateInput();
+  if (parsed === null) return showToast('Nothing to align', 'info');
+  if (parsed === undefined) return showToast('Invalid JSON — fix errors first', 'error');
+  clearError();
+
+  const aligned = alignPropertiesDeep(parsed);
+  setOutput(JSON.stringify(aligned, null, getIndent()));
+  showToast('Properties aligned', 'success');
+}
+
+function alignPropertiesDeep(value) {
+  if (Array.isArray(value)) {
+    // Check if this is an array of objects
+    const objects = value.filter(item => item !== null && typeof item === 'object' && !Array.isArray(item));
+
+    if (objects.length >= 2) {
+      // Gather all keys with frequency counts and first-seen index
+      const keyFreq = new Map();
+      const keyFirstSeen = new Map();
+
+      value.forEach((item, idx) => {
+        if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
+          Object.keys(item).forEach((key, keyIdx) => {
+            keyFreq.set(key, (keyFreq.get(key) || 0) + 1);
+            if (!keyFirstSeen.has(key)) {
+              keyFirstSeen.set(key, idx * 10000 + keyIdx);
+            }
+          });
+        }
+      });
+
+      // Sort keys: by frequency (descending), then by first-seen order
+      const canonicalOrder = [...keyFreq.keys()].sort((a, b) => {
+        const freqDiff = keyFreq.get(b) - keyFreq.get(a);
+        if (freqDiff !== 0) return freqDiff;
+        return keyFirstSeen.get(a) - keyFirstSeen.get(b);
+      });
+
+      // Rebuild each item with canonical key order
+      return value.map(item => {
+        if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+          return alignPropertiesDeep(item);
+        }
+        const reordered = {};
+        for (const key of canonicalOrder) {
+          if (key in item) {
+            reordered[key] = alignPropertiesDeep(item[key]);
+          }
+        }
+        return reordered;
+      });
+    }
+
+    // Not an array of objects, just recurse
+    return value.map(item => alignPropertiesDeep(item));
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const result = {};
+    for (const [k, v] of Object.entries(value)) {
+      result[k] = alignPropertiesDeep(v);
+    }
+    return result;
+  }
+
+  return value;
+}
+
+// ─── Utility Actions ───
+
+function copyOutput() {
+  const text = outputEl.value;
+  if (!text) return showToast('Nothing to copy', 'info');
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copied to clipboard', 'success');
+  }).catch(() => {
+    // Fallback
+    outputEl.select();
+    document.execCommand('copy');
+    showToast('Copied to clipboard', 'success');
+  });
+}
+
+function clearAll() {
+  inputEl.value = '';
+  outputEl.value = '';
+  validateInput();
+  showToast('Cleared', 'info');
+}
+
+function swapPanels() {
+  const out = outputEl.value;
+  if (!out) return showToast('Output is empty', 'info');
+  inputEl.value = out;
+  outputEl.value = '';
+  validateInput();
+  showToast('Output moved to input', 'success');
+}
+
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    inputEl.value = text;
+    validateInput();
+    showToast('Pasted from clipboard', 'success');
+  } catch {
+    showToast('Could not access clipboard', 'error');
+  }
+}
+
+// ─── Keyboard Shortcuts ───
+
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'F') {
+    e.preventDefault();
+    formatJSON();
+  }
+  if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+    e.preventDefault();
+    copyOutput();
+  }
+});
+
+// Allow tab in textarea
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = inputEl.selectionStart;
+    const end = inputEl.selectionEnd;
+    const indent = document.getElementById('indentSize').value === '\\t' ? '\t' : ' '.repeat(parseInt(document.getElementById('indentSize').value));
+    inputEl.value = inputEl.value.substring(0, start) + indent + inputEl.value.substring(end);
+    inputEl.selectionStart = inputEl.selectionEnd = start + indent.length;
+  }
+});
+
+// Init
+validateInput();
+</script>
+
+</body>
+</html>

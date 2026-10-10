@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OAuth Token Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #13161f;
+    --surface-2: #1a1e2a;
+    --border: #252a38;
+    --border-focus: #4f6ef7;
+    --text: #e2e6f0;
+    --text-dim: #6b7394;
+    --accent: #4f6ef7;
+    --accent-glow: rgba(79, 110, 247, 0.15);
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.1);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.1);
+    --yellow: #fbbf24;
+    --yellow-dim: rgba(251, 191, 36, 0.1);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Ambient glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(79, 110, 247, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 720px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 36px;
+  }
+
+  .header h1 {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header h1 .icon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent-glow);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .header p {
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-size: 0.9rem;
+    padding-left: 48px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active {
+    background: var(--surface-2);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  /* Card / Form */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  label .required {
+    color: var(--accent);
+    font-size: 0.6rem;
+  }
+
+  input, select, textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #3d4460;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7394' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 11px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(79, 110, 247, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: #6381f9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(79, 110, 247, 0.35);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    color: var(--text);
+    border-color: #3a4058;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* Spinner */
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Response area */
+  .response-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: none;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .response-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-badge {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-badge.success {
+    background: var(--green-dim);
+    color: var(--green);
+  }
+
+  .status-badge.error {
+    background: var(--red-dim);
+    color: var(--red);
+  }
+
+  .response-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .icon-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .icon-btn:hover {
+    color: var(--text);
+    border-color: #3a4058;
+  }
+
+  .icon-btn .tooltip {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  .icon-btn:hover .tooltip { opacity: 1; }
+
+  .response-body {
+    padding: 16px 20px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .response-body pre {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .response-body::-webkit-scrollbar { width: 6px; }
+  .response-body::-webkit-scrollbar-track { background: transparent; }
+  .response-body::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  /* Token display */
+  .token-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 14px;
+    margin-top: 12px;
+  }
+
+  .token-field .token-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    min-width: fit-content;
+  }
+
+  .token-field .token-value {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--green);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* History panel */
+  .history-panel {
+    margin-top: 20px;
+  }
+
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .history-item:hover { border-color: #3a4058; }
+
+  .history-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .history-meta .grant {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+  }
+
+  .history-meta .time {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-dim);
+  }
+
+  .hidden { display: none !important; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+    .header h1 { font-size: 1.3rem; }
+    body { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><span class="icon">🔑</span> OAuth Token Tool</h1>
+    <p>Retrieve access tokens from any OAuth 2.0 / OIDC provider</p>
+  </div>
+
+  <!-- Grant Type Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-grant="authorization_code">Auth Code</button>
+    <button class="tab" data-grant="client_credentials">Client Credentials</button>
+    <button class="tab" data-grant="password">Password (ROPC)</button>
+    <button class="tab" data-grant="refresh_token">Refresh Token</button>
+  </div>
+
+  <!-- Configuration -->
+  <div class="card">
+    <div class="card-title">Endpoint</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Token URL <span class="required">●</span></label>
+        <input type="url" id="tokenUrl" placeholder="https://auth.example.com/oauth/token" />
+      </div>
+      <div class="form-group full" id="authUrlGroup">
+        <label>Authorization URL <span class="required">●</span></label>
+        <input type="url" id="authUrl" placeholder="https://auth.example.com/oauth/authorize" />
+      </div>
+      <div class="form-group full" id="redirectUriGroup">
+        <label>Redirect URI <span class="required">●</span></label>
+        <input type="url" id="redirectUri" placeholder="http://localhost:8080/callback" />
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Credentials</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client ID <span class="required">●</span></label>
+          <input type="text" id="clientId" placeholder="your-client-id" />
+        </div>
+        <div class="form-group">
+          <label>Client Secret</label>
+          <input type="password" id="clientSecret" placeholder="your-client-secret" />
+        </div>
+      </div>
+      <div class="form-row" id="userCredGroup">
+        <div class="form-group">
+          <label>Username <span class="required">●</span></label>
+          <input type="text" id="username" placeholder="user@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password <span class="required">●</span></label>
+          <input type="password" id="password" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="form-group full" id="refreshTokenGroup">
+        <label>Refresh Token <span class="required">●</span></label>
+        <textarea id="refreshToken" placeholder="paste your refresh token here" rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Options</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Scope</label>
+        <input type="text" id="scope" placeholder="openid profile email (space-separated)" />
+      </div>
+      <div class="form-group full">
+        <label>Audience</label>
+        <input type="text" id="audience" placeholder="https://api.example.com" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Auth Method</label>
+          <select id="authMethod">
+            <option value="body">Credentials in Body</option>
+            <option value="header">Basic Auth Header</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Content Type</label>
+          <select id="contentType">
+            <option value="form">application/x-www-form-urlencoded</option>
+            <option value="json">application/json</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>Extra Parameters</label>
+        <textarea id="extraParams" placeholder="key=value (one per line)" rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="sendBtn" onclick="handleSend()">
+      <span class="spinner" id="spinner"></span>
+      <span id="btnText">Get Token</span>
+    </button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+  </div>
+
+  <!-- Auth Code Flow: Intermediate step -->
+  <div class="card hidden" id="authCodeCard" style="margin-top: 20px;">
+    <div class="card-title">Authorization Code Exchange</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Authorization Code <span class="required">●</span></label>
+        <input type="text" id="authCode" placeholder="paste the authorization code from the redirect" />
+      </div>
+      <div class="form-group full" id="pkceVerifierGroup">
+        <label>Code Verifier (PKCE)</label>
+        <input type="text" id="codeVerifier" placeholder="auto-generated if PKCE was used" />
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="exchangeCode()">Exchange Code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Response -->
+  <div class="response-card" id="responseCard" style="margin-top: 20px;">
+    <div class="response-header">
+      <span class="status-badge" id="statusBadge">
+        <span id="statusDot">●</span>
+        <span id="statusText">200 OK</span>
+      </span>
+      <div class="response-actions">
+        <button class="icon-btn" onclick="copyToken()">
+          <span class="tooltip">Copy Token</span>
+          📋
+        </button>
+        <button class="icon-btn" onclick="copyFull()">
+          <span class="tooltip">Copy Full Response</span>
+          📄
+        </button>
+        <button class="icon-btn" onclick="decodeJwt()">
+          <span class="tooltip">Decode JWT</span>
+          🔍
+        </button>
+      </div>
+    </div>
+    <div class="response-body">
+      <pre id="responseBody"></pre>
+    </div>
+  </div>
+
+  <!-- Decoded JWT -->
+  <div class="response-card" id="jwtCard" style="margin-top: 12px;">
+    <div class="response-header">
+      <span class="status-badge" style="background: var(--yellow-dim); color: var(--yellow);">
+        ● Decoded JWT
+      </span>
+    </div>
+    <div class="response-body">
+      <pre id="jwtBody"></pre>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentGrant = 'authorization_code';
+  let lastResponse = null;
+  let pkceVerifier = null;
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentGrant = tab.dataset.grant;
+      updateVisibility();
+    });
+  });
+
+  function updateVisibility() {
+    const g = currentGrant;
+    toggle('authUrlGroup', g === 'authorization_code');
+    toggle('redirectUriGroup', g === 'authorization_code');
+    toggle('userCredGroup', g === 'password');
+    toggle('refreshTokenGroup', g === 'refresh_token');
+    toggle('authCodeCard', false);
+
+    const btnText = g === 'authorization_code' ? 'Start Auth Flow' : 'Get Token';
+    document.getElementById('btnText').textContent = btnText;
+  }
+
+  function toggle(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', !show);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function val(id) { return document.getElementById(id)?.value?.trim() || ''; }
+
+  // PKCE helpers
+  function generatePKCE() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const verifier = base64UrlEncode(array);
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)).then(hash => {
+      const challenge = base64UrlEncode(new Uint8Array(hash));
+      return { verifier, challenge };
+    });
+  }
+
+  function base64UrlEncode(bytes) {
+    let str = '';
+    bytes.forEach(b => str += String.fromCharCode(b));
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  // Main send handler
+  async function handleSend() {
+    if (currentGrant === 'authorization_code') {
+      await startAuthCodeFlow();
+    } else {
+      await requestToken();
+    }
+  }
+
+  async function startAuthCodeFlow() {
+    const authUrl = val('authUrl');
+    const clientId = val('clientId');
+    const redirectUri = val('redirectUri');
+    const scope = val('scope');
+
+    if (!authUrl || !clientId || !redirectUri) {
+      showToast('Fill in required fields');
+      return;
+    }
+
+    const url = new URL(authUrl);
+    url.searchParams.set('response_type', 'code');
+    url.searchParams.set('client_id', clientId);
+    url.searchParams.set('redirect_uri', redirectUri);
+    if (scope) url.searchParams.set('scope', scope);
+
+    // PKCE
+    const pkce = await generatePKCE();
+    pkceVerifier = pkce.verifier;
+    url.searchParams.set('code_challenge', pkce.challenge);
+    url.searchParams.set('code_challenge_method', 'S256');
+
+    // Generate state
+    const state = base64UrlEncode(crypto.getRandomValues(new Uint8Array(16)));
+    url.searchParams.set('state', state);
+
+    // Add extra params
+    const extra = val('extraParams');
+    if (extra) {
+      extra.split('\n').forEach(line => {
+        const [k, ...v] = line.split('=');
+        if (k && v.length) url.searchParams.set(k.trim(), v.join('=').trim());
+      });
+    }
+
+    // Open auth URL
+    window.open(url.toString(), '_blank');
+
+    // Show code exchange form
+    toggle('authCodeCard', true);
+    document.getElementById('codeVerifier').value = pkceVerifier;
+    showToast('Authorize in the new tab, then paste the code');
+  }
+
+  async function exchangeCode() {
+    const code = val('authCode');
+    if (!code) { showToast('Paste the authorization code'); return; }
+    await requestToken(code);
+  }
+
+  async function requestToken(authCode) {
+    const tokenUrl = val('tokenUrl');
+    const clientId = val('clientId');
+    const clientSecret = val('clientSecret');
+
+    if (!tokenUrl) { showToast('Token URL is required'); return; }
+
+    const body = {};
+    body.grant_type = currentGrant;
+    if (clientId && val('authMethod') === 'body') body.client_id = clientId;
+    if (clientSecret && val('authMethod') === 'body') body.client_secret = clientSecret;
+
+    if (currentGrant === 'authorization_code') {
+      body.code = authCode;
+      body.redirect_uri = val('redirectUri');
+      const verifier = val('codeVerifier');
+      if (verifier) body.code_verifier = verifier;
+    } else if (currentGrant === 'password') {
+      body.username = val('username');
+      body.password = val('password');
+    } else if (currentGrant === 'refresh_token') {
+      body.refresh_token = val('refreshToken');
+    }
+
+    const scope = val('scope');
+    if (scope) body.scope = scope;
+    const audience = val('audience');
+    if (audience) body.audience = audience;
+
+    // Extra params
+    const extra = val('extraParams');
+    if (extra) {
+      extra.split('\n').forEach(line => {
+        const [k, ...v] = line.split('=');
+        if (k && v.length) body[k.trim()] = v.join('=').trim();
+      });
+    }
+
+    // Build headers
+    const headers = {};
+    const useJson = val('contentType') === 'json';
+
+    if (useJson) {
+      headers['Content-Type'] = 'application/json';
+    } else {
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    }
+
+    if (val('authMethod') === 'header' && clientId) {
+      headers['Authorization'] = 'Basic ' + btoa(clientId + ':' + (clientSecret || ''));
+    }
+
+    const reqBody = useJson ? JSON.stringify(body) : new URLSearchParams(body).toString();
+
+    // UI loading state
+    const btn = document.getElementById('sendBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    btnText.textContent = 'Requesting...';
+
+    try {
+      const res = await fetch(tokenUrl, {
+        method: 'POST',
+        headers,
+        body: reqBody
+      });
+
+      let data;
+      const text = await res.text();
+      try { data = JSON.parse(text); } catch { data = text; }
+
+      lastResponse = data;
+      showResponse(res.status, res.ok, data);
+    } catch (err) {
+      lastResponse = { error: err.message };
+      showResponse(0, false, { error: 'Network error', message: err.message });
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btnText.textContent = currentGrant === 'authorization_code' ? 'Start Auth Flow' : 'Get Token';
+    }
+  }
+
+  function showResponse(status, ok, data) {
+    const card = document.getElementById('responseCard');
+    const badge = document.getElementById('statusBadge');
+    const statusText = document.getElementById('statusText');
+    const body = document.getElementById('responseBody');
+
+    card.style.display = 'block';
+    badge.className = 'status-badge ' + (ok ? 'success' : 'error');
+    statusText.textContent = status ? `${status} ${ok ? 'OK' : 'Error'}` : 'Failed';
+
+    const formatted = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    body.textContent = formatted;
+
+    // Hide JWT card
+    document.getElementById('jwtCard').style.display = 'none';
+  }
+
+  function copyToken() {
+    if (!lastResponse) return;
+    const token = lastResponse.access_token || lastResponse.id_token || '';
+    if (!token) { showToast('No token found in response'); return; }
+    navigator.clipboard.writeText(token).then(() => showToast('Token copied!'));
+  }
+
+  function copyFull() {
+    if (!lastResponse) return;
+    const text = typeof lastResponse === 'string' ? lastResponse : JSON.stringify(lastResponse, null, 2);
+    navigator.clipboard.writeText(text).then(() => showToast('Response copied!'));
+  }
+
+  function decodeJwt() {
+    if (!lastResponse) return;
+    const token = lastResponse.access_token || lastResponse.id_token || '';
+    if (!token) { showToast('No token to decode'); return; }
+
+    try {
+      const parts = token.split('.');
+      if (parts.length < 2) throw new Error('Not a JWT');
+
+      const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+      // Add human-readable dates
+      if (payload.exp) payload._exp_readable = new Date(payload.exp * 1000).toISOString();
+      if (payload.iat) payload._iat_readable = new Date(payload.iat * 1000).toISOString();
+      if (payload.nbf) payload._nbf_readable = new Date(payload.nbf * 1000).toISOString();
+
+      const decoded = { header, payload };
+      const jwtCard = document.getElementById('jwtCard');
+      const jwtBody = document.getElementById('jwtBody');
+      jwtCard.style.display = 'block';
+      jwtBody.textContent = JSON.stringify(decoded, null, 2);
+    } catch (e) {
+      showToast('Token is not a valid JWT');
+    }
+  }
+
+  function clearAll() {
+    document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+    document.getElementById('responseCard').style.display = 'none';
+    document.getElementById('jwtCard').style.display = 'none';
+    toggle('authCodeCard', false);
+    lastResponse = null;
+    pkceVerifier = null;
+  }
+
+  // Init visibility
+  updateVisibility();
+</script>
+</body>
+</html>

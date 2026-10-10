@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT Decoder</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e13;
+    --surface: #13161d;
+    --surface-raised: #1a1e28;
+    --border: #252a36;
+    --border-focus: #4a6fa5;
+    --text: #d4dae6;
+    --text-muted: #6b7a94;
+    --header-color: #c9d6f0;
+    --accent-blue: #5b8cd6;
+    --accent-green: #59c98d;
+    --accent-orange: #e0945a;
+    --accent-red: #d65b6a;
+    --accent-purple: #9a7bdb;
+    --header-bg: rgba(91, 140, 214, 0.06);
+    --payload-bg: rgba(89, 201, 141, 0.06);
+    --sig-bg: rgba(224, 148, 90, 0.06);
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(91, 140, 214, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91, 140, 214, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  /* Header */
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .logo {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(91, 140, 214, 0.25);
+  }
+
+  .masthead h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--header-color);
+    letter-spacing: -0.5px;
+  }
+
+  .masthead p {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  /* Input section */
+  .input-section {
+    margin-bottom: 28px;
+  }
+
+  .input-section label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 10px;
+  }
+
+  .input-section label .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .token-input-wrapper {
+    position: relative;
+  }
+
+  textarea {
+    width: 100%;
+    height: 140px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px 18px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(91, 140, 214, 0.1);
+  }
+
+  textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.5;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-raised);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  button:hover {
+    border-color: var(--accent-blue);
+    color: var(--text);
+    background: rgba(91, 140, 214, 0.08);
+  }
+
+  button.primary {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    border: none;
+    color: #fff;
+    padding: 9px 22px;
+    font-weight: 600;
+  }
+
+  button.primary:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 16px rgba(91, 140, 214, 0.3);
+  }
+
+  /* Error display */
+  .error-banner {
+    background: rgba(214, 91, 106, 0.08);
+    border: 1.5px solid rgba(214, 91, 106, 0.25);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: var(--accent-red);
+    display: none;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+  }
+
+  .error-banner.visible { display: flex; }
+
+  .error-banner svg { flex-shrink: 0; }
+
+  /* Output panels */
+  .decoded-output { display: none; }
+  .decoded-output.visible { display: block; }
+
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 760px) {
+    .panel-grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .panel:nth-child(2) { animation-delay: 0.08s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .panel-tag.header-tag {
+    background: rgba(91, 140, 214, 0.15);
+    color: var(--accent-blue);
+  }
+
+  .panel-tag.payload-tag {
+    background: rgba(89, 201, 141, 0.15);
+    color: var(--accent-green);
+  }
+
+  .panel-tag.sig-tag {
+    background: rgba(224, 148, 90, 0.15);
+    color: var(--accent-orange);
+  }
+
+  .panel-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .copy-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 5px;
+    transition: all 0.2s;
+    display: flex;
+  }
+
+  .copy-btn:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .panel-body {
+    padding: 16px 18px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .panel-body::-webkit-scrollbar { width: 5px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* JSON rendering */
+  .json-view {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .json-key { color: var(--accent-blue); }
+  .json-string { color: var(--accent-green); }
+  .json-number { color: var(--accent-orange); }
+  .json-boolean { color: var(--accent-purple); }
+  .json-null { color: var(--text-muted); font-style: italic; }
+  .json-punct { color: var(--text-muted); }
+
+  /* Signature panel */
+  .sig-panel {
+    animation-delay: 0.16s;
+  }
+
+  .sig-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-muted);
+    word-break: break-all;
+  }
+
+  /* Claims detail */
+  .claims-section {
+    animation: fadeUp 0.4s ease both;
+    animation-delay: 0.24s;
+  }
+
+  .claims-section .panel-body { padding: 0; max-height: none; }
+
+  .claim-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .claim-row:last-child { border-bottom: none; }
+
+  .claim-key {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent-blue);
+    padding: 11px 18px;
+    background: rgba(91, 140, 214, 0.03);
+    font-weight: 500;
+    border-right: 1px solid var(--border);
+  }
+
+  .claim-val {
+    padding: 11px 18px;
+    color: var(--text);
+    word-break: break-all;
+  }
+
+  .claim-val .timestamp {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .claim-val .expired { color: var(--accent-red); }
+  .claim-val .valid { color: var(--accent-green); }
+
+  /* Colorized token preview */
+  .token-preview {
+    margin-bottom: 20px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .token-preview-inner {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    word-break: break-all;
+  }
+
+  .token-preview .part-header { color: var(--accent-blue); }
+  .token-preview .part-dot { color: var(--text-muted); }
+  .token-preview .part-payload { color: var(--accent-green); }
+  .token-preview .part-sig { color: var(--accent-orange); }
+
+  /* Animations */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface-raised);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="masthead">
+    <div class="logo">JWT</div>
+    <div>
+      <h1>JWT Decoder</h1>
+      <p>Paste a token to inspect its header, payload, and signature</p>
+    </div>
+  </div>
+
+  <div class="input-section">
+    <label><span class="dot"></span> Encoded Token</label>
+    <div class="token-input-wrapper">
+      <textarea id="tokenInput" placeholder="Paste your JWT token here…" spellcheck="false"></textarea>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="decode()">Decode</button>
+      <button onclick="pasteFromClipboard()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+        Paste
+      </button>
+      <button onclick="loadSample()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Sample
+      </button>
+      <button onclick="clearAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="error-banner" id="errorBanner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+    <span id="errorMsg"></span>
+  </div>
+
+  <div class="decoded-output" id="decodedOutput">
+    <div class="token-preview" id="tokenPreview"></div>
+
+    <div class="panel-grid">
+      <div class="panel" id="headerPanel">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-tag header-tag">Header</span>
+            <span class="panel-title">JOSE Header</span>
+          </div>
+          <button class="copy-btn" onclick="copySection('header')" title="Copy JSON">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <div class="panel-body">
+          <div class="json-view" id="headerJson"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="payloadPanel">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-tag payload-tag">Payload</span>
+            <span class="panel-title">Claims Set</span>
+          </div>
+          <button class="copy-btn" onclick="copySection('payload')" title="Copy JSON">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <div class="panel-body">
+          <div class="json-view" id="payloadJson"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel sig-panel" id="sigPanel">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <span class="panel-tag sig-tag">Signature</span>
+          <span class="panel-title">Verification Data</span>
+        </div>
+        <button class="copy-btn" onclick="copySection('signature')" title="Copy">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="sig-value" id="sigValue"></div>
+      </div>
+    </div>
+
+    <div class="panel claims-section" id="claimsPanel" style="margin-top:20px; display:none;">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <span class="panel-tag payload-tag">Details</span>
+          <span class="panel-title">Registered Claims</span>
+        </div>
+      </div>
+      <div class="panel-body" id="claimsBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KNOWN_CLAIMS = {
+  iss: 'Issuer',
+  sub: 'Subject',
+  aud: 'Audience',
+  exp: 'Expiration',
+  nbf: 'Not Before',
+  iat: 'Issued At',
+  jti: 'JWT ID',
+  azp: 'Authorized Party',
+  scope: 'Scope',
+  nonce: 'Nonce',
+  at_hash: 'Access Token Hash',
+  c_hash: 'Code Hash',
+  auth_time: 'Auth Time',
+  acr: 'Auth Context Class',
+  amr: 'Auth Methods',
+  sid: 'Session ID',
+  email: 'Email',
+  email_verified: 'Email Verified',
+  name: 'Name',
+  given_name: 'Given Name',
+  family_name: 'Family Name',
+  preferred_username: 'Preferred Username',
+  picture: 'Picture',
+  locale: 'Locale',
+  zoneinfo: 'Timezone',
+  updated_at: 'Updated At',
+  org_id: 'Organization ID',
+  roles: 'Roles',
+  permissions: 'Permissions',
+};
+
+const TIME_CLAIMS = new Set(['exp', 'nbf', 'iat', 'auth_time', 'updated_at']);
+
+let decodedData = { header: null, payload: null, signature: '' };
+
+function base64UrlDecode(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = str.length % 4;
+  if (pad) str += '='.repeat(4 - pad);
+  return atob(str);
+}
+
+function decode() {
+  const token = document.getElementById('tokenInput').value.trim();
+  const errorBanner = document.getElementById('errorBanner');
+  const errorMsg = document.getElementById('errorMsg');
+  const output = document.getElementById('decodedOutput');
+
+  errorBanner.classList.remove('visible');
+  output.classList.remove('visible');
+
+  if (!token) {
+    showError('Please paste a JWT token to decode.');
+    return;
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    showError(`Invalid JWT structure: expected 3 parts separated by dots, found ${parts.length}.`);
+    return;
+  }
+
+  try {
+    const headerStr = base64UrlDecode(parts[0]);
+    decodedData.header = JSON.parse(headerStr);
+  } catch (e) {
+    showError('Failed to decode header: ' + e.message);
+    return;
+  }
+
+  try {
+    const payloadStr = base64UrlDecode(parts[1]);
+    decodedData.payload = JSON.parse(payloadStr);
+  } catch (e) {
+    showError('Failed to decode payload: ' + e.message);
+    return;
+  }
+
+  decodedData.signature = parts[2];
+
+  // Render colorized token preview
+  const previewEl = document.getElementById('tokenPreview');
+  previewEl.innerHTML = `<div class="token-preview-inner"><span class="part-header">${esc(parts[0])}</span><span class="part-dot">.</span><span class="part-payload">${esc(parts[1])}</span><span class="part-dot">.</span><span class="part-sig">${esc(parts[2])}</span></div>`;
+
+  // Render JSON panels
+  document.getElementById('headerJson').innerHTML = renderJson(decodedData.header);
+  document.getElementById('payloadJson').innerHTML = renderJson(decodedData.payload);
+  document.getElementById('sigValue').textContent = decodedData.signature;
+
+  // Render claims
+  renderClaims(decodedData.payload);
+
+  output.classList.add('visible');
+}
+
+function showError(msg) {
+  const errorBanner = document.getElementById('errorBanner');
+  const errorMsg = document.getElementById('errorMsg');
+  errorMsg.textContent = msg;
+  errorBanner.classList.add('visible');
+}
+
+function renderJson(obj) {
+  const json = JSON.stringify(obj, null, 2);
+  return json.replace(/(".*?")(\s*:\s*)?(".*?")?|(\b\d+\.?\d*\b)|(true|false)|(null)/g,
+    (match, key, colon, strVal, num, bool, nul) => {
+      if (key && colon) {
+        const val = strVal
+          ? `<span class="json-string">${esc(strVal)}</span>`
+          : '';
+        return `<span class="json-key">${esc(key)}</span><span class="json-punct">${esc(colon)}</span>${val}`;
+      }
+      if (key) return `<span class="json-key">${esc(key)}</span>`;
+      if (strVal) return `<span class="json-string">${esc(strVal)}</span>`;
+      if (num) return `<span class="json-number">${esc(num)}</span>`;
+      if (bool) return `<span class="json-boolean">${esc(bool)}</span>`;
+      if (nul) return `<span class="json-null">null</span>`;
+      return esc(match);
+    });
+}
+
+function renderClaims(payload) {
+  const panel = document.getElementById('claimsPanel');
+  const body = document.getElementById('claimsBody');
+  body.innerHTML = '';
+
+  const knownKeys = Object.keys(payload).filter(k => KNOWN_CLAIMS[k]);
+  if (knownKeys.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  const now = Math.floor(Date.now() / 1000);
+
+  knownKeys.forEach(key => {
+    const val = payload[key];
+    const row = document.createElement('div');
+    row.className = 'claim-row';
+
+    const keyCell = document.createElement('div');
+    keyCell.className = 'claim-key';
+    keyCell.textContent = key;
+
+    const valCell = document.createElement('div');
+    valCell.className = 'claim-val';
+
+    if (TIME_CLAIMS.has(key) && typeof val === 'number') {
+      const date = new Date(val * 1000);
+      valCell.innerHTML = `${val}<span class="timestamp">${date.toUTCString()}</span>`;
+
+      if (key === 'exp') {
+        const status = val < now
+          ? `<span class="timestamp expired">⏱ Expired ${timeAgo(now - val)} ago</span>`
+          : `<span class="timestamp valid">✓ Valid for ${timeAgo(val - now)}</span>`;
+        valCell.innerHTML += status;
+      }
+      if (key === 'nbf') {
+        const status = val > now
+          ? `<span class="timestamp expired">⏱ Not valid for ${timeAgo(val - now)}</span>`
+          : `<span class="timestamp valid">✓ Active since ${timeAgo(now - val)} ago</span>`;
+        valCell.innerHTML += status;
+      }
+    } else if (typeof val === 'object') {
+      valCell.textContent = JSON.stringify(val);
+    } else {
+      valCell.textContent = String(val);
+    }
+
+    const label = document.createElement('div');
+    label.style.cssText = 'font-size:11px;color:var(--text-muted);margin-top:2px;';
+    label.textContent = KNOWN_CLAIMS[key];
+    keyCell.appendChild(label);
+
+    row.appendChild(keyCell);
+    row.appendChild(valCell);
+    body.appendChild(row);
+  });
+}
+
+function timeAgo(seconds) {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  return `${Math.floor(seconds / 86400)}d`;
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function copySection(section) {
+  let text = '';
+  if (section === 'header') text = JSON.stringify(decodedData.header, null, 2);
+  else if (section === 'payload') text = JSON.stringify(decodedData.payload, null, 2);
+  else text = decodedData.signature;
+
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('tokenInput').value = text;
+    decode();
+  } catch {
+    showToast('Clipboard access denied');
+  }
+}
+
+function loadSample() {
+  // A sample JWT (HS256, non-sensitive)
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
+  const now = Math.floor(Date.now() / 1000);
+  const payload = btoa(JSON.stringify({
+    sub: '1234567890',
+    name: 'Jane Developer',
+    email: 'jane@example.com',
+    iat: now - 3600,
+    exp: now + 3600,
+    iss: 'https://auth.example.com',
+    aud: 'https://api.example.com',
+    scope: 'read write',
+    roles: ['admin', 'user']
+  })).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const sig = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';
+
+  document.getElementById('tokenInput').value = `${header}.${payload}.${sig}`;
+  decode();
+}
+
+// Decode on paste
+document.getElementById('tokenInput').addEventListener('paste', () => {
+  setTimeout(decode, 50);
+});
+
+// Decode on Ctrl/Cmd+Enter
+document.getElementById('tokenInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    decode();
+  }
+});
+</script>
+</body>
+</html>

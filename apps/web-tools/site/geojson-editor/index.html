@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoJSON Map Editor - Draw on OpenStreetMap</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+    
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="/vendor/leaflet-draw/leaflet.draw.css" />
+    
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header {
+            background: #34495e;
+            padding: 20px;
+            border-bottom: 1px solid #1a252f;
+        }
+        
+        .sidebar-header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #1a252f;
+        }
+        
+        .sidebar-section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            padding: 10px;
+            background: #3498db;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .control-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .control-btn.active {
+            background: #27ae60;
+        }
+        
+        .control-btn.danger {
+            background: #e74c3c;
+        }
+        
+        .control-btn.danger:hover {
+            background: #c0392b;
+        }
+        
+        .control-btn.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .control-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ecf0f1;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            background: #34495e;
+            border: 1px solid #1a252f;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-card {
+            background: #34495e;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        
+        .layer-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #34495e;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        
+        .layer-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #2c3e50;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .layer-item:hover {
+            background: #1a252f;
+        }
+        
+        .layer-item.selected {
+            background: #3498db;
+        }
+        
+        .layer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .layer-type {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .layer-type.polygon { background: #9b59b6; }
+        .layer-type.polyline { background: #3498db; }
+        .layer-type.rectangle { background: #e67e22; }
+        .layer-type.circle { background: #27ae60; }
+        .layer-type.marker { background: #e74c3c; }
+        .layer-type.circlemarker { background: #f39c12; }
+        
+        .layer-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .layer-action-btn {
+            padding: 4px 8px;
+            background: #34495e;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .layer-action-btn:hover {
+            background: #3498db;
+        }
+        
+        .properties-editor {
+            background: #34495e;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .property-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .property-input {
+            padding: 5px;
+            background: #2c3e50;
+            border: 1px solid #1a252f;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .remove-prop-btn {
+            padding: 5px 10px;
+            background: #e74c3c;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .remove-prop-btn:hover {
+            background: #c0392b;
+        }
+        
+        .floating-toolbar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+        }
+        
+        .toolbar-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .toolbar-btn {
+            padding: 8px 12px;
+            background: #3498db;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .toolbar-btn:hover {
+            background: #2980b9;
+        }
+        
+        .search-box {
+            position: absolute;
+            top: 20px;
+            left: 370px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 250px;
+        }
+        
+        .search-btn {
+            padding: 8px 15px;
+            background: #3498db;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .search-btn:hover {
+            background: #2980b9;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        .color-picker-group {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .color-preview {
+            width: 40px;
+            height: 32px;
+            border-radius: 4px;
+            border: 2px solid #1a252f;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                z-index: 1001;
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .menu-toggle {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 1002;
+                padding: 10px;
+                background: #2c3e50;
+                border: none;
+                border-radius: 5px;
+                color: white;
+                cursor: pointer;
+            }
+            
+            .search-box {
+                left: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>🗺️ GeoJSON Editor</h1>
+                <p>Draw shapes on OpenStreetMap, edit properties, and export as GeoJSON</p>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Drawing Tools</h3>
+                <div class="controls-grid">
+                    <button class="control-btn" onclick="enableDrawing('polygon')" title="Draw Polygon">
+                        <span>📐</span> Polygon
+                    </button>
+                    <button class="control-btn" onclick="enableDrawing('polyline')" title="Draw Line">
+                        <span>📏</span> Line
+                    </button>
+                    <button class="control-btn" onclick="enableDrawing('rectangle')" title="Draw Rectangle">
+                        <span>⬜</span> Rectangle
+                    </button>
+                    <button class="control-btn" onclick="enableDrawing('circle')" title="Draw Circle">
+                        <span>⭕</span> Circle
+                    </button>
+                    <button class="control-btn" onclick="enableDrawing('marker')" title="Add Marker">
+                        <span>📍</span> Marker
+                    </button>
+                    <button class="control-btn" onclick="enableDrawing('circlemarker')" title="Add Circle Marker">
+                        <span>🔵</span> Point
+                    </button>
+                    <button class="control-btn full-width" id="editBtn" onclick="toggleEdit()">
+                        <span>✏️</span> Edit Mode
+                    </button>
+                    <button class="control-btn full-width danger" onclick="deleteSelected()">
+                        <span>🗑️</span> Delete Selected
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Style Settings</h3>
+                <div class="form-group">
+                    <label>Fill Color</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="fillColor" value="#3498db" class="form-group input">
+                        <div class="color-preview" id="fillPreview" style="background: #3498db;"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Stroke Color</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="strokeColor" value="#2c3e50" class="form-group input">
+                        <div class="color-preview" id="strokePreview" style="background: #2c3e50;"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Stroke Width</label>
+                    <input type="range" id="strokeWidth" min="1" max="10" value="3" onchange="updateStrokeLabel()">
+                    <span id="strokeLabel">3px</span>
+                </div>
+                <div class="form-group">
+                    <label>Fill Opacity</label>
+                    <input type="range" id="fillOpacity" min="0" max="100" value="50" onchange="updateOpacityLabel()">
+                    <span id="opacityLabel">50%</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Layers</h3>
+                <div class="layer-list" id="layerList">
+                    <!-- Layers will be added here dynamically -->
+                </div>
+                <button class="control-btn full-width" onclick="clearAll()">
+                    Clear All Layers
+                </button>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Properties</h3>
+                <div id="propertiesEditor" class="properties-editor">
+                    <p style="opacity: 0.7; font-size: 12px;">Select a shape to edit properties</p>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalShapes">0</div>
+                        <div class="stat-label">Total Shapes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="polygonCount">0</div>
+                        <div class="stat-label">Polygons</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="lineCount">0</div>
+                        <div class="stat-label">Lines</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="markerCount">0</div>
+                        <div class="stat-label">Markers</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Import/Export</h3>
+                <div class="form-group">
+                    <label>GeoJSON Data</label>
+                    <textarea id="geojsonOutput" placeholder="GeoJSON will appear here..."></textarea>
+                </div>
+                <div class="controls-grid">
+                    <button class="control-btn" onclick="exportGeoJSON()">
+                        📥 Export
+                    </button>
+                    <button class="control-btn" onclick="downloadGeoJSON()">
+                        💾 Download
+                    </button>
+                    <button class="control-btn" onclick="copyToClipboard()">
+                        📋 Copy
+                    </button>
+                    <button class="control-btn" onclick="importGeoJSON()">
+                        📤 Import
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search location..." onkeypress="handleSearchKey(event)">
+                <button class="search-btn" onclick="searchLocation()">Search</button>
+            </div>
+            
+            <div class="floating-toolbar">
+                <div class="toolbar-buttons">
+                    <button class="toolbar-btn" onclick="zoomToShapes()">Fit All</button>
+                    <button class="toolbar-btn" onclick="toggleMeasure()">📏 Measure</button>
+                    <button class="toolbar-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <!-- Leaflet JS -->
+    <script src="/vendor/leaflet/leaflet.js"></script>
+    
+    <!-- Leaflet Draw JS -->
+    <script src="/vendor/leaflet-draw/leaflet.draw.js"></script>
+    
+    
+    <script>
+        // Initialize map with OpenStreetMap
+        const map = L.map('map', {
+            center: [40.7128, -74.0060],
+            zoom: 13,
+            zoomControl: true
+        });
+        
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Initialize feature group for drawn items
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+        
+        // Store for layers and their properties
+        let layers = [];
+        let selectedLayer = null;
+        let currentDrawControl = null;
+        let editMode = false;
+        let measureControl = null;
+        
+        // Initialize draw control (but don't add it yet)
+        const drawControl = new L.Control.Draw({
+            position: 'topleft',
+            draw: false,
+            edit: {
+                featureGroup: drawnItems,
+                remove: false,
+                edit: false
+            }
+        });
+        
+        // Color and style updaters
+        document.getElementById('fillColor').addEventListener('change', function(e) {
+            document.getElementById('fillPreview').style.background = e.target.value;
+        });
+        
+        document.getElementById('strokeColor').addEventListener('change', function(e) {
+            document.getElementById('strokePreview').style.background = e.target.value;
+        });
+        
+        function updateStrokeLabel() {
+            const value = document.getElementById('strokeWidth').value;
+            document.getElementById('strokeLabel').textContent = value + 'px';
+        }
+        
+        function updateOpacityLabel() {
+            const value = document.getElementById('fillOpacity').value;
+            document.getElementById('opacityLabel').textContent = value + '%';
+        }
+        
+        // Get current style settings
+        function getCurrentStyle() {
+            return {
+                color: document.getElementById('strokeColor').value,
+                weight: parseInt(document.getElementById('strokeWidth').value),
+                fillColor: document.getElementById('fillColor').value,
+                fillOpacity: parseFloat(document.getElementById('fillOpacity').value) / 100,
+                opacity: 1
+            };
+        }
+        
+        // Enable drawing for specific shape type
+        function enableDrawing(shapeType) {
+            // Remove any existing draw control
+            if (currentDrawControl) {
+                map.removeControl(currentDrawControl);
+            }
+            
+            const style = getCurrentStyle();
+            const drawOptions = {
+                position: 'topleft',
+                draw: {
+                    polygon: false,
+                    polyline: false,
+                    rectangle: false,
+                    circle: false,
+                    marker: false,
+                    circlemarker: false
+                },
+                edit: false
+            };
+            
+            // Configure specific shape
+            switch(shapeType) {
+                case 'polygon':
+                    drawOptions.draw.polygon = {
+                        shapeOptions: style,
+                        showArea: true
+                    };
+                    break;
+                case 'polyline':
+                    drawOptions.draw.polyline = {
+                        shapeOptions: style
+                    };
+                    break;
+                case 'rectangle':
+                    drawOptions.draw.rectangle = {
+                        shapeOptions: style
+                    };
+                    break;
+                case 'circle':
+                    drawOptions.draw.circle = {
+                        shapeOptions: style
+                    };
+                    break;
+                case 'marker':
+                    drawOptions.draw.marker = true;
+                    break;
+                case 'circlemarker':
+                    drawOptions.draw.circlemarker = {
+                        radius: 10,
+                        color: style.color,
+                        fillColor: style.fillColor,
+                        fillOpacity: style.fillOpacity,
+                        weight: style.weight
+                    };
+                    break;
+            }
+            
+            currentDrawControl = new L.Control.Draw(drawOptions);
+            map.addControl(currentDrawControl);
+            
+            // Trigger draw
+            const drawHandler = new L.Draw[shapeType.charAt(0).toUpperCase() + shapeType.slice(1)](map, drawOptions.draw[shapeType]);
+            drawHandler.enable();
+            
+            showNotification(`Drawing ${shapeType}. Click on the map to start.`);
+        }
+        
+        // Toggle edit mode
+        function toggleEdit() {
+            editMode = !editMode;
+            const btn = document.getElementById('editBtn');
+            
+            if (editMode) {
+                btn.classList.add('active');
+                btn.innerHTML = '<span>✏️</span> Exit Edit Mode';
+                
+                drawnItems.eachLayer(function(layer) {
+                    if (layer.editing) {
+                        layer.editing.enable();
+                    }
+                });
+                
+                showNotification('Edit mode enabled. Drag vertices to modify shapes.');
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<span>✏️</span> Edit Mode';
+                
+                drawnItems.eachLayer(function(layer) {
+                    if (layer.editing) {
+                        layer.editing.disable();
+                    }
+                });
+                
+                showNotification('Edit mode disabled.');
+            }
+        }
+        
+        // Handle draw created event
+        map.on('draw:created', function(e) {
+            const layer = e.layer;
+            const layerType = e.layerType;
+            
+            // Add to drawn items
+            drawnItems.addLayer(layer);
+            
+            // Create layer data
+            const layerData = {
+                id: L.stamp(layer),
+                type: layerType,
+                layer: layer,
+                properties: {
+                    name: `${layerType}_${layers.length + 1}`,
+                    description: '',
+                    created: new Date().toISOString()
+                }
+            };
+            
+            layers.push(layerData);
+            
+            // Add click handler
+            layer.on('click', function() {
+                selectLayer(layerData);
+            });
+            
+            // Update UI
+            updateLayerList();
+            updateStats();
+            updateGeoJSON();
+            
+            showNotification(`${layerType} added successfully!`);
+            
+            // Remove draw control after drawing
+            if (currentDrawControl) {
+                map.removeControl(currentDrawControl);
+                currentDrawControl = null;
+            }
+        });
+        
+        // Select a layer
+        function selectLayer(layerData) {
+            selectedLayer = layerData;
+            
+            // Update layer list selection
+            document.querySelectorAll('.layer-item').forEach(item => {
+                item.classList.remove('selected');
+                if (item.dataset.id == layerData.id) {
+                    item.classList.add('selected');
+                }
+            });
+            
+            // Update properties editor
+            updatePropertiesEditor();
+        }
+        
+        // Update properties editor
+        function updatePropertiesEditor() {
+            const editor = document.getElementById('propertiesEditor');
+            
+            if (!selectedLayer) {
+                editor.innerHTML = '<p style="opacity: 0.7; font-size: 12px;">Select a shape to edit properties</p>';
+                return;
+            }
+            
+            let html = '<div>';
+            html += '<h4 style="margin-bottom: 10px;">Edit Properties</h4>';
+            
+            // Add existing properties
+            Object.entries(selectedLayer.properties).forEach(([key, value]) => {
+                html += `
+                    <div class="property-row">
+                        <input type="text" class="property-input" value="${key}" onchange="updatePropertyKey(this, '${key}')">
+                        <input type="text" class="property-input" value="${value}" onchange="updatePropertyValue('${key}', this.value)">
+                        <button class="remove-prop-btn" onclick="removeProperty('${key}')">×</button>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            html += '<button class="control-btn full-width" style="margin-top: 10px;" onclick="addProperty()">Add Property</button>';
+            
+            editor.innerHTML = html;
+        }
+        
+        // Property management functions
+        function updatePropertyKey(input, oldKey) {
+            if (!selectedLayer) return;
+            
+            const newKey = input.value;
+            if (newKey && newKey !== oldKey) {
+                selectedLayer.properties[newKey] = selectedLayer.properties[oldKey];
+                delete selectedLayer.properties[oldKey];
+                updatePropertiesEditor();
+                updateGeoJSON();
+            }
+        }
+        
+        function updatePropertyValue(key, value) {
+            if (!selectedLayer) return;
+            selectedLayer.properties[key] = value;
+            updateGeoJSON();
+        }
+        
+        function removeProperty(key) {
+            if (!selectedLayer) return;
+            delete selectedLayer.properties[key];
+            updatePropertiesEditor();
+            updateGeoJSON();
+        }
+        
+        function addProperty() {
+            if (!selectedLayer) return;
+            
+            let i = 1;
+            let newKey = `property_${i}`;
+            while (selectedLayer.properties[newKey]) {
+                i++;
+                newKey = `property_${i}`;
+            }
+            
+            selectedLayer.properties[newKey] = '';
+            updatePropertiesEditor();
+            updateGeoJSON();
+        }
+        
+        // Update layer list
+        function updateLayerList() {
+            const list = document.getElementById('layerList');
+            
+            if (layers.length === 0) {
+                list.innerHTML = '<p style="opacity: 0.7; font-size: 12px; text-align: center;">No layers yet</p>';
+                return;
+            }
+            
+            let html = '';
+            layers.forEach(layerData => {
+                html += `
+                    <div class="layer-item" data-id="${layerData.id}" onclick="selectLayer(layers.find(l => l.id === ${layerData.id}))">
+                        <div class="layer-info">
+                            <div class="layer-type ${layerData.type}"></div>
+                            <span>${layerData.properties.name || layerData.type}</span>
+                        </div>
+                        <div class="layer-actions">
+                            <button class="layer-action-btn" onclick="zoomToLayer(${layerData.id}); event.stopPropagation();">👁️</button>
+                            <button class="layer-action-btn" onclick="deleteLayer(${layerData.id}); event.stopPropagation();">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+        
+        // Delete selected layer
+        function deleteSelected() {
+            if (!selectedLayer) {
+                showNotification('Please select a layer to delete', 'error');
+                return;
+            }
+            
+            deleteLayer(selectedLayer.id);
+        }
+        
+        // Delete specific layer
+        function deleteLayer(layerId) {
+            const layerData = layers.find(l => l.id === layerId);
+            if (!layerData) return;
+            
+            // Remove from map
+            drawnItems.removeLayer(layerData.layer);
+            
+            // Remove from layers array
+            layers = layers.filter(l => l.id !== layerId);
+            
+            // Clear selection if this was selected
+            if (selectedLayer && selectedLayer.id === layerId) {
+                selectedLayer = null;
+                updatePropertiesEditor();
+            }
+            
+            // Update UI
+            updateLayerList();
+            updateStats();
+            updateGeoJSON();
+            
+            showNotification('Layer deleted');
+        }
+        
+        // Zoom to specific layer
+        function zoomToLayer(layerId) {
+            const layerData = layers.find(l => l.id === layerId);
+            if (!layerData) return;
+            
+            const bounds = layerData.layer.getBounds ? layerData.layer.getBounds() : null;
+            if (bounds) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            } else if (layerData.layer.getLatLng) {
+                map.setView(layerData.layer.getLatLng(), 16);
+            }
+        }
+        
+        // Clear all layers
+        function clearAll() {
+            if (!confirm('Are you sure you want to clear all layers?')) return;
+            
+            drawnItems.clearLayers();
+            layers = [];
+            selectedLayer = null;
+            
+            updateLayerList();
+            updatePropertiesEditor();
+            updateStats();
+            updateGeoJSON();
+            
+            showNotification('All layers cleared');
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const counts = {
+                polygon: 0,
+                polyline: 0,
+                rectangle: 0,
+                circle: 0,
+                marker: 0,
+                circlemarker: 0
+            };
+            
+            layers.forEach(layer => {
+                counts[layer.type] = (counts[layer.type] || 0) + 1;
+            });
+            
+            document.getElementById('totalShapes').textContent = layers.length;
+            document.getElementById('polygonCount').textContent = counts.polygon + counts.rectangle;
+            document.getElementById('lineCount').textContent = counts.polyline;
+            document.getElementById('markerCount').textContent = counts.marker + counts.circlemarker + counts.circle;
+        }
+        
+        // Convert drawn items to GeoJSON
+        function updateGeoJSON() {
+            const geojson = {
+                type: "FeatureCollection",
+                features: []
+            };
+            
+            layers.forEach(layerData => {
+                const layer = layerData.layer;
+                const geoJsonLayer = layer.toGeoJSON();
+                
+                // Add custom properties
+                geoJsonLayer.properties = {
+                    ...geoJsonLayer.properties,
+                    ...layerData.properties
+                };
+                
+                // Handle circle (not native GeoJSON)
+                if (layerData.type === 'circle') {
+                    geoJsonLayer.properties.radius = layer.getRadius();
+                    geoJsonLayer.properties.shape_type = 'circle';
+                }
+                
+                geojson.features.push(geoJsonLayer);
+            });
+            
+            document.getElementById('geojsonOutput').value = JSON.stringify(geojson, null, 2);
+        }
+        
+        // Export GeoJSON
+        function exportGeoJSON() {
+            updateGeoJSON();
+            const output = document.getElementById('geojsonOutput');
+            output.select();
+            showNotification('GeoJSON exported to text area');
+        }
+        
+        // Download GeoJSON
+        function downloadGeoJSON() {
+            updateGeoJSON();
+            const geojson = document.getElementById('geojsonOutput').value;
+            const blob = new Blob([geojson], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `geojson_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('GeoJSON downloaded');
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard() {
+            updateGeoJSON();
+            const output = document.getElementById('geojsonOutput');
+            output.select();
+            document.execCommand('copy');
+            showNotification('Copied to clipboard');
+        }
+        
+        // Import GeoJSON
+        function importGeoJSON() {
+            const input = document.getElementById('geojsonOutput').value;
+            
+            if (!input) {
+                showNotification('Please paste GeoJSON data in the text area first', 'error');
+                return;
+            }
+            
+            try {
+                const geojson = JSON.parse(input);
+                
+                // Clear existing layers if confirmed
+                if (layers.length > 0) {
+                    if (!confirm('This will replace existing layers. Continue?')) return;
+                    clearAll();
+                }
+                
+                // Add GeoJSON to map
+                L.geoJSON(geojson, {
+                    onEachFeature: function(feature, layer) {
+                        // Add to drawn items
+                        drawnItems.addLayer(layer);
+                        
+                        // Determine layer type
+                        let layerType = 'polygon';
+                        if (layer instanceof L.Marker) layerType = 'marker';
+                        else if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) layerType = 'polyline';
+                        else if (layer instanceof L.Rectangle) layerType = 'rectangle';
+                        else if (layer instanceof L.Circle) layerType = 'circle';
+                        else if (layer instanceof L.CircleMarker) layerType = 'circlemarker';
+                        
+                        // Create layer data
+                        const layerData = {
+                            id: L.stamp(layer),
+                            type: layerType,
+                            layer: layer,
+                            properties: feature.properties || {}
+                        };
+                        
+                        layers.push(layerData);
+                        
+                        // Add click handler
+                        layer.on('click', function() {
+                            selectLayer(layerData);
+                        });
+                    },
+                    pointToLayer: function(feature, latlng) {
+                        if (feature.properties && feature.properties.shape_type === 'circle' && feature.properties.radius) {
+                            return L.circle(latlng, {
+                                radius: feature.properties.radius,
+                                ...getCurrentStyle()
+                            });
+                        }
+                        return L.circleMarker(latlng, {
+                            radius: 10,
+                            ...getCurrentStyle()
+                        });
+                    },
+                    style: getCurrentStyle()
+                });
+                
+                // Update UI
+                updateLayerList();
+                updateStats();
+                zoomToShapes();
+                
+                showNotification('GeoJSON imported successfully');
+            } catch (e) {
+                showNotification('Invalid GeoJSON format', 'error');
+                console.error(e);
+            }
+        }
+        
+        // Zoom to all shapes
+        function zoomToShapes() {
+            if (layers.length === 0) {
+                showNotification('No shapes to fit', 'error');
+                return;
+            }
+            
+            const bounds = drawnItems.getBounds();
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+        
+        // Toggle measure tool
+        function toggleMeasure() {
+            showNotification('Measure tool requires additional plugin. Use the ruler in edit mode to measure distances.', 'error');
+        }
+        
+        // Search location
+        function searchLocation() {
+            const query = document.getElementById('searchInput').value;
+            if (!query) return;
+            
+            // Use Nominatim API for geocoding
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const result = data[0];
+                        const lat = parseFloat(result.lat);
+                        const lon = parseFloat(result.lon);
+                        
+                        map.setView([lat, lon], 15);
+                        
+                        // Add a temporary marker
+                        const marker = L.marker([lat, lon])
+                            .addTo(map)
+                            .bindPopup(result.display_name)
+                            .openPopup();
+                        
+                        // Remove marker after 5 seconds
+                        setTimeout(() => {
+                            map.removeLayer(marker);
+                        }, 5000);
+                        
+                        showNotification(`Found: ${result.display_name}`);
+                    } else {
+                        showNotification('Location not found', 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('Search failed', 'error');
+                    console.error(error);
+                });
+        }
+        
+        // Handle search on Enter key
+        function handleSearchKey(event) {
+            if (event.key === 'Enter') {
+                searchLocation();
+            }
+        }
+        
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#e74c3c' : '#27ae60';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize
+        updateLayerList();
+        updateStats();
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'z':
+                        // Undo functionality would go here
+                        e.preventDefault();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        downloadGeoJSON();
+                        break;
+                    case 'c':
+                        if (selectedLayer) {
+                            e.preventDefault();
+                            copyToClipboard();
+                        }
+                        break;
+                    case 'Delete':
+                    case 'Backspace':
+                        if (selectedLayer) {
+                            e.preventDefault();
+                            deleteSelected();
+                        }
+                        break;
+                }
+            }
+        });
+        
+        // Mobile menu toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+        
+        // Add mobile menu button if needed
+        if (window.innerWidth <= 768) {
+            const menuBtn = document.createElement('button');
+            menuBtn.className = 'menu-toggle';
+            menuBtn.innerHTML = '☰';
+            menuBtn.onclick = toggleSidebar;
+            document.body.appendChild(menuBtn);
+        }
+        
+        // Show welcome message
+        showNotification('Welcome! Select a drawing tool to start creating shapes on the map.');
+    </script>
+</body>
+</html>

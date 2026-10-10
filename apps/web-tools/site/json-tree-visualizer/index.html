@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Tree Visualizer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-tertiary: #1a2236;
+    --bg-editor: #0d1220;
+    --border: #1e2d4a;
+    --border-active: #3b82f6;
+    --text-primary: #e2e8f0;
+    --text-secondary: #97a6c0;
+    --text-muted: #4a5f82;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.15);
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --scrollbar-track: #0d1220;
+    --scrollbar-thumb: #1e2d4a;
+    --radius: 8px;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a3f66; }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+
+  .app-title {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+  }
+
+  .app-title span {
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-left: 6px;
+    font-size: 13px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text-muted);
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.3s;
+  }
+
+  .status-dot.valid { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.invalid { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .tool-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tool-group + .tool-group {
+    margin-left: 6px;
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+  }
+
+  .tool-group-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-right: 4px;
+    font-weight: 600;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .btn:hover {
+    background: var(--border);
+    color: var(--text-primary);
+    border-color: #2a3f66;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn.accent {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .btn.accent:hover { background: rgba(56, 189, 248, 0.25); }
+
+  .search-group {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .search-input {
+    min-width: 220px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--border-active);
+  }
+
+  .match-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 8px;
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid var(--border);
+    background: var(--bg-secondary);
+  }
+
+  .panel:last-child { border-right: none; }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .panel-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+  }
+
+  .panel-btn {
+    padding: 3px 8px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .panel-btn:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
+
+  .panel-body {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .editor {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    border: none;
+    outline: none;
+    resize: none;
+    background: var(--bg-editor);
+    color: var(--text-primary);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.65;
+    tab-size: 2;
+    letter-spacing: 0.2px;
+  }
+
+  .editor::placeholder { color: var(--text-muted); }
+
+  .editor:focus { box-shadow: inset 0 0 0 1px var(--border-active); }
+
+  .tree-body {
+    background: var(--bg-editor);
+    padding: 16px;
+    overflow: auto;
+  }
+
+  .tree {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-primary);
+  }
+
+  .tree-node {
+    position: relative;
+    padding: 4px 0 4px 4px;
+  }
+
+  .tree-node.hidden { display: none; }
+
+  .node-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::marker { content: ''; }
+
+  .node-summary::before {
+    content: '>';
+    color: var(--text-muted);
+    font-size: 10px;
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+  }
+
+  details[open] > summary.node-summary::before { transform: rotate(90deg) translateX(-2px); }
+
+  .node-key {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .node-type {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--text-secondary);
+  }
+
+  .node-type.string { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
+  .node-type.number { background: rgba(34, 197, 94, 0.18); color: #86efac; }
+  .node-type.boolean { background: rgba(245, 158, 11, 0.18); color: #fcd34d; }
+  .node-type.null { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
+  .node-type.object, .node-type.array { background: rgba(168, 85, 247, 0.18); color: #d8b4fe; }
+
+  .node-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .node-leaf {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .node-value {
+    color: var(--text-primary);
+  }
+
+  .node-leaf .node-type { margin-left: auto; }
+
+  .children {
+    margin-left: 18px;
+    padding-left: 10px;
+    border-left: 1px dashed rgba(148, 163, 184, 0.2);
+  }
+
+  .is-match > .node-summary,
+  .is-match.node-leaf {
+    background: rgba(56, 189, 248, 0.12);
+    border-radius: 6px;
+    padding: 4px 6px;
+  }
+
+  .error-msg {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    text-align: center;
+    padding: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .panel { border-right: none; border-bottom: 1px solid var(--border); }
+    .panel:last-child { border-bottom: none; }
+    .toolbar { padding: 8px 12px; }
+    .header { padding: 12px 16px; }
+    .search-group { width: 100%; margin-left: 0; }
+    .search-input { flex: 1; min-width: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">{ }</div>
+      <div class="app-title">JSON Tree Visualizer <span>v1.0</span></div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Empty</span>
+      </div>
+      <div class="status-item" id="nodeCount">-- nodes</div>
+      <div class="status-item" id="byteCount">--</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tool-group">
+      <span class="tool-group-label">Actions</span>
+      <button class="btn accent" onclick="renderTree()">Render</button>
+      <button class="btn" onclick="formatJSON()">Format</button>
+      <button class="btn" onclick="loadSample()">Sample</button>
+      <button class="btn" onclick="clearAll()">Clear</button>
+    </div>
+    <div class="tool-group">
+      <span class="tool-group-label">Tree</span>
+      <button class="btn" onclick="expandAll()">Expand</button>
+      <button class="btn" onclick="collapseAll()">Collapse</button>
+    </div>
+    <div class="tool-group search-group">
+      <span class="tool-group-label">Search</span>
+      <input class="search-input" id="searchInput" placeholder="Filter keys/values" spellcheck="false" />
+      <span class="match-count" id="matchCount">0</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="panel input-panel">
+      <div class="panel-header">
+        <span class="panel-label">JSON Input</span>
+        <span class="error-msg" id="errorMsg"></span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="pasteFromClipboard()">Paste</button>
+          <button class="panel-btn" onclick="copyInput()">Copy</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <textarea class="editor" id="jsonInput" placeholder='Paste JSON here...\n\n{"name":"Example","items":[1,2,3]}' spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <div class="panel tree-panel">
+      <div class="panel-header">
+        <span class="panel-label">Tree View</span>
+      </div>
+      <div class="panel-body tree-body">
+        <div class="tree" id="treeContainer"></div>
+        <div class="empty-state" id="emptyState">Paste JSON to render the tree.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const inputEl = document.getElementById('jsonInput');
+  const treeContainer = document.getElementById('treeContainer');
+  const emptyState = document.getElementById('emptyState');
+  const errorMsg = document.getElementById('errorMsg');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const nodeCountEl = document.getElementById('nodeCount');
+  const byteCountEl = document.getElementById('byteCount');
+  const searchInput = document.getElementById('searchInput');
+  const matchCountEl = document.getElementById('matchCount');
+
+  let renderTimer;
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1048576).toFixed(1)} MB`;
+  }
+
+  function setStatus(state, text) {
+    statusDot.className = 'status-dot';
+    if (state === 'valid') statusDot.classList.add('valid');
+    if (state === 'invalid') statusDot.classList.add('invalid');
+    statusText.textContent = text;
+  }
+
+  function setError(message) {
+    errorMsg.textContent = message || '';
+  }
+
+  function getType(value) {
+    if (value === null) return 'null';
+    if (Array.isArray(value)) return 'array';
+    return typeof value;
+  }
+
+  function isSafeKey(key) {
+    return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key);
+  }
+
+  function buildPath(parent, key, isArray) {
+    if (isArray) return `${parent}[${key}]`;
+    if (isSafeKey(key)) return parent === '$' ? `$.${key}` : `${parent}.${key}`;
+    return `${parent}['${key.replace(/'/g, "\\'")}']`;
+  }
+
+  function formatDisplayValue(value) {
+    const type = getType(value);
+    if (type === 'string') {
+      const raw = `"${value}"`;
+      const text = raw.length > 140 ? `${raw.slice(0, 140)}...` : raw;
+      return { text, raw, type };
+    }
+    if (type === 'number') return { text: String(value), raw: String(value), type };
+    if (type === 'boolean') return { text: value ? 'true' : 'false', raw: value ? 'true' : 'false', type };
+    if (type === 'null') return { text: 'null', raw: 'null', type };
+    return { text: String(value), raw: String(value), type };
+  }
+
+  function buildSearchText({ key, valueText, type, path }) {
+    return `${key} ${valueText || ''} ${type} ${path}`.toLowerCase();
+  }
+
+  function buildLeaf(key, value, path) {
+    const { text, raw, type } = formatDisplayValue(value);
+    const row = document.createElement('div');
+    row.className = 'tree-node node-leaf';
+    row.dataset.path = path;
+    row.dataset.search = buildSearchText({ key, valueText: raw, type, path });
+    row.title = path;
+
+    const keySpan = document.createElement('span');
+    keySpan.className = 'node-key';
+    keySpan.textContent = key;
+
+    const valueSpan = document.createElement('span');
+    valueSpan.className = 'node-value';
+    valueSpan.textContent = text;
+    valueSpan.title = raw;
+
+    const typeSpan = document.createElement('span');
+    typeSpan.className = `node-type ${type}`;
+    typeSpan.textContent = type;
+
+    row.append(keySpan, valueSpan, typeSpan);
+    return { element: row, count: 1 };
+  }
+
+  function buildBranch(key, value, path, isRoot) {
+    const type = getType(value);
+    const details = document.createElement('details');
+    details.className = `tree-node node-branch${isRoot ? ' root-node' : ''}`;
+    details.dataset.path = path;
+    details.open = true;
+
+    const summary = document.createElement('summary');
+    summary.className = 'node-summary';
+    summary.title = path;
+
+    const keySpan = document.createElement('span');
+    keySpan.className = 'node-key';
+    keySpan.textContent = key;
+
+    const typeSpan = document.createElement('span');
+    typeSpan.className = `node-type ${type}`;
+    typeSpan.textContent = type;
+
+    const metaSpan = document.createElement('span');
+    metaSpan.className = 'node-meta';
+
+    const childrenWrap = document.createElement('div');
+    childrenWrap.className = 'children';
+
+    let count = 1;
+    if (Array.isArray(value)) {
+      metaSpan.textContent = `${value.length} items`;
+      value.forEach((item, index) => {
+        const childKey = `[${index}]`;
+        const childPath = buildPath(path, index, true);
+        const childNode = buildNode(item, childKey, childPath, false);
+        count += childNode.count;
+        childrenWrap.appendChild(childNode.element);
+      });
+    } else {
+      const keys = Object.keys(value);
+      metaSpan.textContent = `${keys.length} keys`;
+      keys.forEach((childKey) => {
+        const childPath = buildPath(path, childKey, false);
+        const childNode = buildNode(value[childKey], childKey, childPath, false);
+        count += childNode.count;
+        childrenWrap.appendChild(childNode.element);
+      });
+    }
+
+    summary.append(keySpan, typeSpan, metaSpan);
+    details.append(summary, childrenWrap);
+    details.dataset.search = buildSearchText({ key, valueText: '', type, path });
+
+    return { element: details, count };
+  }
+
+  function buildNode(value, key, path, isRoot) {
+    const type = getType(value);
+    if (type === 'object' || type === 'array') {
+      return buildBranch(key, value, path, isRoot);
+    }
+    return buildLeaf(key, value, path);
+  }
+
+  function clearTree() {
+    treeContainer.innerHTML = '';
+    emptyState.style.display = 'flex';
+    nodeCountEl.textContent = '-- nodes';
+  }
+
+  function renderTree() {
+    const raw = inputEl.value.trim();
+    if (!raw) {
+      setStatus('empty', 'Empty');
+      setError('');
+      byteCountEl.textContent = '--';
+      clearTree();
+      return;
+    }
+
+    byteCountEl.textContent = formatBytes(new Blob([raw]).size);
+
+    try {
+      const parsed = JSON.parse(raw);
+      const tree = buildNode(parsed, 'root', '$', true);
+      treeContainer.innerHTML = '';
+      treeContainer.appendChild(tree.element);
+      emptyState.style.display = 'none';
+      nodeCountEl.textContent = `${tree.count} nodes`;
+      setStatus('valid', 'Valid JSON');
+      setError('');
+      applyFilter();
+    } catch (err) {
+      setStatus('invalid', 'Invalid JSON');
+      setError(err.message.replace(/^JSON\.parse:\s*/, ''));
+    }
+  }
+
+  function formatJSON() {
+    const raw = inputEl.value.trim();
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      inputEl.value = JSON.stringify(parsed, null, 2);
+      renderTree();
+    } catch (err) {
+      setStatus('invalid', 'Invalid JSON');
+      setError(err.message.replace(/^JSON\.parse:\s*/, ''));
+    }
+  }
+
+  function loadSample() {
+    const sample = {
+      name: 'Acme Project',
+      version: 3,
+      active: true,
+      tags: ['utilities', 'tree', 'json'],
+      owner: {
+        id: 418,
+        email: 'dev@acme.test',
+        plan: null
+      },
+      metrics: [
+        { label: 'cpu', value: 0.42 },
+        { label: 'memory', value: 256 },
+        { label: 'latency', value: 120.5 }
+      ]
+    };
+    inputEl.value = JSON.stringify(sample, null, 2);
+    renderTree();
+  }
+
+  function clearAll() {
+    inputEl.value = '';
+    searchInput.value = '';
+    matchCountEl.textContent = '0';
+    renderTree();
+  }
+
+  function expandAll() {
+    treeContainer.querySelectorAll('details').forEach((node) => {
+      node.open = true;
+    });
+  }
+
+  function collapseAll() {
+    treeContainer.querySelectorAll('details').forEach((node) => {
+      if (!node.classList.contains('root-node')) {
+        node.open = false;
+      }
+    });
+  }
+
+  function applyFilter() {
+    const query = searchInput.value.trim().toLowerCase();
+    const nodes = treeContainer.querySelectorAll('.tree-node');
+    if (!query) {
+      nodes.forEach((node) => {
+        node.classList.remove('hidden', 'is-match');
+      });
+      matchCountEl.textContent = '0';
+      return;
+    }
+
+    let matches = 0;
+
+    function walk(node) {
+      const isBranch = node.classList.contains('node-branch');
+      const text = node.dataset.search || '';
+      const isMatch = text.includes(query);
+      let childMatch = false;
+
+      if (isBranch) {
+        const childrenWrap = node.querySelector(':scope > .children');
+        if (childrenWrap) {
+          Array.from(childrenWrap.children).forEach((child) => {
+            if (child.classList.contains('tree-node')) {
+              if (walk(child)) childMatch = true;
+            }
+          });
+        }
+        node.open = isMatch || childMatch;
+      }
+
+      node.classList.toggle('hidden', !(isMatch || childMatch));
+      node.classList.toggle('is-match', isMatch);
+      if (isMatch) matches += 1;
+      return isMatch || childMatch;
+    }
+
+    Array.from(treeContainer.children).forEach((child) => {
+      if (child.classList.contains('tree-node')) walk(child);
+    });
+
+    matchCountEl.textContent = String(matches);
+  }
+
+  async function pasteFromClipboard() {
+    try {
+      const text = await navigator.clipboard.readText();
+      inputEl.value = text;
+      renderTree();
+    } catch {
+      setError('Clipboard access denied');
+    }
+  }
+
+  function copyInput() {
+    const text = inputEl.value;
+    if (!text) return;
+    navigator.clipboard.writeText(text).catch(() => {
+      inputEl.select();
+      document.execCommand('copy');
+    });
+  }
+
+  inputEl.addEventListener('input', () => {
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(renderTree, 400);
+  });
+
+  searchInput.addEventListener('input', applyFilter);
+
+  renderTree();
+</script>
+</body>
+</html>

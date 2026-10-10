@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Converter — CSV · JSON · YAML</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/vendor/js-yaml/js-yaml.min.js"></script>
+<style>
+  :root {
+    --bg: #0c0e13;
+    --surface: #13161d;
+    --surface-hover: #1a1e28;
+    --border: #252a36;
+    --border-focus: #3d445a;
+    --text: #c8cdd8;
+    --text-dim: #6b7280;
+    --text-bright: #eef0f6;
+    --accent-csv: #f59e0b;
+    --accent-json: #3b82f6;
+    --accent-yaml: #a855f7;
+    --accent-csv-dim: rgba(245, 158, 11, 0.1);
+    --accent-json-dim: rgba(59, 130, 246, 0.1);
+    --accent-yaml-dim: rgba(168, 85, 247, 0.1);
+    --error: #ef4444;
+    --error-dim: rgba(239, 68, 68, 0.1);
+    --success: #22c55e;
+    --radius: 8px;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-csv), var(--accent-json), var(--accent-yaml));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+
+  .title {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-bright);
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-family: var(--mono);
+    font-weight: 300;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Format pills */
+  .format-selector {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .format-pill {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .format-pill:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
+
+  .format-pill.active[data-format="csv"] {
+    background: var(--accent-csv-dim);
+    color: var(--accent-csv);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.1);
+  }
+  .format-pill.active[data-format="json"] {
+    background: var(--accent-json-dim);
+    color: var(--accent-json);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.1);
+  }
+  .format-pill.active[data-format="yaml"] {
+    background: var(--accent-yaml-dim);
+    color: var(--accent-yaml);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.1);
+  }
+
+  /* Main converter layout */
+  .converter {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    align-items: stretch;
+    min-height: 520px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+
+  .panel:focus-within {
+    border-color: var(--border-focus);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .panel-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-label .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .input-dot { background: var(--accent-csv); }
+  .output-dot { background: var(--accent-json); }
+
+  .panel-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    font-size: 14px;
+  }
+
+  .icon-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  .icon-btn.copied {
+    color: var(--success) !important;
+  }
+
+  textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-bright);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: none;
+    outline: none;
+    tab-size: 2;
+  }
+
+  textarea::placeholder {
+    color: var(--text-dim);
+    opacity: 0.6;
+  }
+
+  textarea:read-only {
+    color: var(--text);
+    cursor: default;
+  }
+
+  /* Middle controls */
+  .middle-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    gap: 16px;
+  }
+
+  .convert-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    font-size: 20px;
+  }
+
+  .convert-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-focus);
+    transform: scale(1.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .convert-btn:active {
+    transform: scale(0.95);
+  }
+
+  .swap-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+
+  .swap-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+    border-color: var(--border-focus);
+  }
+
+  /* Status bar */
+  .status-bar {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 36px;
+  }
+
+  .status-msg {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  .status-msg.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .status-msg.error {
+    background: var(--error-dim);
+    color: var(--error);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .status-msg.success {
+    background: rgba(34, 197, 94, 0.08);
+    color: var(--success);
+    border: 1px solid rgba(34, 197, 94, 0.15);
+  }
+
+  .status-msg.info {
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--accent-json);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+  }
+
+  /* Options row */
+  .options-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .option-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .option-group label {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .option-group select {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 8px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .option-group select:hover {
+    border-color: var(--border-focus);
+  }
+
+  /* File drop overlay */
+  .drop-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 14, 19, 0.9);
+    border: 2px dashed var(--accent-json);
+    border-radius: var(--radius);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent-json);
+  }
+
+  .drop-overlay.active {
+    display: flex;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .converter {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto 1fr;
+      min-height: auto;
+    }
+
+    .panel {
+      min-height: 280px;
+    }
+
+    .middle-controls {
+      flex-direction: row;
+      padding: 12px 0;
+    }
+
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel {
+    animation: fadeInUp 0.5s ease backwards;
+  }
+
+  .panel:nth-child(1) { animation-delay: 0.05s; }
+  .panel:nth-child(3) { animation-delay: 0.15s; }
+
+  .middle-controls {
+    animation: fadeInUp 0.5s ease 0.1s backwards;
+  }
+
+  /* Auto-convert indicator */
+  .auto-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">⇄</div>
+      <div>
+        <div class="title">Data Converter</div>
+        <div class="subtitle">csv · json · yaml</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">From</span>
+        <div class="format-selector" id="inputSelector">
+          <button class="format-pill active" data-format="csv" onclick="setInputFormat('csv')">CSV</button>
+          <button class="format-pill" data-format="json" onclick="setInputFormat('json')">JSON</button>
+          <button class="format-pill" data-format="yaml" onclick="setInputFormat('yaml')">YAML</button>
+        </div>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin:0 4px;">→</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">To</span>
+        <div class="format-selector" id="outputSelector">
+          <button class="format-pill" data-format="csv" onclick="setOutputFormat('csv')">CSV</button>
+          <button class="format-pill active" data-format="json" onclick="setOutputFormat('json')">JSON</button>
+          <button class="format-pill" data-format="yaml" onclick="setOutputFormat('yaml')">YAML</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="converter">
+    <!-- Input panel -->
+    <div class="panel" id="inputPanel" style="position:relative;">
+      <div class="drop-overlay" id="dropOverlay">Drop file here</div>
+      <div class="panel-header">
+        <div class="panel-label">
+          <span class="dot input-dot" id="inputDot"></span>
+          <span id="inputLabel">Input — CSV</span>
+        </div>
+        <div class="panel-actions">
+          <button class="icon-btn" onclick="loadSample()" title="Load sample data">⟡</button>
+          <button class="icon-btn" onclick="openFile()" title="Open file">📂</button>
+          <button class="icon-btn" onclick="clearInput()" title="Clear">✕</button>
+        </div>
+      </div>
+      <textarea id="inputArea" placeholder="Paste your data here, or drag & drop a file..." spellcheck="false"></textarea>
+      <input type="file" id="fileInput" accept=".csv,.json,.yaml,.yml,.tsv" style="display:none">
+    </div>
+
+    <!-- Middle controls -->
+    <div class="middle-controls">
+      <span class="auto-badge">auto</span>
+      <button class="convert-btn" onclick="convert()" title="Convert">→</button>
+      <button class="swap-btn" onclick="swapFormats()" title="Swap input/output">⇄</button>
+    </div>
+
+    <!-- Output panel -->
+    <div class="panel" id="outputPanel">
+      <div class="panel-header">
+        <div class="panel-label">
+          <span class="dot output-dot" id="outputDot"></span>
+          <span id="outputLabel">Output — JSON</span>
+        </div>
+        <div class="panel-actions">
+          <button class="icon-btn" onclick="copyOutput(this)" title="Copy to clipboard">⎘</button>
+          <button class="icon-btn" onclick="downloadOutput()" title="Download">↓</button>
+        </div>
+      </div>
+      <textarea id="outputArea" readonly placeholder="Converted output will appear here..." spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+
+  <div class="options-row">
+    <div class="option-group">
+      <label>JSON indent</label>
+      <select id="jsonIndent" onchange="convert()">
+        <option value="2" selected>2 spaces</option>
+        <option value="4">4 spaces</option>
+        <option value="\t">Tab</option>
+        <option value="0">Minified</option>
+      </select>
+    </div>
+    <div class="option-group">
+      <label>CSV delimiter</label>
+      <select id="csvDelimiter" onchange="convert()">
+        <option value="," selected>Comma</option>
+        <option value=";">Semicolon</option>
+        <option value="\t">Tab</option>
+        <option value="|">Pipe</option>
+      </select>
+    </div>
+    <div class="option-group">
+      <label>YAML flow</label>
+      <select id="yamlFlow" onchange="convert()">
+        <option value="block" selected>Block</option>
+        <option value="flow">Flow</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+  let inputFormat = 'csv';
+  let outputFormat = 'json';
+  let statusTimeout;
+
+  const accentColors = {
+    csv: 'var(--accent-csv)',
+    json: 'var(--accent-json)',
+    yaml: 'var(--accent-yaml)',
+  };
+
+  const placeholders = {
+    csv: 'name,age,city\nAlice,30,Portland\nBob,25,Seattle\nCharlie,35,Denver',
+    json: '[\n  { "name": "Alice", "age": 30, "city": "Portland" },\n  { "name": "Bob", "age": 25, "city": "Seattle" },\n  { "name": "Charlie", "age": 35, "city": "Denver" }\n]',
+    yaml: '- name: Alice\n  age: 30\n  city: Portland\n- name: Bob\n  age: 25\n  city: Seattle\n- name: Charlie\n  age: 35\n  city: Denver',
+  };
+
+  function setInputFormat(fmt) {
+    inputFormat = fmt;
+    updateSelectors();
+    convert();
+  }
+
+  function setOutputFormat(fmt) {
+    outputFormat = fmt;
+    updateSelectors();
+    convert();
+  }
+
+  function updateSelectors() {
+    document.querySelectorAll('#inputSelector .format-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.format === inputFormat);
+    });
+    document.querySelectorAll('#outputSelector .format-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.format === outputFormat);
+    });
+    document.getElementById('inputLabel').textContent = `Input — ${inputFormat.toUpperCase()}`;
+    document.getElementById('outputLabel').textContent = `Output — ${outputFormat.toUpperCase()}`;
+    document.getElementById('inputDot').style.background = accentColors[inputFormat];
+    document.getElementById('outputDot').style.background = accentColors[outputFormat];
+    document.getElementById('inputArea').placeholder = `Paste your ${inputFormat.toUpperCase()} here, or drag & drop a file...\n\nExample:\n${placeholders[inputFormat]}`;
+  }
+
+  function getDelimiter() {
+    const val = document.getElementById('csvDelimiter').value;
+    return val === '\\t' ? '\t' : val;
+  }
+
+  function getJsonIndent() {
+    const val = document.getElementById('jsonIndent').value;
+    if (val === '\\t') return '\t';
+    return parseInt(val);
+  }
+
+  // --- Parsers ---
+
+  function parseCSV(text) {
+    const delimiter = getDelimiter();
+    const lines = [];
+    let current = '';
+    let inQuotes = false;
+    const rows = [];
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') { current += '"'; i++; }
+          else { inQuotes = false; }
+        } else {
+          current += ch;
+        }
+      } else {
+        if (ch === '"') { inQuotes = true; }
+        else if (ch === delimiter) { lines.push(current); current = ''; }
+        else if (ch === '\n' || (ch === '\r' && text[i + 1] === '\n')) {
+          lines.push(current); current = '';
+          rows.push([...lines]); lines.length = 0;
+          if (ch === '\r') i++;
+        } else {
+          current += ch;
+        }
+      }
+    }
+    if (current || lines.length) { lines.push(current); rows.push([...lines]); }
+
+    // Filter empty trailing rows
+    while (rows.length && rows[rows.length - 1].every(c => c.trim() === '')) rows.pop();
+
+    if (rows.length < 2) throw new Error('CSV needs at least a header row and one data row');
+
+    const headers = rows[0].map(h => h.trim());
+    const result = [];
+    for (let i = 1; i < rows.length; i++) {
+      const obj = {};
+      headers.forEach((h, j) => {
+        let val = (rows[i][j] || '').trim();
+        // Auto-type numbers and booleans
+        if (/^-?\d+(\.\d+)?$/.test(val)) val = Number(val);
+        else if (val.toLowerCase() === 'true') val = true;
+        else if (val.toLowerCase() === 'false') val = false;
+        else if (val.toLowerCase() === 'null' || val === '') val = null;
+        obj[h] = val;
+      });
+      result.push(obj);
+    }
+    return result;
+  }
+
+  function parseJSON(text) {
+    const data = JSON.parse(text);
+    // Normalize to array of objects
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'object' && data !== null) return [data];
+    throw new Error('JSON must be an object or array of objects');
+  }
+
+  function parseYAML(text) {
+    const data = jsyaml.load(text);
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'object' && data !== null) return [data];
+    throw new Error('YAML must be an object or array of objects');
+  }
+
+  // --- Serializers ---
+
+  function toCSV(data) {
+    if (!data.length) return '';
+    const delimiter = getDelimiter();
+    const headers = [...new Set(data.flatMap(obj => Object.keys(obj)))];
+
+    const escapeCell = (val) => {
+      if (val === null || val === undefined) return '';
+      const s = String(val);
+      if (s.includes(delimiter) || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    };
+
+    const lines = [headers.map(escapeCell).join(delimiter)];
+    for (const row of data) {
+      lines.push(headers.map(h => escapeCell(row[h])).join(delimiter));
+    }
+    return lines.join('\n');
+  }
+
+  function toJSON(data) {
+    const indent = getJsonIndent();
+    return JSON.stringify(data.length === 1 ? data[0] : data, null, indent || undefined);
+  }
+
+  function toYAML(data) {
+    const flowLevel = document.getElementById('yamlFlow').value === 'flow' ? 2 : -1;
+    return jsyaml.dump(data.length === 1 ? data[0] : data, {
+      indent: 2,
+      flowLevel: flowLevel,
+      lineWidth: 120,
+      noRefs: true,
+    });
+  }
+
+  // --- Convert ---
+
+  function convert() {
+    const input = document.getElementById('inputArea').value.trim();
+    if (!input) {
+      document.getElementById('outputArea').value = '';
+      hideStatus();
+      return;
+    }
+
+    try {
+      const parsers = { csv: parseCSV, json: parseJSON, yaml: parseYAML };
+      const serializers = { csv: toCSV, json: toJSON, yaml: toYAML };
+
+      const data = parsers[inputFormat](input);
+      const output = serializers[outputFormat](data);
+
+      document.getElementById('outputArea').value = output;
+
+      const rowCount = Array.isArray(data) ? data.length : 1;
+      showStatus(`Converted ${rowCount} record${rowCount !== 1 ? 's' : ''} · ${inputFormat.toUpperCase()} → ${outputFormat.toUpperCase()}`, 'success');
+    } catch (e) {
+      document.getElementById('outputArea').value = '';
+      showStatus(`Error: ${e.message}`, 'error');
+    }
+  }
+
+  // --- Status ---
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = `status-msg ${type} visible`;
+    clearTimeout(statusTimeout);
+    if (type === 'success' || type === 'info') {
+      statusTimeout = setTimeout(() => { el.classList.remove('visible'); }, 4000);
+    }
+  }
+
+  function hideStatus() {
+    document.getElementById('statusMsg').classList.remove('visible');
+  }
+
+  // --- Actions ---
+
+  function clearInput() {
+    document.getElementById('inputArea').value = '';
+    document.getElementById('outputArea').value = '';
+    hideStatus();
+    document.getElementById('inputArea').focus();
+  }
+
+  function loadSample() {
+    document.getElementById('inputArea').value = placeholders[inputFormat];
+    convert();
+  }
+
+  function swapFormats() {
+    const outputVal = document.getElementById('outputArea').value;
+    const tmp = inputFormat;
+    inputFormat = outputFormat;
+    outputFormat = tmp;
+    updateSelectors();
+    if (outputVal) {
+      document.getElementById('inputArea').value = outputVal;
+      convert();
+    }
+  }
+
+  function copyOutput(btn) {
+    const text = document.getElementById('outputArea').value;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.textContent = '✓';
+      showStatus('Copied to clipboard', 'info');
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '⎘'; }, 1500);
+    });
+  }
+
+  function downloadOutput() {
+    const text = document.getElementById('outputArea').value;
+    if (!text) return;
+    const ext = outputFormat === 'yaml' ? 'yaml' : outputFormat;
+    const mime = { csv: 'text/csv', json: 'application/json', yaml: 'text/yaml' }[outputFormat];
+    const blob = new Blob([text], { type: mime });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `converted.${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showStatus(`Downloaded converted.${ext}`, 'info');
+  }
+
+  function openFile() {
+    document.getElementById('fileInput').click();
+  }
+
+  // --- File handling ---
+
+  document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    readFile(file);
+    e.target.value = '';
+  });
+
+  function readFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const fmtMap = { csv: 'csv', tsv: 'csv', json: 'json', yaml: 'yaml', yml: 'yaml' };
+    if (fmtMap[ext]) {
+      setInputFormat(fmtMap[ext]);
+      if (ext === 'tsv') document.getElementById('csvDelimiter').value = '\\t';
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('inputArea').value = ev.target.result;
+      convert();
+      showStatus(`Loaded ${file.name}`, 'info');
+    };
+    reader.readAsText(file);
+  }
+
+  // Drag & drop
+  const inputPanel = document.getElementById('inputPanel');
+  const dropOverlay = document.getElementById('dropOverlay');
+
+  ['dragenter', 'dragover'].forEach(evt => {
+    inputPanel.addEventListener(evt, (e) => { e.preventDefault(); dropOverlay.classList.add('active'); });
+  });
+  ['dragleave', 'drop'].forEach(evt => {
+    inputPanel.addEventListener(evt, () => { dropOverlay.classList.remove('active'); });
+  });
+  inputPanel.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  });
+
+  // Auto-convert on typing (debounced)
+  let convertTimeout;
+  document.getElementById('inputArea').addEventListener('input', () => {
+    clearTimeout(convertTimeout);
+    convertTimeout = setTimeout(convert, 300);
+  });
+
+  // Auto-detect format on paste
+  document.getElementById('inputArea').addEventListener('paste', (e) => {
+    setTimeout(() => {
+      const text = document.getElementById('inputArea').value.trim();
+      if (!text) return;
+      // Try to auto-detect format
+      if (text[0] === '[' || text[0] === '{') {
+        try { JSON.parse(text); setInputFormat('json'); return; } catch {}
+      }
+      try { const y = jsyaml.load(text); if (typeof y === 'object' && !Array.isArray(y) && text.includes(':')) { setInputFormat('yaml'); return; } } catch {}
+      if (text.includes(',') && text.includes('\n')) {
+        setInputFormat('csv');
+      }
+    }, 50);
+  });
+
+  // Init
+  updateSelectors();
+</script>
+
+</body>
+</html>
