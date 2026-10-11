@@ -256,3 +256,6 @@
 [submodule "tools/dxf-converter"]
 	path = tools/dxf-converter
 	url = git@github.com:dwilson2547/dxf-converter.git
+[submodule "apps/nodewright"]
+	path = apps/nodewright
+	url = git@github.com:dwilson2547/nodewright.git
