@@ -259,3 +259,6 @@
 [submodule "apps/nodewright"]
 	path = apps/nodewright
 	url = git@github.com:dwilson2547/nodewright.git
+[submodule "apps/webdoc"]
+	path = apps/webdoc
+	url = git@github.com:dwilson2547/webdoc.git
