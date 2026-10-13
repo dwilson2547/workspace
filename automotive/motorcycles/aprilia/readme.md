@@ -1,14 +1,76 @@
-part diagrams can be found by config starting from here: https://aprilia.genuine-parts-catalogue.com/
+# aprilia
 
-Goal here is to categorize and persist all aprilia parts for an interchange lookup 
-scraping parts from the web directly will likely be a necessity in this case, i don't have a great source of part pdfs like i had for ducati. after selecting the displacement from the landing page you can select the model, then the year, and then the trim and the next page has all the part categories. when you select a cateogry you get to a page with the diagram and all the parts listed out, i'd like to persist the full bike details from the selector as well as the diagram images and corresponding parts.
+Aprilia OEM parts diagrams — https://aprilia.genuine-parts-catalogue.com
 
-General scraper considerations: persist a copy of every page visited in a web cache, please lz4 compress the data when it's stored to save space. query the cache and use the cached page if possible to parse data from, ovbiously it won't really be that useful for the model year and trim selector pages but i like to be thorrough. the scraper should be generally safe from hard shutdowns, i'd like to persist data at reasonable intervals and build int graceful handling for sigterms or keyboard interrupts. preventing data loss should be a priority
+Server-rendered catalogue (no browser needed): the URL hierarchy
+displacement → model → year → trim lists its children as links on each page,
+and the trim page groups the diagram cards by category accordion. Selector
+recon is in `scraper.py`'s header. The site was redesigned since the original
+Playwright-based scraper was written; every level is now plain HTML.
 
-output data considerations: I plan to integrate this with another project i have called parts_interchange, the end goal is a reverse lookup for parts so users can find out if a part from a 2012 chevy will work on a 2018 buick for example. that project has the data structured such that there's a car table (year make model trim) and car has car_diagrams as well as car_parts, diagrams has an index to part mapping table as well so i can maintain the full structure while also having a quick global part lookup at the vehicle level. i'd like to keep that same structure here if possible. 
+## Running under scrape-job-manager
 
-please use the playwright mcp to develop a scraper to persist all part diagrams and parts from this site, maintain a database or status file to keep track of the current position and data pulled, i'm not too fussed whether we scrape the pages and parse later or parse in real time, parsing shouldn't be terrible honestly
+Part of the motorcycle parts reference system (`motorcycle_common` schema →
+shared `motorcycle_parts` Postgres). Release status: [`../RELEASES.md`](../RELEASES.md).
 
-create a folder called part_data to store the project data and a further subfolder called images for the downloaded images
+- **Contract** — `scrape_contract.run` wraps `main()`; exit codes 0 / 75 / 65;
+  result payload `{\"items\": diagrams_scraped, \"new\": parts_new, …}`.
+  Honors the operator-injected `SCRAPE_DEADLINE` (stops gracefully at the end
+  of the active-hours window).
+- **Image** — `Dockerfile` (build context `automotive/motorcycles/`, copies
+  `scrape_contract.py` + `motorcycle_common/`), pushed as
+  `dwilson2547/motorcycle-scraper-aprilia`, pinned by digest in
+  `infra/cluster-config/motorcycles/{dev,prod}/aprilia.yaml`:
+  ```bash
+  cd automotive/motorcycles
+  docker build -f aprilia/Dockerfile -t dwilson2547/motorcycle-scraper-aprilia:latest .
+  docker push dwilson2547/motorcycle-scraper-aprilia:latest
+  # then update the digest in both manifests + commit
+  ```
+- **Schedule** — ScrapePool `motorcycle-parts` (weekly, Mon–Fri 09:00–19:00
+  America/New_York). Full-catalogue backfill spans many runs: progress is
+  resume-safe (`scraped_at`), each run continues where the previous stopped.
 
-you can use the ducati project as a reference though it doesn't involve a webcache and is mostly ocr/pdf parsing rather than page parsing
+## Rate limiting
+
+The catalogue throttles per IP (~400 requests per ~15 min, observed 2026-10-13)
+and answers with a reCAPTCHA "Verification Required" page — HTTP 200, not a
+429 — once the budget is spent. Two consequences:
+
+- request-auth paces `aprilia.genuine-parts-catalogue.com` at 1 req/15s. The
+  override lives in the request-auth DB (set via the request-auth API in both
+  the `scrape-stack` and `scrapestack-dev` namespaces) — not in this repo.
+- The scraper detects the challenge page, deletes any poisoned webcache entry
+  it finds, and aborts the run gracefully (exit 0, partial result); the next
+  run resumes from `scraped_at`. Never parsed, never cached.
+
+A full-catalogue backfill (~15.6k diagrams per the site sitemaps, ≈36k
+requests) takes many weekly 8h runs at this pacing; accelerate with a run-now
+annotation (each run stays well under the site's budget on its own, so avoid
+running dev and prod jobs at the same time).
+
+## Environment
+
+| Variable | Meaning |
+|---|---|
+| `MOTORCYCLE_DATABASE_URL` | shared motorcycle_parts Postgres (required) |
+| `WEBCACHE_URL` / `IMGCACHE_URL` | scrape-stack cache services |
+| `REQUEST_AUTH_SERVER_URL` | request-auth permit server (pacing: default 1 req/s/domain) |
+| `SCRAPE_DEADLINE` | injected by the operator; graceful stop |
+
+## Data notes
+
+- One callout index can list several part numbers (colour/variant options);
+  one part number can appear at several indices — those collapse to a single
+  `DiagramPart` row whose `extras.ref_nums` carries every index.
+- `quantity` is not exposed by the current site design (stored as NULL).
+- `extras` also carries `price` (site currency, locale-dependent),
+  `available`, and `superseded` (line-through reference).
+
+## History
+
+The original version was Playwright-based with local sleep pacing, images on
+disk, and a private SQLite schema (`db.py`); it was converted to the shared
+schema + scrape-stack clients on 2026-10-12 after a site recon found every
+level server-rendered. The original prompt-style readme is preserved in git
+history.

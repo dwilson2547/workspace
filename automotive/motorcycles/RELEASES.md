@@ -16,7 +16,7 @@ All OEM scrapers write the same `motorcycle_parts` database through
 | `kawasaki/` | kawasaki.com owner-center | no | [x] | [x] | Prod since 2026-10-13 (run 20261013032847: 211 diagrams). Dev verified 2026-10-13 (100 diagrams), then suspended |
 | `harley/` | harley-davidson.com (ARI PartStream API) | no | [ ] | [ ] | Not yet converted to the shared schema |
 | `yamaha/` | yamahamotor.com/parts | JWT bootstrap | [ ] | [ ] | Not yet converted |
-| `aprilia/` | aprilia genuine-parts-catalogue | yes | [ ] | [ ] | Not yet converted |
+| `aprilia/` | aprilia genuine-parts-catalogue | no | [x] | [x] | Prod since 2026-10-13 (run 20261013041952 with challenge detection: 9 diagrams, Healthy). Dev verified (18 diagrams), then suspended. Site throttles per IP and serves a reCAPTCHA gate page — request-auth paces it at 1 req/15s; see `aprilia/readme.md` § Rate limiting |
 | `suzuki/` | suzukipartshouse.com | yes | [ ] | [ ] | Not yet converted |
 | `ducati/` | ducatiomaha.com Issuu catalogues → pdfplumber | yes | [ ] | [ ] | Two-stage pipeline, Postgres |
 
