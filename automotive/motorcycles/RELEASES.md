@@ -18,7 +18,7 @@ All OEM scrapers write the same `motorcycle_parts` database through
 | `yamaha/` | yamahamotor.com/parts (token + `_next/data`) | no | [x] | [x] | Prod since 2026-10-13 (backfill run live, real diagram data flowing). Browser-free now: anonymous `POST api.yamaha-motor.com/auth` token. API only has parts data for a subset of diagrams/years — empty ones are skipped |
 | `aprilia/` | aprilia genuine-parts-catalogue | no | [x] | [x] | Prod since 2026-10-13 (run 20261013041952 with challenge detection: 9 diagrams, Healthy). Dev verified (18 diagrams), then suspended. Site throttles per IP and serves a reCAPTCHA gate page — request-auth paces it at 1 req/15s; see `aprilia/readme.md` § Rate limiting |
 | `suzuki/` | suzukipartshouse.com | stealth browser | [x] | [x] | Prod since 2026-10-13 (backfill run live). Only scraper shipping Chromium: Cloudflare managed challenge — plain requests/headless fail, playwright-stealth passes (intermittently; stuck pages are skipped). request-auth paces at 1 req/30s |
-| `ducati/` | ducatiomaha.com Issuu catalogues → pdfplumber | yes | [ ] | [ ] | Two-stage pipeline, Postgres |
+| `ducati/` | ducatiomaha.com Issuu catalogues → per-page SVG text layer | no | [x] | [x] | Prod since 2026-10-13 (backfill run live). No PDFs, no OCR: Issuu's SVG renders carry a text layer for both born-digital catalogues and scans (Issuu's own OCR) — see `ducati/svg_parse.py`. ~70k pages across 598 catalogues |
 
 Manual scrapers (document downloaders, not part of the interchange fleet):
 `honda/` (hondamotopub.com owner's manuals), `ducati_owners_manuals/`
