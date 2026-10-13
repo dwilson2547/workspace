@@ -42,6 +42,7 @@ from cache_client import ImgCacheClient, WebCacheClient
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 from request_auth_client import RequestAuthClient
+from sqlalchemy.exc import IntegrityError
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from motorcycle_common import (  # noqa: E402
@@ -580,7 +581,23 @@ def scrape_diagram(
             scraped_at=datetime.now(timezone.utc),
         )
         db_session.add(diagram)
-        db_session.flush()
+        try:
+            db_session.flush()
+        except IntegrityError:
+            # Another run (e.g. a forgotten dev job) inserted this diagram
+            # concurrently — adopt their row instead of dying. The rollback
+            # also drops this scrape's pending Image row, so re-persist it
+            # (imgcache makes that a cheap lookup).
+            db_session.rollback()
+            diagram = db_session.query(Diagram).filter_by(source_url=diagram_url).first()
+            if diagram is None:
+                logger.error("Diagram insert failed for %s and row vanished", diagram_url)
+                return
+            if diagram.scraped_at:
+                return
+            image_id = persist_image(image_url, request_auth, img_cache, db_session)
+            diagram.image_id = image_id
+            diagram.scraped_at = datetime.now(timezone.utc)
 
     if moto not in diagram.motorcycles:
         diagram.motorcycles.append(moto)
