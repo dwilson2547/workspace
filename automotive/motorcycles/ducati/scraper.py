@@ -1,363 +1,512 @@
-"""
-scraper.py
-----------
-1. Visits ducatiomaha.com and extracts every Issuu catalog link with its
-   year, model-family, and model name.
-2. Upserts catalog metadata into PostgreSQL.
-3. For catalogs that have never been downloaded—or were last downloaded more
-   than REDOWNLOAD_THRESHOLD_DAYS ago—navigates to Issuu, clicks the Download
-   button inside the reader iframe, and saves the file to ./part_catalogs/.
+#!/usr/bin/env python3
+# Site: Ducati Omaha OEM parts catalogues (republished on Issuu)
+# Strategy: static-http + svg-parsing (no browser, no PDFs, no OCR — see
+#   svg_parse.py: Issuu renders every page as an SVG with a text layer, for
+#   both born-digital catalogues and scans with Issuu's own OCR)
+# Discovered endpoints (recon 2026-10-13):
+#   GET ducatiomaha.com/pages/ducati-oem-parts      (index; 598 catalog links)
+#   GET reader3.isu.pub/{user}/{slug}/reader4.json  (page list; svgUrl per page)
+#   GET svg.issuu.com/{revision}-{pub}/page_N.svg    (per-page vector render)
+# Last recon: 2026-10-13
+#
+# Page flow per catalogue (pages are sequential; a drawing's table pages
+# follow its drawing page under the same "DRAWING {code}" header):
+#   contents pages → skipped
+#   drawing pages  → subsystem code+name, rasterized page image → imgcache
+#   table pages    → part rows: callout | code | description | qty
+# A drawing is marked complete (scraped_at) when the NEXT code appears, so
+# multi-page tables accumulate correctly.
+#
+# Runs under scrape-job-manager (scrape_contract exit codes + result payload).
+# All target requests run under request-auth permits; reader4.json and page
+# SVGs through webcache (re-runs are nearly free); progress is resume-safe
+# (scraped_at per diagram, keyed by catalogue slug).
 
-Usage:
-    python scraper.py
-"""
-
-import asyncio
+import json
 import logging
-import random
+import os
 import re
+import signal
+import sys
+import time
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
-from playwright.async_api import async_playwright, Page, BrowserContext
+import httpx
+from bs4 import BeautifulSoup
+from cache_client import ImgCacheClient, WebCacheClient
+from request_auth_client import RequestAuthClient
 
-from config import (
-    SOURCE_URL,
-    CATALOGS_DIR,
-    REDOWNLOAD_THRESHOLD_DAYS,
-    DELAY_MIN_SECONDS,
-    DELAY_MAX_SECONDS,
-    DOWNLOAD_MAX_RETRIES,
-    DOWNLOAD_BACKOFF_BASE_SECONDS,
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from motorcycle_common import (  # noqa: E402
+    Diagram,
+    DiagramPart,
+    Image,
+    Motorcycle,
+    Part,
+    get_engine,
+    get_session_factory,
+    init_db,
 )
-from db import get_session, init_db, upsert_catalog, mark_downloaded, mark_no_download_button, needs_download
+from scrape_contract import Broken, run  # noqa: E402
+
+import svg_parse  # noqa: E402
+
+from config import (  # noqa: E402
+    CACHE_BUCKET,
+    CACHE_CLIENT_NAME,
+    IMGCACHE_URL,
+    INDEX_DOMAIN,
+    ISSUU_DOC_URL,
+    MAX_RETRIES,
+    PAGE_HEADERS,
+    READER_BASE,
+    READER_DOMAIN,
+    READER_JSON_MAX_AGE_DAYS,
+    REQUEST_AUTH_SERVER_URL,
+    RETRY_BACKOFF_SECONDS,
+    SOURCE_URL,
+    SVG_DOMAIN,
+    WEBCACHE_URL,
+)
+
+MAKE = "Ducati"
+
+# ── Logging ───────────────────────────────────────────────────────────────────
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S",
+    format="%(asctime)s %(levelname)-8s %(message)s",
 )
-log = logging.getLogger(__name__)
-
-# ── Catalog link extraction ───────────────────────────────────────────────────
-
-# JavaScript run in the browser to extract every (year, family, model, url)
-# combination from the ducatiomaha parts page.
-_EXTRACT_JS = """
-() => {
-    const results = [];
-    const seen = new Set();
-
-    // All anchor tags pointing to issuu.com/ducatiomaha/docs/
-    const links = Array.from(
-        document.querySelectorAll('a[href*="issuu.com/ducatiomaha/docs/"]')
-    );
-
-    for (const link of links) {
-        // Strip query-string tracking parameters from the URL
-        let url;
-        try {
-            const u = new URL(link.href);
-            url = u.origin + u.pathname;
-        } catch (_) {
-            continue;
-        }
-        if (seen.has(url)) continue;
-        seen.add(url);
-
-        const modelName = link.textContent.trim();
-
-        // --- find model family: last non-empty text node before this link ---
-        let modelFamily = '';
-        let sib = link.previousSibling;
-        while (sib) {
-            if (sib.nodeType === Node.TEXT_NODE) {
-                const t = sib.textContent
-                    .trim()
-                    .replace(/^[,\\s]+/, '')        // leading commas/spaces
-                    .replace(/\\s*[-\\u2013\\u2014]\\s*$/, '') // trailing dash/em-dash
-                    .trim();
-                if (t) { modelFamily = t; break; }
-            }
-            sib = sib.previousSibling;
-        }
-
-        // --- find year: walk up/back looking for an element whose text is a 4-digit year ---
-        let year = '';
-        let el = link;
-        outer:
-        while (el) {
-            const parent = el.parentElement;
-            if (!parent) break;
-            const children = Array.from(parent.childNodes);
-            const myIdx = children.indexOf(el);
-            for (let i = myIdx - 1; i >= 0; i--) {
-                const t = (children[i].textContent || '').trim();
-                if (/^\\d{4}$/.test(t)) { year = t; break outer; }
-            }
-            el = parent;
-        }
-
-        // Fallback: parse year from the Issuu document slug
-        if (!year) {
-            const m = url.match(/_(20\\d{2})_/);
-            if (m) year = m[1];
-        }
-
-        results.push({ year: year || '0', modelFamily, modelName, url });
-    }
-
-    return results;
-}
-"""
+logger = logging.getLogger(__name__)
 
 
-async def scrape_catalog_links(page: Page) -> list[dict]:
-    """Return list of {year, modelFamily, modelName, url} dicts."""
-    log.info("Loading %s …", SOURCE_URL)
-    await page.goto(SOURCE_URL, wait_until="networkidle", timeout=60_000)
-    catalogs = await page.evaluate(_EXTRACT_JS)
-    log.info("Found %d catalog links.", len(catalogs))
+# ── Graceful shutdown ─────────────────────────────────────────────────────────
+
+class ShutdownRequested(Exception):
+    """A SIGTERM/SIGINT arrived; stop after the current item and return the result."""
+
+
+_shutdown = False
+
+# scrape-job-manager injects SCRAPE_DEADLINE (RFC 3339) — the time by which the
+# run should have exited. Long-running backfills stop there gracefully.
+_DEADLINE: Optional[datetime] = None
+
+
+def _parse_deadline() -> Optional[datetime]:
+    raw = os.environ.get("SCRAPE_DEADLINE")
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        logger.warning("Unparseable SCRAPE_DEADLINE %r — ignoring", raw)
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def _handle_signal(signum: int, _frame) -> None:
+    global _shutdown
+    logger.warning("Signal %d received — will exit after current item.", signum)
+    _shutdown = True
+
+
+def check_shutdown() -> None:
+    global _DEADLINE
+    if _shutdown:
+        raise ShutdownRequested()
+    if _DEADLINE is None:
+        _DEADLINE = _parse_deadline()
+    if _DEADLINE is not None and datetime.now(timezone.utc) >= _DEADLINE:
+        logger.info("SCRAPE_DEADLINE reached — stopping after current item.")
+        raise ShutdownRequested()
+
+
+signal.signal(signal.SIGTERM, _handle_signal)
+signal.signal(signal.SIGINT, _handle_signal)
+
+
+# ── HTTP client (request-auth paced) ──────────────────────────────────────────
+
+class DucatiClient:
+    """httpx wrapper: every target request runs under a request-auth permit."""
+
+    def __init__(self, request_auth: RequestAuthClient) -> None:
+        self._request_auth = request_auth
+        self._client = httpx.Client(
+            headers={"User-Agent": PAGE_HEADERS["User-Agent"]},
+            follow_redirects=True,
+            timeout=30.0,
+        )
+
+    def get_text(self, url: str, domain: str) -> str:
+        with self._request_auth.acquire(domain) as permit:
+            r = self._client.get(url, headers=PAGE_HEADERS, timeout=30)
+            permit.set_status(r.status_code)
+        r.raise_for_status()
+        return r.text
+
+    def close(self) -> None:
+        self._client.close()
+
+
+# ── Webcache-aware fetchers ───────────────────────────────────────────────────
+
+def fetch_text(url: str, domain: str, client: DucatiClient, cache: WebCacheClient,
+               max_age: Optional[int] = None) -> Optional[str]:
+    """Fetch a text resource via webcache; None on unrecoverable failure."""
+    try:
+        cached = cache.get(url, bucket=CACHE_BUCKET, max_age=max_age)
+        if cached:
+            return cached["content"]
+    except Exception as exc:
+        logger.warning("WebCache GET failed for %s: %s", url, exc)
+
+    logger.info("[fetch] %s", url)
+    check_shutdown()
+
+    last_exc: Optional[Exception] = None
+    text = ""
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            text = client.get_text(url, domain)
+            break
+        except Exception as exc:
+            last_exc = exc
+            logger.warning("Error fetching %s (attempt %d/%d): %s", url, attempt, MAX_RETRIES, exc)
+            check_shutdown()
+            if attempt < MAX_RETRIES:
+                time.sleep(RETRY_BACKOFF_SECONDS * attempt)
+    else:
+        logger.error("Failed to fetch %s after %d attempts — skipping", url, MAX_RETRIES)
+        return None
+
+    try:
+        cache.store(url=url, content=text, client_name=CACHE_CLIENT_NAME, bucket=CACHE_BUCKET)
+    except Exception as exc:
+        logger.warning("WebCache store failed for %s: %s", url, exc)
+
+    return text
+
+
+# ── Catalogue enumeration ──────────────────────────────────────────────────────
+
+_TITLE_RE = re.compile(r"Ducati Omaha (\d{4}) OEM Ducati (.*?) Parts Diagram", re.IGNORECASE)
+
+
+def parse_catalog_links(html: str) -> list[dict]:
+    """Extract catalogue entries from the index page.
+
+    Returns [{slug, url, year, model_name}] — title metadata when present,
+    otherwise the link text and slug-derived year.
+    """
+    soup = BeautifulSoup(html, "lxml")
+    seen: set[str] = set()
+    catalogs: list[dict] = []
+
+    for a in soup.find_all("a", href=True):
+        href = a["href"].strip()
+        m = re.match(rf"(?:https?://issuu\.com)?/?[^/]*?/docs/([^/?#]+)", href)
+        if not m or "issuu.com" not in href:
+            continue
+        slug = m.group(1)
+        if slug in seen:
+            continue
+        seen.add(slug)
+
+        title = a.get("title", "") or ""
+        tm = _TITLE_RE.search(title)
+        year = tm.group(1) if tm else ""
+        model_name = tm.group(2).strip() if tm else a.get_text(strip=True)
+        if not year:
+            sm = re.match(r"^(20\d{2})_", slug) or re.search(r"_((?:19|20)\d{2})_", slug)
+            if sm:
+                year = sm.group(1)
+            else:
+                sm = re.search(r"[_/](\d{2})[_\.]", slug) or re.search(r"-(\d{2})$", slug)
+                if sm:
+                    year = f"20{sm.group(1)}"
+
+        catalogs.append({
+            "slug": slug,
+            "url": f"{ISSUU_DOC_URL}/{slug}",
+            "year": year,
+            "model_name": model_name,
+        })
     return catalogs
 
 
-# ── Issuu PDF download ────────────────────────────────────────────────────────
+# ── Database helpers ──────────────────────────────────────────────────────────
+
+def upsert_motorcycle(db_session, catalog: dict) -> Motorcycle:
+    moto = (
+        db_session.query(Motorcycle)
+        .filter_by(make=MAKE, variant_key=catalog["slug"])
+        .first()
+    )
+    if moto:
+        return moto
+    moto = Motorcycle(
+        make=MAKE,
+        vehicle_type="Motorcycle",
+        year=catalog["year"] or "unknown",
+        model_code=catalog["slug"],
+        model_name=catalog["model_name"] or catalog["slug"],
+        variant_key=catalog["slug"],
+        source_url=catalog["url"],
+    )
+    db_session.add(moto)
+    db_session.flush()
+    return moto
 
 
-def _jitter_delay() -> float:
-    """Return a random delay in [DELAY_MIN_SECONDS, DELAY_MAX_SECONDS]."""
-    return random.uniform(DELAY_MIN_SECONDS, DELAY_MAX_SECONDS)
+def upsert_part(db_session, part_number: str, name: str) -> Part:
+    part = (
+        db_session.query(Part)
+        .filter_by(make=MAKE, part_number=part_number)
+        .first()
+    )
+    if not part:
+        part = Part(make=MAKE, part_number=part_number, name=name)
+        db_session.add(part)
+        db_session.flush()
+    elif not part.name and name:
+        part.name = name
+    return part
 
 
-async def _attempt_download(context: BrowserContext, issuu_url: str, output_path: Path) -> bool | None:
-    """
-    Single attempt: open a fresh page, navigate to the Issuu viewer, click the
-    Download button inside the reader iframe, save the file.
-    Returns:
-        True  – file saved successfully
-        None  – no Download button present (skip, do not retry)
-        False – transient error (caller should retry with back-off)
-    """
-    page = await context.new_page()
+# ── Image persistence (imgcache) ──────────────────────────────────────────────
+
+def persist_image(page_url: str, image_bytes: bytes, img_cache: ImgCacheClient, db_session) -> Optional[int]:
     try:
-        log.info("  → Navigating to Issuu: %s", issuu_url)
-        await page.goto(issuu_url, wait_until="networkidle", timeout=90_000)
-
-        # Dismiss cookie/consent dialog if present
-        try:
-            ok_btn = page.get_by_role("button", name=re.compile(r"^ok$", re.I))
-            if await ok_btn.count() > 0:
-                await ok_btn.first.click()
-                await page.wait_for_timeout(random.randint(400, 800))
-        except Exception:
-            pass
-
-        # Human-like pause before looking for the Download button
-        await page.wait_for_timeout(random.randint(2_500, 4_500))
-
-        # The Download button lives inside the Issuu reader iframe.
-        # Try every iframe on the page until we find one with the button.
-        reader_frame = None
-        for frame in page.frames:
-            if frame == page.main_frame:
-                continue
-            try:
-                btn = frame.get_by_role("button", name="Download")
-                if await btn.count() > 0:
-                    reader_frame = frame
-                    break
-            except Exception:
-                continue
-
-        if reader_frame is None:
-            # Fall back: look for the button in the main frame (some embed styles)
-            btn = page.get_by_role("button", name="Download")
-            if await btn.count() == 0:
-                log.warning("  ✗ No Download button found for %s", issuu_url)
-                return None  # not a transient error – don't retry
-            reader_frame = page
-
-        download_btn = reader_frame.get_by_role("button", name="Download")
-
-        # Small random pause before clicking to mimic a human reading the page
-        await page.wait_for_timeout(random.randint(800, 2_000))
-        log.info("  → Clicking Download …")
-        async with page.expect_download(timeout=120_000) as dl_info:
-            await download_btn.first.click()
-
-        download = await dl_info.value
-        suggested = download.suggested_filename or output_path.name
-        final_path = output_path.with_suffix(Path(suggested).suffix or ".pdf")
-
-        await download.save_as(str(final_path))
-        log.info("  ✓ Saved to %s (%d bytes)", final_path.name, final_path.stat().st_size)
-        return True
-
+        entry = img_cache.store(
+            url=page_url, file_bytes=image_bytes,
+            client_name=CACHE_CLIENT_NAME, bucket=CACHE_BUCKET,
+        )
     except Exception as exc:
-        log.warning("  ✗ Attempt failed for %s: %s", issuu_url, exc)
-        return False
+        logger.warning("ImgCache store failed for %s: %s", page_url, exc)
+        return None
+    content_hash = entry.get("content_hash") or entry.get("hash")
+    if not content_hash:
+        return None
+    existing = db_session.query(Image).filter_by(content_hash=content_hash).first()
+    if existing:
+        return existing.id
+    img = Image(content_hash=content_hash, source_url=page_url)
+    db_session.add(img)
+    db_session.flush()
+    return img.id
+
+
+# ── Catalogue scraping ─────────────────────────────────────────────────────────
+
+def scrape_catalog(
+    catalog: dict,
+    moto: Motorcycle,
+    db_session,
+    client: DucatiClient,
+    cache: WebCacheClient,
+    img_cache: ImgCacheClient,
+    counters: dict,
+) -> None:
+    """Walk every page of one catalogue SVG by SVG."""
+    if moto.scraped_at:
+        logger.debug("Catalogue already fully scraped: %s", catalog["slug"])
+        return
+
+    slug = catalog["slug"]
+    logger.info("── %s %s [%s] ──", catalog["year"], catalog["model_name"], slug)
+
+    reader_json = fetch_text(
+        f"{READER_BASE}/{slug}/reader4.json", READER_DOMAIN, client, cache,
+        max_age=READER_JSON_MAX_AGE_DAYS * 86400,
+    )
+    if reader_json is None:
+        logger.error("Skipping catalogue %s: no reader4.json", slug)
+        return
+
+    try:
+        pages = json.loads(reader_json)["document"]["pages"]
+    except Exception as exc:
+        logger.error("Bad reader4.json for %s: %s", slug, exc)
+        return
+    logger.info("  %d pages", len(pages))
+
+    # code → diagram id; a code's pages are contiguous, so completion is
+    # detected when the next code appears (or the catalogue ends)
+    diagrams: dict[str, int] = {}
+    prev_code: Optional[str] = None
+
+    def complete(code: Optional[str]) -> None:
+        if code and code in diagrams:
+            db_session.query(Diagram).filter_by(id=diagrams[code]).update(
+                {"scraped_at": datetime.now(timezone.utc)}
+            )
+            db_session.commit()
+
+    for n, page_info in enumerate(pages, start=1):
+        check_shutdown()
+        svg_url = page_info.get("svgUrl")
+        if not svg_url:
+            continue
+
+        svg_text = fetch_text(svg_url, SVG_DOMAIN, client, cache)
+        if svg_text is None:
+            continue
+
+        page = svg_parse.parse_page(svg_text)
+        header = page["header"]
+        if header is None or page["is_contents"]:
+            continue
+
+        code, name = header
+        page_url = f"{catalog['url']}/{n}"
+
+        # a new code means the previous code's pages are done
+        if code != prev_code:
+            complete(prev_code)
+            prev_code = code
+
+        diagram_id = diagrams.get(code)
+        if diagram_id is None:
+            diagram_id = _ensure_diagram(
+                db_session, code, name, page_url, diagrams
+            )
+            if diagram_id is None:
+                continue
+            diagrams[code] = diagram_id
+
+        diagram = db_session.query(Diagram).filter_by(id=diagram_id).first()
+        if diagram.scraped_at:
+            continue  # already complete from a previous run
+
+        if moto not in diagram.motorcycles:
+            diagram.motorcycles.append(moto)
+
+        # drawing pages carry the raster image; keep the first one
+        if page["image"] and not diagram.image_id:
+            image_id = persist_image(page_url, page["image"], img_cache, db_session)
+            if image_id:
+                diagram.image_id = image_id
+                db_session.commit()
+
+        for row in page["rows"]:
+            part = upsert_part(db_session, row["code"], row["description"])
+            counters["parts_seen"] += 1
+
+            existing_dp = (
+                db_session.query(DiagramPart)
+                .filter_by(diagram_id=diagram_id, part_id=part.id)
+                .first()
+            )
+            if existing_dp is None:
+                db_session.add(
+                    DiagramPart(
+                        diagram_id=diagram_id,
+                        part_id=part.id,
+                        ref_num=row["ref"],
+                        quantity=row["qty"],
+                        extras={
+                            "notes": row["notes"],
+                            "validity": row["validity"],
+                        },
+                    )
+                )
+                counters["parts_new"] += 1
+
+            if part not in moto.parts:
+                moto.parts.append(part)
+
+        if page["rows"]:
+            db_session.commit()
+            counters["diagrams"] += 1
+            logger.info("  ✓ %s %s — %d parts", code, name, len(page["rows"]))
+
+    complete(prev_code)
+    moto.scraped_at = datetime.now(timezone.utc)
+    db_session.commit()
+    counters["motorcycles"] += 1
+
+
+def _ensure_diagram(db_session, code: str, name: str, page_url: str, diagrams: dict) -> Optional[int]:
+    existing = db_session.query(Diagram).filter_by(source_url=page_url).first()
+    if existing is None:
+        diagram = Diagram(
+            title=name or code,
+            category_id=None,
+            source_url=page_url,
+        )
+        db_session.add(diagram)
+        db_session.flush()
+        diagrams[code] = diagram.id
+        return diagram.id
+    diagrams[code] = existing.id
+    return existing.id
+
+
+# ── Main orchestrator ─────────────────────────────────────────────────────────
+
+def main() -> dict:
+    counters = {"motorcycles": 0, "diagrams": 0, "parts_seen": 0, "parts_new": 0}
+
+    engine = get_engine()
+    init_db(engine)
+    SessionFactory = get_session_factory(engine)
+
+    cache = WebCacheClient(WEBCACHE_URL)
+    img_cache = ImgCacheClient(IMGCACHE_URL)
+    request_auth = RequestAuthClient(REQUEST_AUTH_SERVER_URL)
+
+    try:
+        cache.health()
+        img_cache.health()
+    except Exception as exc:
+        raise Broken(f"scrape-stack cache service unreachable: {exc}") from exc
+
+    logger.info("=== Ducati parts scraper starting ===")
+
+    client = DucatiClient(request_auth)
+
+    total_catalogs = 0
+    try:
+        with SessionFactory() as db_session:
+            index_html = fetch_text(SOURCE_URL, INDEX_DOMAIN, client, cache,
+                                     max_age=7 * 86400)
+            if index_html is None:
+                raise Broken("could not fetch the catalogue index page")
+            catalogs = parse_catalog_links(index_html)
+            total_catalogs = len(catalogs)
+            logger.info("Found %d catalogues", total_catalogs)
+
+            for catalog in catalogs:
+                check_shutdown()
+                moto = upsert_motorcycle(db_session, catalog)
+                db_session.commit()
+                scrape_catalog(
+                    catalog, moto, db_session,
+                    client, cache, img_cache, counters,
+                )
+    except ShutdownRequested:
+        logger.info("Graceful shutdown: returning partial result.")
     finally:
-        await page.close()
+        client.close()
+        request_auth.close()
 
+    if total_catalogs == 0:
+        raise Broken("index page listed no catalogues — site drift?")
 
-async def download_issuu_pdf(
-    context: BrowserContext, issuu_url: str, output_path: Path
-) -> bool | None:
-    """
-    Download a single Issuu document with exponential back-off + jitter.
-    Retries up to DOWNLOAD_MAX_RETRIES times on transient failures.
-
-    Returns:
-        True  – file saved successfully
-        None  – no Download button present (caller should flag the row)
-        False – all retries exhausted
-    """
-    for attempt in range(1, DOWNLOAD_MAX_RETRIES + 1):
-        result = await _attempt_download(context, issuu_url, output_path)
-        if result is True:
-            return True
-        if result is None:
-            # No download button – propagate so caller can persist the flag
-            return None
-        # result is False – transient error, back off and retry
-        if attempt < DOWNLOAD_MAX_RETRIES:
-            backoff = DOWNLOAD_BACKOFF_BASE_SECONDS * (2 ** (attempt - 1))
-            jitter = random.uniform(0, backoff * 0.3)  # ±30 % jitter
-            wait = backoff + jitter
-            log.warning(
-                "  Retry %d/%d in %.1f s …", attempt, DOWNLOAD_MAX_RETRIES, wait
-            )
-            await asyncio.sleep(wait)
-    log.error("  ✗ All %d attempts failed for %s", DOWNLOAD_MAX_RETRIES, issuu_url)
-    return False
-
-
-# ── Filename helpers ──────────────────────────────────────────────────────────
-
-
-def safe_filename(year: str, model_family: str, model_name: str) -> str:
-    """Produce a filesystem-safe base filename."""
-    parts = [str(year)]
-    if model_family:
-        parts.append(model_family)
-    parts.append(model_name)
-    name = "_".join(parts)
-    name = re.sub(r"[^\w\s-]", "", name)
-    name = re.sub(r"[\s]+", "_", name)
-    return name[:120]  # cap length
-
-
-# ── Main ──────────────────────────────────────────────────────────────────────
-
-
-async def run():
-    CATALOGS_DIR.mkdir(parents=True, exist_ok=True)
-    init_db()
-
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-            ),
-            accept_downloads=True,
-        )
-        context.set_default_timeout(90_000)
-
-        # ── Step 1: scrape catalog list ───────────────────────────────────
-        page = await context.new_page()
-        raw_catalogs = await scrape_catalog_links(page)
-        await page.close()
-
-        # ── Step 2: upsert metadata; decide what needs downloading ────────
-        to_download: list[dict] = []  # {catalog_id, year, family, name, url, path}
-
-        with get_session() as session:
-            for item in raw_catalogs:
-                year_int = int(item["year"]) if item["year"].isdigit() else 0
-                catalog_id = upsert_catalog(
-                    session,
-                    year_int,
-                    item["modelFamily"],
-                    item["modelName"],
-                    item["url"],
-                )
-                session.commit()
-
-                should_dl, _ = needs_download(
-                    session, item["url"], REDOWNLOAD_THRESHOLD_DAYS
-                )
-                if should_dl:
-                    fname = safe_filename(
-                        item["year"], item["modelFamily"], item["modelName"]
-                    )
-                    # Avoid clobbering an existing file with the same base name
-                    # (can happen when two Issuu URLs share the same year/family/name).
-                    candidate = CATALOGS_DIR / f"{fname}.pdf"
-                    counter = 2
-                    while candidate.exists():
-                        candidate = CATALOGS_DIR / f"{fname}_{counter}.pdf"
-                        counter += 1
-                    to_download.append(
-                        {
-                            "catalog_id": catalog_id,
-                            "year": item["year"],
-                            "family": item["modelFamily"],
-                            "name": item["modelName"],
-                            "url": item["url"],
-                            "path": candidate,
-                        }
-                    )
-
-        log.info(
-            "%d catalogs need downloading (out of %d total).",
-            len(to_download),
-            len(raw_catalogs),
-        )
-
-        # ── Step 3: download PDFs ─────────────────────────────────────────
-        for i, item in enumerate(to_download, 1):
-            log.info(
-                "[%d/%d] %s %s – %s",
-                i,
-                len(to_download),
-                item["year"],
-                item["family"],
-                item["name"],
-            )
-
-            result = await download_issuu_pdf(context, item["url"], item["path"])
-
-            if result is True:
-                # Find the actual saved file (extension may differ from .pdf)
-                saved_files = list(CATALOGS_DIR.glob(item["path"].stem + ".*"))
-                if saved_files:
-                    saved = saved_files[0]
-                    with get_session() as session:
-                        mark_downloaded(
-                            session,
-                            item["catalog_id"],
-                            str(saved),
-                            saved.stat().st_size,
-                        )
-                        session.commit()
-            elif result is None:
-                # Issuu has no Download button – flag the row so we skip it next run
-                with get_session() as session:
-                    mark_no_download_button(session, item["catalog_id"])
-                    session.commit()
-                log.info("  Flagged catalog_id=%d as no-download-button.", item["catalog_id"])
-
-            # Jittered polite delay between Issuu requests
-            if i < len(to_download):
-                delay = _jitter_delay()
-                log.debug("  Waiting %.1f s before next request …", delay)
-                await asyncio.sleep(delay)
-
-        await browser.close()
-
-    log.info("Scraper finished.")
+    logger.info("=== Scraping complete ===")
+    return {
+        "items": counters["diagrams"],
+        "new": counters["parts_new"],
+        "motorcycles": counters["motorcycles"],
+        "message": "ok",
+    }
 
 
 if __name__ == "__main__":
-    asyncio.run(run())
+    run(main)
