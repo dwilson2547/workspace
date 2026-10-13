@@ -8,6 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY scrape_contract.py ./
 COPY motorcycle_common/ ./motorcycle_common/
 COPY kawasaki/*.py ./
+# COPY preserves host permission bits; guarantee readability for USER 10001.
+RUN chmod -R a+rX /app
 
 USER 10001
 CMD ["python", "scraper.py"]
