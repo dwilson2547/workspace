@@ -1,16 +1,67 @@
-part diagrams can be found by config starting from here: yamaha-motor.com/parts
+# yamaha
 
-Goal here is to categorize and persist all yamaha parts for an interchange lookup 
-scraping parts from the web directly will likely be a necessity in this case, i don't have a great source of part pdfs like i had for ducati. after selecting the displacement from the landing page you can select the model, then the year, and then the trim and the next page has all the part categories. when you select a cateogry you get to a page with the diagram and all the parts listed out, i'd like to persist the full bike details from the selector as well as the diagram images and corresponding parts.
+Yamaha OEM parts — https://yamaha-motor.com/parts
 
-General scraper considerations: persist a copy of every page visited in my webcache. query the cache and use the cached page if possible to parse data from, ovbiously it won't really be that useful for the model year and trim selector pages but i like to be thorrough. the scraper should be generally safe from hard shutdowns, i'd like to persist data at reasonable intervals and build int graceful handling for sigterms or keyboard interrupts. preventing data loss should be a priority. use sqlite as the database with sqlalchemy as the orm. I prefer to scrape slow with a 2-5 second delay between requests, it isn't always necessary but generally speaking a lot of care should be taken to ensure we aren't ddosing the site. we don't want to get ip banned. 
+Browser-free since the 2026 site redesign: an anonymous service token
+(`POST https://api.yamaha-motor.com/auth`, no body, ~3 h validity) unlocks the
+legacy browse API, and the diagram/parts data comes from Next.js `_next/data`
+JSON endpoints. The diagram JSON embeds the diagram image as a base64 PNG data
+URI, so images come free with the parts call. Endpoint recon is in
+`scraper.py`'s header.
 
-output data considerations: I plan to integrate this with another project i have called parts_interchange, the end goal is a reverse lookup for parts so users can find out if a part from a 2012 chevy will work on a 2018 buick for example. that project has the data structured such that there's a car table (year make model trim) and car has car_diagrams as well as car_parts, diagrams has an index to part mapping table as well so i can maintain the full structure while also having a quick global part lookup at the vehicle level. i'd like to keep that same structure here if possible.
+(The old per-IP POC API host `yamaha-api-poc-main.prod.yamaha-motor.com` now
+resolves to private addresses and is unreachable from outside Yamaha.)
 
-please use the playwright mcp to develop a scraper to persist all part diagrams and parts from this site, maintain a database or status file to keep track of the current position and data pulled, i'm not too fussed whether we scrape the pages and parse later or parse in real time, parsing shouldn't be terrible honestly
+## Running under scrape-job-manager
 
-create a folder called part_data to store the project data and a further subfolder called images for the downloaded images
+Part of the motorcycle parts reference system (`motorcycle_common` schema →
+shared `motorcycle_parts` Postgres). Release status: [`../RELEASES.md`](../RELEASES.md).
 
-you can use the aprilia project as a reference.
+- **Contract** — `scrape_contract.run` wraps `main()`; exit codes 0 / 75 / 65;
+  result payload `{"items": diagrams_scraped, "new": parts_new, …}`.
+  Honors the operator-injected `SCRAPE_DEADLINE`.
+- **Image** — `Dockerfile` (build context `automotive/motorcycles/`), pushed as
+  `dwilson2547/motorcycle-scraper-yamaha`, pinned by digest in
+  `infra/cluster-config/motorcycles/{dev,prod}/yamaha.yaml`:
+  ```bash
+  cd automotive/motorcycles
+  docker build -f yamaha/Dockerfile -t dwilson2547/motorcycle-scraper-yamaha:latest .
+  docker push dwilson2547/motorcycle-scraper-yamaha:latest
+  # then update the digest in both manifests + commit
+  ```
+- **Schedule** — ScrapePool `motorcycle-parts` (weekly, Mon–Fri 09:00–19:00
+  America/New_York). All JSON responses go through webcache (keyed by URL), so
+  re-runs are cheap; the backfill is resume-safe (`scraped_at`).
 
-while scraping cache as much info as possible so we don't need to re-pull every piece of information on every error
+## Environment
+
+| Variable | Meaning |
+|---|---|
+| `MOTORCYCLE_DATABASE_URL` | shared motorcycle_parts Postgres (required) |
+| `WEBCACHE_URL` / `IMGCACHE_URL` | scrape-stack cache services |
+| `REQUEST_AUTH_SERVER_URL` | request-auth permit server (pacing) |
+| `SCRAPE_DEADLINE` | injected by the operator; graceful stop |
+
+## Data notes
+
+- Model identity: the catalogue model id is the `variant_key`. Labels like
+  `FZ09ECGY (FZ09 CA) 1RC5 2014` parse into model code / model name / trim
+  (frame) code / year.
+- The legacy API only has parts data for a subset of diagrams — several years
+  404 at the models endpoint, and many diagrams (title pages, most 2024+
+  models) return an empty fallback. Diagrams without items are skipped, not
+  recorded; models whose catalogue has no diagrams at all are marked scraped
+  so they aren't re-walked. If Yamaha publishes more later, the affected
+  motorcycles' `scraped_at` can be reset to re-walk them.
+- Diagrams have no grouping in this catalogue — `category_id` stays NULL and
+  the diagram name (e.g. `AIR INDUCTION SYSTEM`) is the title.
+- DiagramPart `extras` carries `display_part_number` (dashed form) and
+  `price` (listPrice when present); `quantity` is the OEM callout qty.
+
+## History
+
+The original version used Playwright solely to capture the anonymous JWT from
+page request headers, plus a local lz4 file cache and private SQLite schema.
+The 2026-10-13 recon found the plain `POST /auth` token endpoint, so the
+browser is gone entirely. The original prompt-style readme is preserved in
+git history.

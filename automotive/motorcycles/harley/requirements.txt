@@ -1,5 +1,7 @@
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-lxml>=5.0.0
-sqlalchemy>=2.0.0
-httpx>=0.27.0
+httpx>=0.27
+beautifulsoup4>=4.12
+lxml>=5.0
+dwilson-cache-client==0.1.1
+dwilson-request-auth-client==0.1.3
+sqlalchemy>=2.0,<2.1  # 2.1 defaults postgresql:// to psycopg 3
+psycopg2-binary>=2.9
