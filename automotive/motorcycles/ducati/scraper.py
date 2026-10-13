@@ -394,25 +394,44 @@ def scrape_catalog(
                 diagram.image_id = image_id
                 db_session.commit()
 
+        # A table can list one part at several callouts (and both column
+        # groups). Collapse by code before inserting: the first callout is
+        # ref_num, every callout lands in extras["ref_nums"]. The session has
+        # autoflush=False, so a DB-only existence check can't see this page's
+        # own pending inserts — dedup in memory.
+        seen_dp: set[int] = {
+            dp.part_id
+            for dp in db_session.query(DiagramPart).filter_by(diagram_id=diagram_id)
+        }
+        by_code: dict[str, dict] = {}
         for row in page["rows"]:
-            part = upsert_part(db_session, row["code"], row["description"])
+            entry = by_code.setdefault(row["code"], {
+                "ref": row["ref"],
+                "qty": row["qty"],
+                "notes": row["notes"],
+                "validity": row["validity"],
+                "description": row["description"],
+                "ref_nums": [],
+            })
+            if row["ref"] and row["ref"] not in entry["ref_nums"]:
+                entry["ref_nums"].append(row["ref"])
+
+        for code, entry in by_code.items():
+            part = upsert_part(db_session, code, entry["description"])
             counters["parts_seen"] += 1
 
-            existing_dp = (
-                db_session.query(DiagramPart)
-                .filter_by(diagram_id=diagram_id, part_id=part.id)
-                .first()
-            )
-            if existing_dp is None:
+            if part.id not in seen_dp:
+                seen_dp.add(part.id)
                 db_session.add(
                     DiagramPart(
                         diagram_id=diagram_id,
                         part_id=part.id,
-                        ref_num=row["ref"],
-                        quantity=row["qty"],
+                        ref_num=entry["ref"],
+                        quantity=entry["qty"],
                         extras={
-                            "notes": row["notes"],
-                            "validity": row["validity"],
+                            "notes": entry["notes"],
+                            "validity": entry["validity"],
+                            "ref_nums": entry["ref_nums"],
                         },
                     )
                 )
