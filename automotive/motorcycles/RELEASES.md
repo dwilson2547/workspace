@@ -13,7 +13,7 @@ All OEM scrapers write the same `motorcycle_parts` database through
 
 | Scraper | Source | Browser needed | Dev | Prod | Notes |
 |---------|--------|:--------------:|:---:|:----:|-------|
-| `kawasaki/` | kawasaki.com owner-center | no | [ ] | [ ] | Server-rendered + AJAX enumeration |
+| `kawasaki/` | kawasaki.com owner-center | no | [x] | [x] | Prod since 2026-10-13 (run 20261013032847: 211 diagrams). Dev verified 2026-10-13 (100 diagrams), then suspended |
 | `harley/` | harley-davidson.com (ARI PartStream API) | no | [ ] | [ ] | Not yet converted to the shared schema |
 | `yamaha/` | yamahamotor.com/parts | JWT bootstrap | [ ] | [ ] | Not yet converted |
 | `aprilia/` | aprilia genuine-parts-catalogue | yes | [ ] | [ ] | Not yet converted |
