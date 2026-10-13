@@ -1,47 +1,24 @@
 #!/usr/bin/env python3
-"""
-Kawasaki Parts Scraper
-======================
-Crawls https://www.kawasaki.com/en-us/owner-center/parts and persists all
-part diagrams and parts to a local SQLite database.
+# Site: Kawasaki Owner Center parts diagrams
+# Strategy: static-html + ajax-api  (server-rendered; no headless browser needed)
+# Discovered endpoint / base URL: https://www.kawasaki.com/en-us/owner-center/parts
+# Last recon: 2026-05-05 (see git history for prior recon notes)
+#
+# URL hierarchy
+# -------------
+# /en-us/ownercenter/PartsAjaxModelYears   (POST)  → years per category
+# /en-us/ownercenter/PartsAjaxProducts     (POST)  → model codes per category + year
+# /en-us/owner-center/parts/{year}/{model_code}                 — diagram list
+# /en-us/owner-center/parts/{diagram_id}/{year}/{model_code}    — diagram + parts
+#
+# Runs under scrape-job-manager (scrape_contract exit codes + result payload).
+# All target-site requests go through request-auth permits; pages through
+# webcache; diagram images through imgcache. Progress is resume-safe
+# (scraped_at), so weekly runs continue a backfill where the last one stopped.
 
-Key behaviours
---------------
-* The Kawasaki site is server-rendered: all data is extracted with httpx +
-  BeautifulSoup — no headless browser is required.
-* A session cookie (ASPSESID) is obtained by visiting the main page and is
-  refreshed every SESSION_REFRESH_INTERVAL seconds to prevent expiry during
-  long runs.
-* Two JSON API endpoints enumerate all vehicle categories, years and model
-  codes; their responses are cached in the WebCache service to avoid redundant
-  round-trips on restart.
-* Every HTML page visited is cached in WebCache (http://localhost:8000).
-  On subsequent runs the cache is checked first so HTTP is only used for
-  pages not yet seen.
-* Diagram images are downloaded once, SHA-256 content-addressed, and saved to
-  part_data/images/.  Identical images (same bytes) share one Image row.
-* Scraping is intentionally slow (2–5 s random delay per page) to stay well
-  under any rate-limit threshold.
-* SIGTERM and keyboard interrupt trigger a graceful shutdown: the current item
-  finishes writing before the process exits.
-* Progress is tracked via scraped_at timestamps.  Re-running the scraper
-  skips already-completed motorcycles and diagrams.
-
-URL hierarchy
--------------
-  Enumeration (JSON API — POST):
-    /en-us/ownercenter/PartsAjaxModelYears   → years per category
-    /en-us/ownercenter/PartsAjaxProducts     → model codes per category + year
-
-  HTML pages:
-    /en-us/owner-center/parts/{year}/{model_code}                 — diagram list
-    /en-us/owner-center/parts/{diagram_id}/{year}/{model_code}    — diagram + parts
-"""
-
-import hashlib
 import json
 import logging
-import random
+import os
 import re
 import signal
 import sys
@@ -52,15 +29,22 @@ from typing import Optional
 
 import httpx
 from bs4 import BeautifulSoup
+from cache_client import ImgCacheClient, WebCacheClient
+from request_auth_client import RequestAuthClient
 
-# ── Bootstrap: make the webcache client importable ───────────────────────────
-_WEBCACHE_CLIENT_DIR = (
-    Path(__file__).resolve().parent.parent.parent / "webcache" / "client"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from motorcycle_common import (  # noqa: E402
+    Diagram,
+    DiagramPart,
+    Image,
+    Motorcycle,
+    Part,
+    PartCategory,
+    get_engine,
+    get_session_factory,
+    init_db,
 )
-if str(_WEBCACHE_CLIENT_DIR) not in sys.path:
-    sys.path.insert(0, str(_WEBCACHE_CLIENT_DIR))
-
-from webcache_client import WebCacheClient  # noqa: E402
+from scrape_contract import Broken, run  # noqa: E402
 
 from config import (  # noqa: E402
     AJAX_HEADERS,
@@ -70,42 +54,55 @@ from config import (  # noqa: E402
     CACHE_BUCKET,
     CACHE_CLIENT_NAME,
     CATEGORIES,
-    DELAY_MAX_SECONDS,
-    DELAY_MIN_SECONDS,
-    IMAGES_DIR,
+    IMGCACHE_URL,
     MAIN_PAGE_URL,
     MAX_RETRIES,
     PAGE_HEADERS,
-    PART_DATA_DIR,
+    REQUEST_AUTH_SERVER_URL,
     RETRY_BACKOFF_SECONDS,
     SESSION_REFRESH_INTERVAL,
+    SITE_DOMAIN,
     USER_AGENT,
     WEBCACHE_URL,
 )
-from db import (  # noqa: E402
-    Diagram,
-    DiagramPart,
-    Image,
-    Motorcycle,
-    Part,
-    PartCategory,
-    SessionFactory,
-    init_db,
-)
+
+MAKE = "Kawasaki"
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 
-_fmt = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
-_console = logging.StreamHandler(sys.stdout)
-_console.setFormatter(_fmt)
-logging.root.setLevel(logging.INFO)
-logging.root.addHandler(_console)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
 # ── Graceful shutdown ─────────────────────────────────────────────────────────
 
+class ShutdownRequested(Exception):
+    """A SIGTERM/SIGINT arrived; stop after the current item and return the result."""
+
+
 _shutdown = False
+
+# scrape-job-manager injects SCRAPE_DEADLINE (RFC 3339) — the time by which the
+# run should have exited (timeout bound / end of active hours). Long-running
+# backfills stop there gracefully: finish current item, write result, exit 0.
+_DEADLINE: Optional[datetime] = None
+
+
+def _parse_deadline() -> Optional[datetime]:
+    raw = os.environ.get("SCRAPE_DEADLINE")
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        logger.warning("Unparseable SCRAPE_DEADLINE %r — ignoring", raw)
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 
 def _handle_signal(signum: int, _frame) -> None:
@@ -114,15 +111,19 @@ def _handle_signal(signum: int, _frame) -> None:
     _shutdown = True
 
 
-signal.signal(signal.SIGTERM, _handle_signal)
-signal.signal(signal.SIGINT,  _handle_signal)
-
-
 def check_shutdown() -> None:
-    """Exit cleanly if a shutdown signal has been received."""
+    global _DEADLINE
     if _shutdown:
-        logger.info("Graceful shutdown: exiting cleanly.")
-        sys.exit(0)
+        raise ShutdownRequested()
+    if _DEADLINE is None:
+        _DEADLINE = _parse_deadline()
+    if _DEADLINE is not None and datetime.now(timezone.utc) >= _DEADLINE:
+        logger.info("SCRAPE_DEADLINE reached — stopping after current item.")
+        raise ShutdownRequested()
+
+
+signal.signal(signal.SIGTERM, _handle_signal)
+signal.signal(signal.SIGINT, _handle_signal)
 
 
 # ── Session management ────────────────────────────────────────────────────────
@@ -136,17 +137,17 @@ class KawasakiSession:
     instead of JSON (sign that the session has expired).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, request_auth: RequestAuthClient) -> None:
+        self._request_auth = request_auth
         self._client: Optional[httpx.Client] = None
         self._last_refresh: float = 0.0
 
     def _build_client(self) -> httpx.Client:
-        client = httpx.Client(
+        return httpx.Client(
             headers={"User-Agent": USER_AGENT},
             follow_redirects=True,
             timeout=30.0,
         )
-        return client
 
     def _refresh(self) -> None:
         if self._client:
@@ -157,7 +158,9 @@ class KawasakiSession:
         self._client = self._build_client()
         logger.info("Establishing session (visiting main page)…")
         try:
-            self._client.get(MAIN_PAGE_URL, headers=PAGE_HEADERS, timeout=20)
+            with self._request_auth.acquire(SITE_DOMAIN) as permit:
+                r = self._client.get(MAIN_PAGE_URL, headers=PAGE_HEADERS, timeout=20)
+                permit.set_status(r.status_code)
         except Exception as exc:
             logger.warning("Session refresh request failed: %s", exc)
         self._last_refresh = time.monotonic()
@@ -171,18 +174,33 @@ class KawasakiSession:
 
     def get(self, url: str) -> httpx.Response:
         self._ensure_fresh()
-        return self._client.get(url, headers=PAGE_HEADERS, timeout=30)
+        with self._request_auth.acquire(SITE_DOMAIN) as permit:
+            r = self._client.get(url, headers=PAGE_HEADERS, timeout=30)
+            permit.set_status(r.status_code)
+        return r
 
     def post_ajax(self, url: str, data: dict) -> httpx.Response:
         """POST to an AJAX endpoint; refreshes session and retries once on failure."""
         self._ensure_fresh()
-        r = self._client.post(url, data=data, headers=AJAX_HEADERS, timeout=15)
+        with self._request_auth.acquire(SITE_DOMAIN) as permit:
+            r = self._client.post(url, data=data, headers=AJAX_HEADERS, timeout=15)
+            permit.set_status(r.status_code)
         # Detect session expiry: server returns full HTML page instead of JSON
         if "application/json" not in r.headers.get("content-type", ""):
             logger.warning("Session appears expired — refreshing and retrying…")
             self._refresh()
-            r = self._client.post(url, data=data, headers=AJAX_HEADERS, timeout=15)
+            with self._request_auth.acquire(SITE_DOMAIN) as permit:
+                r = self._client.post(url, data=data, headers=AJAX_HEADERS, timeout=15)
+                permit.set_status(r.status_code)
         return r
+
+    def get_bytes(self, url: str) -> bytes:
+        self._ensure_fresh()
+        with self._request_auth.acquire(SITE_DOMAIN) as permit:
+            r = self._client.get(url, timeout=30)
+            permit.set_status(r.status_code)
+            r.raise_for_status()
+        return r.content
 
     def close(self) -> None:
         if self._client:
@@ -196,9 +214,9 @@ def fetch_page(url: str, session: KawasakiSession, cache: WebCacheClient) -> str
     Return the rendered HTML for *url*.
 
     1. Checks WebCache first.
-    2. On a cache miss: fetches with httpx (after a random delay), stores in
-       cache, and returns the HTML.
-    3. Retries up to MAX_RETRIES times with exponential back-off on errors.
+    2. On a cache miss: fetches under a request-auth permit, stores in cache,
+       and returns the HTML.
+    3. Retries up to MAX_RETRIES times with back-off on transport errors.
     """
     url = url.strip()
 
@@ -210,9 +228,7 @@ def fetch_page(url: str, session: KawasakiSession, cache: WebCacheClient) -> str
     except Exception as exc:
         logger.warning("WebCache GET failed for %s: %s", url, exc)
 
-    delay = random.uniform(DELAY_MIN_SECONDS, DELAY_MAX_SECONDS)
-    logger.info("[fetch] %s  (delay=%.1f s)", url, delay)
-    time.sleep(delay)
+    logger.info("[fetch] %s", url)
     check_shutdown()
 
     last_exc: Optional[Exception] = None
@@ -226,6 +242,7 @@ def fetch_page(url: str, session: KawasakiSession, cache: WebCacheClient) -> str
         except Exception as exc:
             last_exc = exc
             logger.warning("Error fetching %s (attempt %d/%d): %s", url, attempt, MAX_RETRIES, exc)
+            check_shutdown()
             if attempt < MAX_RETRIES:
                 time.sleep(RETRY_BACKOFF_SECONDS * attempt)
     else:
@@ -248,8 +265,7 @@ def fetch_json_api(
     session: KawasakiSession,
     cache: WebCacheClient,
 ) -> list:
-    """
-    Call a JSON AJAX endpoint (POST) and return the parsed list.
+    """Call a JSON AJAX endpoint (POST) and return the parsed list.
 
     Caches the JSON response body under *cache_key* so re-runs are instant.
     """
@@ -261,9 +277,7 @@ def fetch_json_api(
     except Exception as exc:
         logger.warning("WebCache GET failed for %s: %s", cache_key, exc)
 
-    delay = random.uniform(DELAY_MIN_SECONDS, DELAY_MAX_SECONDS)
-    logger.debug("[api] %s  (delay=%.1f s)", cache_key, delay)
-    time.sleep(delay)
+    logger.debug("[api] %s", cache_key)
     check_shutdown()
 
     last_exc: Optional[Exception] = None
@@ -277,6 +291,7 @@ def fetch_json_api(
         except Exception as exc:
             last_exc = exc
             logger.warning("API error %s (attempt %d/%d): %s", cache_key, attempt, MAX_RETRIES, exc)
+            check_shutdown()
             if attempt < MAX_RETRIES:
                 time.sleep(RETRY_BACKOFF_SECONDS * attempt)
     else:
@@ -292,50 +307,62 @@ def fetch_json_api(
     return data
 
 
-# ── Image download & deduplication ───────────────────────────────────────────
+# ── Image download & deduplication ────────────────────────────────────────────
 
 def persist_image(
     image_url: str,
-    http: httpx.Client,
+    session: KawasakiSession,
+    img_cache: ImgCacheClient,
     db_session,
 ) -> Optional[int]:
-    """
-    Download *image_url*, compute SHA-256, and:
-      • return the existing Image.id if the same bytes are already stored, or
-      • write the file to IMAGES_DIR, insert an Image row, return the new id.
+    """Persist *image_url* through imgcache and return the Image.id.
+
+    imgcache content-addresses the bytes (perceptual + content hash); the Image
+    row is keyed by the imgcache content hash so identical images share a row.
     Returns None on download failure (non-fatal).
     """
     if not image_url:
         return None
 
-    # Strip query-string parameters (e.g. ?w=350 thumbnail sizing)
-    clean_url = image_url.split("?")[0]
+    clean_url = image_url.split("?")[0]          # strip ?w=350 thumbnail sizing
     if not clean_url.startswith("http"):
         clean_url = BASE_URL + clean_url
 
+    # Already in imgcache under this URL?
+    entry = None
     try:
-        r = http.get(clean_url, timeout=30)
-        r.raise_for_status()
-        data = r.content
+        entry = img_cache.lookup(clean_url, bucket=CACHE_BUCKET)
     except Exception as exc:
-        logger.warning("Image download failed (%s): %s", clean_url, exc)
+        logger.warning("ImgCache lookup failed for %s: %s", clean_url, exc)
+
+    if entry is None:
+        check_shutdown()
+        try:
+            data = session.get_bytes(clean_url)
+        except Exception as exc:
+            logger.warning("Image download failed (%s): %s", clean_url, exc)
+            return None
+        try:
+            entry = img_cache.store(
+                url=clean_url, file_bytes=data,
+                client_name=CACHE_CLIENT_NAME, bucket=CACHE_BUCKET,
+            )
+        except Exception as exc:
+            logger.warning("ImgCache store failed for %s: %s", clean_url, exc)
+            return None
+
+    content_hash = entry.get("content_hash") or entry.get("hash")
+    if not content_hash:
+        logger.warning("ImgCache entry for %s has no content hash: %s", clean_url, entry)
         return None
 
-    sha = hashlib.sha256(data).hexdigest()
-
-    existing = db_session.query(Image).filter_by(sha256=sha).first()
+    existing = db_session.query(Image).filter_by(content_hash=content_hash).first()
     if existing:
-        logger.debug("Image dedup: %s… already stored (id=%d)", sha[:8], existing.id)
         return existing.id
 
-    ext = clean_url.rsplit(".", 1)[-1].lower() or "gif"
-    local_path = IMAGES_DIR / f"{sha}.{ext}"
-    local_path.write_bytes(data)
-
-    img = Image(sha256=sha, local_path=str(local_path), source_url=clean_url)
+    img = Image(content_hash=content_hash, source_url=clean_url)
     db_session.add(img)
     db_session.flush()
-    logger.debug("Saved image %s… → %s", sha[:8], local_path.name)
     return img.id
 
 
@@ -394,8 +421,7 @@ def parse_diagram_cards(html: str) -> list[dict]:
 
 
 def parse_diagram_page(html: str) -> dict:
-    """
-    Parse a single parts-diagram page and return::
+    """Parse a single parts-diagram page and return::
 
         {
             'image_url': str | None,
@@ -442,12 +468,12 @@ def parse_diagram_page(html: str) -> dict:
         if texts[0].upper() == "ITEM NAME":
             continue
 
-        name        = texts[0]
-        ref_num     = texts[1] if len(texts) > 1 else ""
-        part_number = texts[2] if len(texts) > 2 else ""
+        name         = texts[0]
+        ref_num      = texts[1] if len(texts) > 1 else ""
+        part_number  = texts[2] if len(texts) > 2 else ""
         quantity_raw = texts[3] if len(texts) > 3 else "1"
-        destination = texts[4] if len(texts) > 4 else ""
-        remarks     = texts[5] if len(texts) > 5 else ""
+        destination  = texts[4] if len(texts) > 4 else ""
+        remarks      = texts[5] if len(texts) > 5 else ""
 
         if not part_number:
             continue  # skip rows without an OEM part number
@@ -476,26 +502,27 @@ def parse_diagram_page(html: str) -> dict:
 def upsert_motorcycle(
     db_session,
     *,
-    category_id: int,
-    category_name: str,
+    vehicle_type: str,
     year: str,
     model_code: str,
     model_name: str,
     source_url: str,
 ) -> Motorcycle:
+    variant_key = f"{year}|{model_code}"
     moto = (
         db_session.query(Motorcycle)
-        .filter_by(year=year, model_code=model_code)
+        .filter_by(make=MAKE, variant_key=variant_key)
         .first()
     )
     if moto:
         return moto
     moto = Motorcycle(
-        category_id=category_id,
-        category_name=category_name,
+        make=MAKE,
+        vehicle_type=vehicle_type,
         year=year,
         model_code=model_code,
         model_name=model_name,
+        variant_key=variant_key,
         source_url=source_url,
     )
     db_session.add(moto)
@@ -513,9 +540,13 @@ def upsert_part_category(db_session, name: str) -> PartCategory:
 
 
 def upsert_part(db_session, part_number: str, name: str) -> Part:
-    part = db_session.query(Part).filter_by(part_number=part_number).first()
+    part = (
+        db_session.query(Part)
+        .filter_by(make=MAKE, part_number=part_number)
+        .first()
+    )
     if not part:
-        part = Part(part_number=part_number, name=name)
+        part = Part(make=MAKE, part_number=part_number, name=name)
         db_session.add(part)
         db_session.flush()
     return part
@@ -529,12 +560,13 @@ def scrape_diagram(
     db_session,
     session: KawasakiSession,
     cache: WebCacheClient,
-    http: httpx.Client,
+    img_cache: ImgCacheClient,
+    counters: dict,
 ) -> None:
     """
     Scrape a single diagram page identified by *card* (from parse_diagram_cards).
 
-    • Downloads and deduplicates the diagram image.
+    • Persists the diagram image through imgcache.
     • Persists all parts and their diagram-position metadata.
     • Links the diagram and its parts to the Motorcycle record.
     • No-op if the diagram already has a scraped_at timestamp.
@@ -556,8 +588,8 @@ def scrape_diagram(
 
     data = parse_diagram_page(html)
 
-    cat  = upsert_part_category(db_session, card["title"] or "Unknown")
-    image_id = persist_image(data["image_url"], http, db_session)
+    cat = upsert_part_category(db_session, card["title"] or "Unknown")
+    image_id = persist_image(data["image_url"], session, img_cache, db_session)
 
     if existing:
         existing.image_id  = image_id
@@ -565,7 +597,6 @@ def scrape_diagram(
         diagram = existing
     else:
         diagram = Diagram(
-            external_id = card["external_id"],
             title       = card["title"],
             category_id = cat.id,
             image_id    = image_id,
@@ -585,30 +616,31 @@ def scrape_diagram(
 
     for p in data["parts"]:
         part = upsert_part(db_session, p["part_number"], p["name"])
+        counters["parts_seen"] += 1
 
         key = (diagram.id, part.id)
         if key not in seen_dp:
             seen_dp.add(key)
             db_session.add(
                 DiagramPart(
-                    diagram_id  = diagram.id,
-                    part_id     = part.id,
-                    ref_num     = p["ref_num"],
-                    quantity    = p["quantity"],
-                    destination = p["destination"],
-                    remarks     = p["remarks"],
+                    diagram_id = diagram.id,
+                    part_id    = part.id,
+                    ref_num    = p["ref_num"],
+                    quantity   = p["quantity"],
+                    extras     = {"destination": p["destination"], "remarks": p["remarks"]},
                 )
             )
+            counters["parts_new"] += 1
 
         if part not in moto.parts:
             moto.parts.append(part)
 
     db_session.commit()
+    counters["diagrams"] += 1
 
     logger.info(
         "    ✓ [%s] — %d parts%s",
-        card["title"],
-        len(data["parts"]),
+        card["title"], len(data["parts"]),
         "" if data["image_url"] else " (no image)",
     )
 
@@ -617,15 +649,15 @@ def scrape_diagram(
 
 def scrape_motorcycle(
     *,
-    category_id: int,
-    category_name: str,
+    vehicle_type: str,
     year: str,
     model_code: str,
     model_name: str,
     db_session,
     session: KawasakiSession,
     cache: WebCacheClient,
-    http: httpx.Client,
+    img_cache: ImgCacheClient,
+    counters: dict,
 ) -> None:
     """
     Scrape all diagrams for a single motorcycle variant.
@@ -639,8 +671,7 @@ def scrape_motorcycle(
 
     moto = upsert_motorcycle(
         db_session,
-        category_id=category_id,
-        category_name=category_name,
+        vehicle_type=vehicle_type,
         year=year,
         model_code=model_code,
         model_name=model_name,
@@ -652,10 +683,7 @@ def scrape_motorcycle(
         logger.debug("Already fully scraped: %s %s %s", year, model_name, model_code)
         return
 
-    logger.info(
-        "  [%s] %s %s (%s)",
-        category_name, year, model_name, model_code,
-    )
+    logger.info("  [%s] %s %s (%s)", vehicle_type, year, model_name, model_code)
 
     try:
         html = fetch_page(categories_url, session, cache)
@@ -675,54 +703,46 @@ def scrape_motorcycle(
 
     for card in cards:
         check_shutdown()
-        scrape_diagram(card, moto, db_session, session, cache, http)
+        scrape_diagram(card, moto, db_session, session, cache, img_cache, counters)
 
     moto.scraped_at = datetime.now(timezone.utc)
     db_session.commit()
+    counters["motorcycles"] += 1
 
 
 # ── Main orchestrator ─────────────────────────────────────────────────────────
 
-def main() -> None:
-    PART_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+def main() -> dict:
+    counters = {"motorcycles": 0, "diagrams": 0, "parts_seen": 0, "parts_new": 0}
 
-    # File log handler (opened after directories exist)
-    fh = logging.FileHandler(PART_DATA_DIR / "scraper.log")
-    fh.setFormatter(_fmt)
-    logging.root.addHandler(fh)
+    engine = get_engine()
+    init_db(engine)
+    SessionFactory = get_session_factory(engine)
 
-    init_db()
-
-    # Verify WebCache is reachable before starting
     cache = WebCacheClient(WEBCACHE_URL)
+    img_cache = ImgCacheClient(IMGCACHE_URL)
+    request_auth = RequestAuthClient(REQUEST_AUTH_SERVER_URL)
+
     try:
         cache.health()
+        img_cache.health()
     except Exception as exc:
-        logger.error("WebCache not reachable at %s: %s", WEBCACHE_URL, exc)
-        sys.exit(1)
+        raise Broken(f"scrape-stack cache service unreachable: {exc}") from exc
 
     logger.info("=== Kawasaki parts scraper starting ===")
 
-    session = KawasakiSession()
+    session = KawasakiSession(request_auth)
     # Warm up session immediately
     session._refresh()
 
-    http = httpx.Client(
-        headers={"User-Agent": USER_AGENT},
-        follow_redirects=True,
-        timeout=30.0,
-    )
-
+    total_models = 0
     try:
         with SessionFactory() as db_session:
             for cat_id, cat_name in CATEGORIES.items():
                 logger.info("━━ Category: %s (id=%d) ━━", cat_name, cat_id)
 
                 # ── Step 1: years for this category ───────────────────────────
-                years_cache_key = (
-                    f"kawasaki://api/years?cat={cat_id}"
-                )
+                years_cache_key = f"kawasaki://api/years?cat={cat_id}"
                 try:
                     years_data = fetch_json_api(
                         AJAX_YEARS_URL,
@@ -742,9 +762,7 @@ def main() -> None:
                     year: str = year_entry["Id"]
 
                     # ── Step 2: models for this category + year ───────────────
-                    models_cache_key = (
-                        f"kawasaki://api/products?cat={cat_id}&year={year}"
-                    )
+                    models_cache_key = f"kawasaki://api/products?cat={cat_id}&year={year}"
                     try:
                         models_data = fetch_json_api(
                             AJAX_PRODUCTS_URL,
@@ -765,27 +783,38 @@ def main() -> None:
                         continue
 
                     logger.info("  Year %s: %d models", year, len(models_data))
+                    total_models += len(models_data)
 
                     for model_entry in models_data:
                         check_shutdown()
                         scrape_motorcycle(
-                            category_id   = cat_id,
-                            category_name = cat_name,
-                            year          = year,
-                            model_code    = model_entry["Id"],
-                            model_name    = model_entry["Value"],
-                            db_session    = db_session,
-                            session       = session,
-                            cache         = cache,
-                            http          = http,
+                            vehicle_type = cat_name,
+                            year         = year,
+                            model_code   = model_entry["Id"],
+                            model_name   = model_entry["Value"],
+                            db_session   = db_session,
+                            session      = session,
+                            cache        = cache,
+                            img_cache    = img_cache,
+                            counters     = counters,
                         )
-
+    except ShutdownRequested:
+        logger.info("Graceful shutdown: returning partial result.")
     finally:
         session.close()
-        http.close()
+        request_auth.close()
+
+    if total_models == 0:
+        raise Broken("enumeration returned no models — site or API drift?")
 
     logger.info("=== Scraping complete ===")
+    return {
+        "items": counters["diagrams"],
+        "new": counters["parts_new"],
+        "motorcycles": counters["motorcycles"],
+        "message": "ok",
+    }
 
 
 if __name__ == "__main__":
-    main()
+    run(main)

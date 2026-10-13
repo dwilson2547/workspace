@@ -1,18 +1,11 @@
-from pathlib import Path
-
-# ── Directories ───────────────────────────────────────────────────────────────
-BASE_DIR      = Path(__file__).parent
-PART_DATA_DIR = BASE_DIR / "part_data"
-IMAGES_DIR    = PART_DATA_DIR / "images"
-
-# ── Database ──────────────────────────────────────────────────────────────────
-DB_PATH = PART_DATA_DIR / "kawasaki_parts.db"
+import os
 
 # ── Source site ───────────────────────────────────────────────────────────────
 BASE_URL            = "https://www.kawasaki.com"
 MAIN_PAGE_URL       = f"{BASE_URL}/en-us/owner-center/parts"
 AJAX_YEARS_URL      = f"{BASE_URL}/en-us/ownercenter/PartsAjaxModelYears"
 AJAX_PRODUCTS_URL   = f"{BASE_URL}/en-us/ownercenter/PartsAjaxProducts"
+SITE_DOMAIN          = "www.kawasaki.com"
 
 # Maps ProductCategoryId → human-readable vehicle category name.
 # Categories 5+ appear in the UI but currently have no parts-diagram data.
@@ -23,10 +16,12 @@ CATEGORIES: dict[int, str] = {
     4: "Watercraft",
 }
 
-# ── WebCache ──────────────────────────────────────────────────────────────────
-WEBCACHE_URL      = "http://localhost:8000"
-CACHE_CLIENT_NAME = "kawasaki_scraper"
-CACHE_BUCKET      = "default"
+# ── Scrape stack ──────────────────────────────────────────────────────────────
+WEBCACHE_URL            = os.environ.get("WEBCACHE_URL", "http://localhost:8000")
+IMGCACHE_URL            = os.environ.get("IMGCACHE_URL", "http://localhost:8010")
+REQUEST_AUTH_SERVER_URL = os.environ.get("REQUEST_AUTH_SERVER_URL", "localhost:9000")
+CACHE_CLIENT_NAME       = "kawasaki_scraper"
+CACHE_BUCKET            = os.environ.get("CACHE_BUCKET", "default")
 
 # ── HTTP headers ──────────────────────────────────────────────────────────────
 USER_AGENT = (
@@ -49,13 +44,11 @@ PAGE_HEADERS = {
     "Referer":          MAIN_PAGE_URL,
 }
 
-# ── Pacing — intentionally slow to avoid IP bans ─────────────────────────────
-DELAY_MIN_SECONDS    = 2.0
-DELAY_MAX_SECONDS    = 5.0
-
 # ── Retry settings for failed requests ───────────────────────────────────────
+# Rate limiting against the site is handled by request-auth (permits); these
+# retries only cover transient transport failures.
 MAX_RETRIES           = 3
-RETRY_BACKOFF_SECONDS = 30.0
+RETRY_BACKOFF_SECONDS = 10.0
 
 # ── Session refresh interval (seconds) ───────────────────────────────────────
 # Re-establish the ASPSESID cookie roughly every 30 minutes to prevent expiry.

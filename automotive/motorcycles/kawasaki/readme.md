@@ -1,19 +1,46 @@
-https://www.kawasaki.com/en-us/owner-center/parts
+# kawasaki
 
+Kawasaki OEM parts diagrams — https://www.kawasaki.com/en-us/owner-center/parts
 
-part diagrams can be found by config starting from here: https://www.kawasaki.com/en-us/owner-center/parts
+Server-rendered site (no browser needed): two JSON AJAX endpoints enumerate
+category → years → model codes, then two HTML page shapes give the diagram list
+and the per-diagram parts table (selector recon in `scraper.py` header).
 
-Goal here is to categorize and persist all kawasaki parts for an interchange lookup 
-scraping parts from the web directly will likely be a necessity in this case, i don't have a great source of part pdfs like i had for ducati. after selecting the displacement from the landing page you can select the model, then the year, and then the trim and the next page has all the part categories. when you select a cateogry you get to a page with the diagram and all the parts listed out, i'd like to persist the full bike details from the selector as well as the diagram images and corresponding parts.
+## Running under scrape-job-manager
 
-General scraper considerations: persist a copy of every page visited in my webcache (web_scrapers/webcache, client code can be found under client/ in the webcache dir). query the cache and use the cached page if possible to parse data from, ovbiously it won't really be that useful for the model year and trim selector pages but i like to be thorrough. the scraper should be generally safe from hard shutdowns, i'd like to persist data at reasonable intervals and build int graceful handling for sigterms or keyboard interrupts. preventing data loss should be a priority. use sqlite as the database with sqlalchemy as the orm. I prefer to scrape slow with a 2-5 second delay between requests, it isn't always necessary but generally speaking a lot of care should be taken to ensure we aren't ddosing the site. we don't want to get ip banned. 
+Part of the motorcycle parts reference system (`motorcycle_common` schema →
+shared `motorcycle_parts` Postgres). Release status: [`../RELEASES.md`](../RELEASES.md).
 
-output data considerations: I plan to integrate this with another project i have called parts_interchange, the end goal is a reverse lookup for parts so users can find out if a part from a 2012 chevy will work on a 2018 buick for example. that project has the data structured such that there's a car table (year make model trim) and car has car_diagrams as well as car_parts, diagrams has an index to part mapping table as well so i can maintain the full structure while also having a quick global part lookup at the vehicle level. i'd like to keep that same structure here if possible.
+- **Contract** — `scrape_contract.run` wraps `main()`; exit codes 0 / 75 / 65;
+  result payload `{"items": diagrams_scraped, "new": parts_new, …}`.
+  Honors the operator-injected `SCRAPE_DEADLINE` (stops gracefully at the end
+  of the active-hours window).
+- **Image** — `Dockerfile` (build context `automotive/motorcycles/`, copies
+  `scrape_contract.py` + `motorcycle_common/`), pushed as
+  `dwilson2547/motorcycle-scraper-kawasaki`, pinned by digest in
+  `infra/cluster-config/motorcycles/{dev,prod}/kawasaki.yaml`:
+  ```bash
+  cd automotive/motorcycles
+  docker build -f kawasaki/Dockerfile -t dwilson2547/motorcycle-scraper-kawasaki:latest .
+  docker push dwilson2547/motorcycle-scraper-kawasaki:latest
+  # then update the digest in both manifests + commit
+  ```
+- **Schedule** — ScrapePool `motorcycle-parts` (weekly, Mon–Fri 09:00–19:00
+  America/New_York). Full-catalogue backfill spans many runs: progress is
+  resume-safe (`scraped_at`), each run continues where the previous stopped.
 
-please use the playwright mcp to develop a scraper to persist all part diagrams and parts from this site, maintain a database or status file to keep track of the current position and data pulled, i'm not too fussed whether we scrape the pages and parse later or parse in real time, parsing shouldn't be terrible honestly
+## Environment
 
-create a folder called part_data to store the project data and a further subfolder called images for the downloaded images
+| Variable | Meaning |
+|---|---|
+| `MOTORCYCLE_DATABASE_URL` | shared motorcycle_parts Postgres (required) |
+| `WEBCACHE_URL` / `IMGCACHE_URL` | scrape-stack cache services |
+| `REQUEST_AUTH_SERVER_URL` | request-auth permit server (pacing: default 1 req/s/domain) |
+| `SCRAPE_DEADLINE` | injected by the operator; graceful stop |
 
-you can use the aprilia project as a reference.
+## History
 
-while scraping cache as much info as possible so we don't need to re-pull every piece of information on every error
+The original version scraped to a local SQLite file with local sleep-based
+pacing and images on disk; it was converted to the shared schema + scrape-stack
+clients on 2026-10-12 (see `../motorcycle_common/models.py`). The original
+prompt-style readme is preserved in git history.
