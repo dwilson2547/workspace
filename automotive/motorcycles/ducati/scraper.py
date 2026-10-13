@@ -416,8 +416,8 @@ def scrape_catalog(
             if row["ref"] and row["ref"] not in entry["ref_nums"]:
                 entry["ref_nums"].append(row["ref"])
 
-        for code, entry in by_code.items():
-            part = upsert_part(db_session, code, entry["description"])
+        for part_code, entry in by_code.items():
+            part = upsert_part(db_session, part_code, entry["description"])
             counters["parts_seen"] += 1
 
             if part.id not in seen_dp:

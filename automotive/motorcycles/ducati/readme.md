@@ -60,8 +60,10 @@ shared `motorcycle_parts` Postgres). Release status: [`../RELEASES.md`](../RELEA
   slug-derived fallbacks. Catalogues without a derivable year get "unknown".
 - Part codes span eras: dotted (`88765.1236`, pre-2016) and 9-char
   alphanumeric (`5101I231D`, 2016+). Both match the same parser.
-- DiagramPart `extras` carries the table's `notes` (market codes like I/GB/D)
-  and `validity` tokens; `qty` is stored only when unambiguous (single-digit
+- DiagramPart `extras` carries the table's `notes` (market codes like I/GB/D),
+  `validity` tokens, and `ref_nums` (all callouts for that part — Ducati tables
+  list one part at several callouts; rows collapse by code with the first
+  callout as `ref_num`); `qty` is stored only when unambiguous (single-digit
   token — the 2016+ tables fuse qty+validity into one run).
 - Subsystem images are the rasterized drawing pages, stored via imgcache.
   Born-digital catalogues carry their own raster; scans are the page JPEG.
