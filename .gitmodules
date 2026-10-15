@@ -262,3 +262,6 @@
 [submodule "apps/webdoc"]
 	path = apps/webdoc
 	url = git@github.com:dwilson2547/webdoc.git
+[submodule "web-scrapers/web-workflows"]
+	path = web-scrapers/web-workflows
+	url = git@github.com:dwilson2547/web-workflows.git
