@@ -1,5 +1,6 @@
 # Notes index
 
+- [argocd: new helm-based app repos need a repo-<name> repository secret](argocd-new-helm-based-app-repos-need-a-repo-name-repository-.md) — A new helm-based Application pointing at git@github.com:dwilson2547/<repo>.git fails with ComparisonError 'fa… `argocd,k8s,github`
 - [ArgoCD plain-HTTP ingress via Traefik nginx emulator](argocd-plain-http-ingress-via-traefik-nginx-emulator.md) — ArgoCD exposed at argocd.local via Traefik (ingressClassName: nginx). `argocd,k8s,ingress,traefik,coredns`
 - [ArgoCD repo registration without CLI via kubectl secret](argocd-repo-registration-without-cli-via-kubectl-secret.md) — Register a private git repo with ArgoCD by creating a Secret with label argocd.argoproj.io/secret-type=reposi… `argocd,git,ssh,infrastructure`
 - [cluster_config ArgoCD onboarding — service structure and secret pattern](cluster-config-argocd-onboarding-service-structure-and-secre.md) — cluster_config repo (git@github.com:dwilson2547/cluster_config.git) manages homelab infrastructure via ArgoCD. `argocd,cluster_config,infrastructure,gitops`
