@@ -13,6 +13,11 @@ the two prod postgres instances only. In order:
   the old two-instance replication, so copy them with a CronJob to the Unraid backup share, next to the dumps.
 - [ ] **Back up the file volumes** — `danwiki/danwiki-uploads` (20 GiB), `web-workflows/web-workflows-db`,
   `build-sim/build-sim-data`; all `nfs-dataset` (TrueNAS). Not the scrape-stack caches (rebuildable) or iggy (pipeline data).
+- [ ] **Promote scraped images from scrape-stack into `part-images`** — the parts-direct updater saves new images
+  only in scrape-stack's imgcache (500 GiB `nfs-dataset` volume, not backed up). Intended split (user,
+  2026-10-16): scrape-stack is a quick-recovery cache; `part-images` on AIStor is the permanent, backed-up store
+  (backed up nightly once its copy from the old MinIO finishes). Needs a mechanism to move images from imgcache
+  into `part-images` (e.g. a periodic job, or the updater writing both).
 - [ ] **Encrypted export of the cluster's secrets** — ~110 hand-applied Secrets (authentik clients, DB credentials,
   SMTP, bucket keys, VPN) exist only in the cluster datastore; rebuilding from git would mean recreating each by hand.
   Nightly `age`-encrypted export to the backup share, plus a short rebuild runbook (what to apply in what order).
