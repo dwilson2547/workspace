@@ -34,9 +34,11 @@ the two prod postgres instances only. In order:
   agents running commands on primary storage, and Unraid's permissions are limited). Accepted risk: the cluster can
   delete what it writes to the share. Mitigation: MEGA restic snapshots (weekly, 4 weekly + 6 monthly) and periodic
   checks that the share isn't shrinking.
-- [ ] **TimescaleDB: back up or not** — it holds only robo-services' `telemetry.track_position_samples` (Flink sink,
-  ~10 MB on 2026-10-16), i.e. pipeline output, which is why it was likely left out. Find where the parsed laps and
-  tracks live (the registry's `/api/analytics/sessions/{id}/laps`) and back those up instead if they aren't already.
+- [x] **TimescaleDB / race-logger data** — decided 2026-10-17: TimescaleDB (laps are computed from its samples),
+  iggy and the `race-logger` bucket stay out while the data is synthetic; revisit when the race logger holds real
+  data. Kept: registry tracks (`robo_registry.tracks` on postgres-dev) via CronJob `postgres-backup-tracks`.
+  Found then: iggy writes to `/app/local_data` (container filesystem), not its `iggy-data` volume at `/local_data`;
+  a pod restart loses the stream data. Fix the mount when the pipeline matters.
 - [ ] **Less by-hand release work** — tests run only when someone runs them, migrations are applied by hand, and
   dev→prod promotion is by cherry-pick while dev carries unreleased work. A free CI running tests on push
   (`infra/desktop-jenkins` exists) and a promote checklist.
