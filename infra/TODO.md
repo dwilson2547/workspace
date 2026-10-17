@@ -7,10 +7,9 @@ Backlog imported from the retired todo store, 2026-07-06.
 The postgres backups (cluster-config `postgres/backup.yaml`, runbook `cluster-config/docs/postgres_backup.md`) cover
 the two prod postgres instances only. In order:
 
-- [ ] **Back up the object-store buckets** — files live in AIStor on the TrueNAS box (192.168.0.10:30320), the same box
-  as the live database volumes, and nothing copies them: `photo-dump-prod` (the photos), `nodewright` (attachments).
-  Undecided: `dxf-converter`, `race-logger` (robo-services parquet archive). AIStor's free tier no longer allows
-  the old two-instance replication, so copy them with a CronJob to the Unraid backup share, next to the dumps.
+- [ ] **Back up the object-store buckets** — done for `nodewright`, `photo-dump-prod`/`-dev` and `part-images`
+  (nightly CronJob `backup-objects` to the Unraid share, 2026-10-16/17; the latter three moved off the old MinIO
+  first). Still undecided: `dxf-converter`, `race-logger` (robo-services parquet archive).
 - [ ] **Back up the file volumes** — `danwiki/danwiki-uploads` (20 GiB), `web-workflows/web-workflows-db`,
   `build-sim/build-sim-data`; all `nfs-dataset` (TrueNAS). Not the scrape-stack caches (rebuildable) or iggy (pipeline data).
 - [ ] **Promote scraped images from scrape-stack into `part-images`** — the parts-direct updater saves new images
