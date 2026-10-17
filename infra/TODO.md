@@ -30,8 +30,10 @@ the two prod postgres instances only. In order:
   export and a dump tested. part-images (~135 GiB) joins on the first run after its nightly copy lands.
 - [ ] **Syncthing mirror of the backup share** — the user still plans to mirror the share to the friend's and
   parents' houses via Syncthing on Unraid (set up on the Unraid side).
-- [ ] **Protect backups from the cluster** — the cluster can delete what it writes to the backup share; a weekly
-  read-only snapshot on the Unraid side would survive a bad script or pod.
+- [x] **Protect backups from the cluster** — decided 2026-10-17: no Unraid-side snapshots (the user won't have
+  agents running commands on primary storage, and Unraid's permissions are limited). Accepted risk: the cluster can
+  delete what it writes to the share. Mitigation: MEGA restic snapshots (weekly, 4 weekly + 6 monthly) and periodic
+  checks that the share isn't shrinking.
 - [ ] **TimescaleDB: back up or not** — it holds only robo-services' `telemetry.track_position_samples` (Flink sink,
   ~10 MB on 2026-10-16), i.e. pipeline output, which is why it was likely left out. Find where the parsed laps and
   tracks live (the registry's `/api/analytics/sessions/{id}/laps`) and back those up instead if they aren't already.
