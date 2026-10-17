@@ -24,8 +24,12 @@ the two prod postgres instances only. In order:
   scrape-job-manager's own mail reach anyone. Pick the alerts worth mail (node down, volume filling, crashloops,
   KubeJobFailed), and silence the microk8s false positives (KubeProxyDown / KubeSchedulerDown /
   KubeControllerManagerDown: those run inside kubelite).
-- [ ] **Weekly offsite copy through Syncthing** — newest dump set + bucket copies into a Syncthing folder on Unraid,
-  weekly (not the dailies), which already mirrors to the friend's and parents' houses (rate-limited; a set is a few GB).
+- [x] **Weekly offsite copy** — CronJob `offsite-backup` (cluster-config `offsite-backup/`, 2026-10-17): restic
+  snapshot of the whole backup share to MEGA S4 (Montreal), Sunday 07:00 ET, 4 weekly + 6 monthly kept, monthly
+  5% read-back check; runbook `cluster-config/docs/offsite_backup.md`. First run 6.3 GiB; restore of a secrets
+  export and a dump tested. part-images (~135 GiB) joins on the first run after its nightly copy lands.
+- [ ] **Syncthing mirror of the backup share** — the user still plans to mirror the share to the friend's and
+  parents' houses via Syncthing on Unraid (set up on the Unraid side).
 - [ ] **Protect backups from the cluster** — the cluster can delete what it writes to the backup share; a weekly
   read-only snapshot on the Unraid side would survive a bad script or pod.
 - [ ] **TimescaleDB: back up or not** — it holds only robo-services' `telemetry.track_position_samples` (Flink sink,
