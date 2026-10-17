@@ -21,10 +21,9 @@ the two prod postgres instances only. In order:
 - [x] **Encrypted export of the cluster's secrets** — nightly CronJob `backup-secrets` (cluster-config
   `secrets-backup/`, 2026-10-17): all Secrets, `age`-encrypted to the user's public key, 28 days on the backup
   share; restore and rebuild runbook in `cluster-config/docs/secrets_backup.md`. First run: 114 secrets.
-- [ ] **Route cluster alerts to email** — Alertmanager's default receiver is `null`; only the backup alerts and
-  scrape-job-manager's own mail reach anyone. Pick the alerts worth mail (node down, volume filling, crashloops,
-  KubeJobFailed), and silence the microk8s false positives (KubeProxyDown / KubeSchedulerDown /
-  KubeControllerManagerDown: those run inside kubelite).
+- [x] **Route cluster alerts to email** — AlertmanagerConfig `cluster-alerts` is the root config (2026-10-17): all
+  criticals plus a short warning list mailed; KubeJobFailed without scrape-job-manager's retried Jobs; microk8s
+  kube-proxy/scheduler/controller-manager/etcd monitoring off. Runbook `cluster-config/docs/alerting.md`.
 - [x] **Weekly offsite copy** — CronJob `offsite-backup` (cluster-config `offsite-backup/`, 2026-10-17): restic
   snapshot of the whole backup share to MEGA S4 (Montreal), Sunday 07:00 ET, 4 weekly + 6 monthly kept, monthly
   5% read-back check; runbook `cluster-config/docs/offsite_backup.md`. First run 6.3 GiB; restore of a secrets
