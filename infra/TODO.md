@@ -17,9 +17,9 @@ the two prod postgres instances only. In order:
   2026-10-16): scrape-stack is a quick-recovery cache; `part-images` on AIStor is the permanent, backed-up store
   (backed up nightly once its copy from the old MinIO finishes). Needs a mechanism to move images from imgcache
   into `part-images` (e.g. a periodic job, or the updater writing both).
-- [ ] **Encrypted export of the cluster's secrets** — ~110 hand-applied Secrets (authentik clients, DB credentials,
-  SMTP, bucket keys, VPN) exist only in the cluster datastore; rebuilding from git would mean recreating each by hand.
-  Nightly `age`-encrypted export to the backup share, plus a short rebuild runbook (what to apply in what order).
+- [x] **Encrypted export of the cluster's secrets** — nightly CronJob `backup-secrets` (cluster-config
+  `secrets-backup/`, 2026-10-17): all Secrets, `age`-encrypted to the user's public key, 28 days on the backup
+  share; restore and rebuild runbook in `cluster-config/docs/secrets_backup.md`. First run: 114 secrets.
 - [ ] **Route cluster alerts to email** — Alertmanager's default receiver is `null`; only the backup alerts and
   scrape-job-manager's own mail reach anyone. Pick the alerts worth mail (node down, volume filling, crashloops,
   KubeJobFailed), and silence the microk8s false positives (KubeProxyDown / KubeSchedulerDown /
