@@ -10,8 +10,9 @@ the two prod postgres instances only. In order:
 - [ ] **Back up the object-store buckets** — done for `nodewright`, `photo-dump-prod`/`-dev` and `part-images`
   (nightly CronJob `backup-objects` to the Unraid share, 2026-10-16/17; the latter three moved off the old MinIO
   first). Still undecided: `dxf-converter`, `race-logger` (robo-services parquet archive).
-- [ ] **Back up the file volumes** — `danwiki/danwiki-uploads` (20 GiB), `web-workflows/web-workflows-db`,
-  `build-sim/build-sim-data`; all `nfs-dataset` (TrueNAS). Not the scrape-stack caches (rebuildable) or iggy (pipeline data).
+- [x] **Back up the file volumes** — CronJob `backup-volumes` (cluster-config `postgres/volume-backup.yaml`,
+  2026-10-17): web-workflows and build-sim SQLite DBs via the online backup API, danwiki uploads mirrored; runbook
+  section "File volumes" in `cluster-config/docs/postgres_backup.md`. Not the scrape-stack caches or iggy.
 - [ ] **Promote scraped images from scrape-stack into `part-images`** — the parts-direct updater saves new images
   only in scrape-stack's imgcache (500 GiB `nfs-dataset` volume, not backed up). Intended split (user,
   2026-10-16): scrape-stack is a quick-recovery cache; `part-images` on AIStor is the permanent, backed-up store
