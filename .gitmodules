@@ -265,3 +265,7 @@
 [submodule "web-scrapers/web-workflows"]
 	path = web-scrapers/web-workflows
 	url = git@github.com:dwilson2547/web-workflows.git
+[submodule "messaging/stream-canary"]
+	path = messaging/stream-canary
+	url = git@github.com:dwilson2547/stream-canary.git
+	branch = main
