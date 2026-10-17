@@ -45,6 +45,12 @@ the two prod postgres instances only. In order:
 
 ## Medium
 
+- [ ] **OTel instrumentation + log ingestion** — the user's plan (2026-10-17): OpenTelemetry in the apps
+  (otel-collector, Tempo and Loki are already deployed) and logs shipped into Loki. Nothing ships logs today: no
+  promtail/alloy/fluent-bit, and Loki's volume is 50 GiB, so ingesting everything would fill it fast. Before turning
+  it on: per-namespace selection (scrapers + apps, not browserless or the operators), a retention period, and
+  drop rules for chatty lines.
+
 - [ ] **Plan migration from legacy MinIO to AiStor** — Evaluate moving existing data from the legacy MinIO instance to AiStor so we avoid re-ingesting roughly 6 million photos.
 - [ ] **Install Proxmox and ZFS on the EPYC box** — Install Proxmox on the EPYC machine and bring up the ZFS filesystem so the box becomes a stronger base for HPC-related work.
 - [ ] **Fix Grafana dashboard sidecar reload auth** — The monitoring Grafana sidecar writes dashboard files into /tmp/dashboards but POSTs to /api/admin/provisioning/dashboards/reload return 401 Unauthorized, so newly synced dashboards may not appear immediately. Investigate the admin secret/runtime password mismatch and restore reliable sidecar-triggered reloads.
