@@ -24,11 +24,11 @@ The cluster's backup target (`/mnt/user/cluster_backup`, NFS). The live data is 
 | | |
 |---|---|
 | Motherboard | **MSI PRO B760M-A WIFI DDR4** (user's word, 2026-10-18) |
-| BIOS | Updated 2026-10-18; version not recorded ⚠ |
-| OS | Unraid 7.x, kernel `6.18.54-Unraid` (verified `uname -r`, 2026-10-18); exact Unraid release not recorded ⚠ |
+| BIOS | 1J, updated 2026-10-18 (user) |
+| OS | Unraid 7.3.3 (user), kernel `6.18.54-Unraid` (verified `uname -r`), since 2026-10-18 |
 | NFS | `fs.leases-enable=0` (no delegations) set in `/boot/config/go`; nfsd threads raised to 64 (user, 2026-10-18) |
 
-- **Update the BIOS before an Unraid major upgrade.** On 2026-10-18 the upgrade from 6.12.9 (kernel 6.1.82) hung
+- **Update the BIOS before an Unraid major upgrade.** On 2026-10-18 the upgrade from 6.12.9 (kernel 6.1.82) to 7.3.3 hung
   right after the board's boot splash, before the OS loaded. The screen stayed black, the box was unreachable, and
   the power button cut it off instantly. The new kernel wouldn't boot with the board's 2024 BIOS, and a BIOS update
   fixed it. Have a monitor and keyboard on hand for the first boot.
