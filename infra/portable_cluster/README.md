@@ -83,7 +83,19 @@ Two layers, decided separately:
 
 - **Datastore membership** stays app-native (operators/gossip/ring) — Kafka,
   CRDB, Redis Cluster and Garage each own their own clustering; nothing is
-  layered on top of that.
+  layered on top of that. This is not a preference, it's structural: their
+  failure detection (Kafka session timeouts to the KRaft controller, CRDB's
+  Raft heartbeats, Redis gossip + `cluster-node-timeout`, Garage's ring) is
+  internal consensus — the correctness of leader election/ISR/range leases
+  depends on the participants themselves detecting loss, so an external
+  registry can never sit in that path even if you wired one up. Consul's health
+  signal is not an input to any availability decision; it duplicates what
+  these systems already do, in about the same seconds-scale time, wired to
+  nothing. New-node bootstrap is likewise native: CRDB `--join`, Redis
+  `CLUSTER MEET`, Strimzi-managed broker identity, Garage layout.
+  (Where an external registry WOULD be necessary: nodes without an
+  orchestrator — plain VMs or bare metal. If the office-PC nodes end up not
+  running k8s, this decision flips and Consul becomes the standard answer.)
 - **Service registration/discovery**, if and when a registration layer is
   needed at all (cross-cluster consumers, mixed estate with VMs/bare metal
   like a future GPU box, non-k8s services): **Consul is the preferred tool.**
