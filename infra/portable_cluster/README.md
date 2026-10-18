@@ -79,11 +79,19 @@ measurement target once nodes exist.
 
 ## Consul's place (decision record)
 
-In a single k8s cluster the built-in registry (etcd/Endpoints/CoreDNS) already
-answers "where is the thing" — Consul is redundant. It earns a role only if the
-blueprint goes mixed-estate (k8s clusters + VMs + bare metal like a future GPU
-box sharing one live catalog) or as a deliberate practice environment for work.
-Default for this project: app-native membership (operators/gossip), no Consul.
+Two layers, decided separately:
+
+- **Datastore membership** stays app-native (operators/gossip/ring) — Kafka,
+  CRDB, Redis Cluster and Garage each own their own clustering; nothing is
+  layered on top of that.
+- **Service registration/discovery**, if and when a registration layer is
+  needed at all (cross-cluster consumers, mixed estate with VMs/bare metal
+  like a future GPU box, non-k8s services): **Consul is the preferred tool.**
+  Same software as work — deliberate practice value, plus the one genuinely
+  idiomatic use case (one live catalog spanning k8s and non-k8s).
+
+Inside a single k8s cluster the built-in registry (etcd/Endpoints/CoreDNS)
+already answers "where is the thing" — no Consul needed there.
 
 ## Verification checklist
 
