@@ -18,23 +18,32 @@ hold a slice of the data.
 hot tier        local PVs per node (local-path / node disk), sharded by the app
                 Kafka partitions | CockroachDB ranges | Redis Cluster slots
 shared tier      nfs-dataset (TrueNAS ssd_pool): backups, uploads, cold blobs
-bucket tier      object storage for large/immutable data
+bucket tier      Garage (S3-compatible): every node holds part of every object
+                (3x replication or Reed-Solomon erasure coding), local disks
 membership       self-registration on boot, health-checked deregistration
                 (in k8s: StatefulSet + operator; Consul optional, see below)
 ```
 
 Candidate services, in build order:
 
-1. **Kafka** (Strimzi, KRaft) — designed for exactly this; batched sequential IO
+1. **Garage** (S3-compatible object storage) — the easiest entry point: single
+   Rust binary, tiny idle footprint, native multi-node layout where each node
+   stores a slice of every object (3x replication or erasure codes). Speaks S3,
+   so existing bucket consumers can target it later. Also natively geo-aware
+   (zone-aware layouts) — the one service here that's designed for *multi-site*
+   from day one, matching the "portable" ambition.
+2. **Kafka** (Strimzi, KRaft) — designed for exactly this; batched sequential IO
    over the network; ISR replication handles node churn.
-2. **CockroachDB** — the Postgres-shaped version of the same idea: nodes join at
+3. **CockroachDB** — the Postgres-shaped version of the same idea: nodes join at
    will, ranges rebalance, survives node loss with quorum.
-3. **Redis Cluster** — slots across nodes, elastic pool semantics (also the
+4. **Redis Cluster** — slots across nodes, elastic pool semantics (also the
    Consul learning exercise if we do that sandbox).
 
-Quorum floor: three nodes minimum for any of these (2f+1). Backups are
+Quorum floor: three nodes minimum for any of these (2f+1; Garage's 3x-replication
+layout needs three, erasure coding can trade width for tolerance). Backups are
 app-consistent (WAL dump / Kafka mirror / CRDB backup) to the NFS or bucket tier
-— there is no storage-layer replica to fall back on.
+— there is no storage-layer replica to fall back on. Garage stores its metadata
+and data on local-path PVCs like the others.
 
 ## Node profile (target hardware)
 
@@ -79,6 +88,8 @@ Default for this project: app-native membership (operators/gossip), no Consul.
 ## Verification checklist
 
 - [ ] `lsblk` the three prod nodes — confirm NVMe vs SATA assumption (Path B)
+- [ ] Garage on vmk8 local-path: 1 node → 3-node layout, S3 write/read,
+      kill a node, confirm object availability
 - [ ] Strimzi Kafka on vmk8 local-path: deploy, scale 1→3, partition rebalance
 - [ ] Node-kill test on vmk8: ISR/under-replicated recovery timing
 - [ ] CockroachDB single-node first, then 3-node on vmk8
