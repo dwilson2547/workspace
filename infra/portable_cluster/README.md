@@ -108,8 +108,9 @@ already answers "where is the thing" — no Consul needed there.
 ## Verification checklist
 
 - [ ] `lsblk` the three prod nodes — confirm NVMe vs SATA assumption (Path B)
-- [ ] Garage on vmk8 local-path: 1 node → 3-node layout, S3 write/read,
-      kill a node, confirm object availability
+- [x] Garage on vmk8 local-path: deployed 3-node directly (not 1→3), 256
+      partitions 3x replicated, S3 write/read verified, node-kill during read
+      verified — see `infra/vmk8-cluster-config/docs/garage-experiment-notes.md`
 - [ ] Strimzi Kafka on vmk8 local-path: deploy, scale 1→3, partition rebalance
 - [ ] Node-kill test on vmk8: ISR/under-replicated recovery timing
 - [ ] CockroachDB single-node first, then 3-node on vmk8
