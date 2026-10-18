@@ -269,3 +269,6 @@
 	path = messaging/stream-canary
 	url = git@github.com:dwilson2547/stream-canary.git
 	branch = main
+[submodule "infra/vmk8-cluster-config"]
+	path = infra/vmk8-cluster-config
+	url = git@github.com:dwilson2547/vmk8_cluster_config.git
