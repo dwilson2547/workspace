@@ -28,6 +28,12 @@ The cluster's backup target (`/mnt/user/cluster_backup`, NFS). The live data is 
 | OS | Unraid 7.3.3 (user), kernel `6.18.54-Unraid` (verified `uname -r`), since 2026-10-18 |
 | NFS | `fs.leases-enable=0` (no delegations) set in `/boot/config/go`; nfsd threads raised to 64 (user, 2026-10-18) |
 
+- **`/mnt/minio-pool`** (btrfs RAID1, 3 devices: sdi, sdk, sdl) is used only by the old MinIO container. Its
+  buckets moved to AIStor on TrueNAS on 2026-10-16, and nothing is known to write to it. On 2026-10-18 the lifetime
+  counters showed `corruption_errs` 24 (sdk) and 43 (sdl), with 0 read/write/flush errors, no new csum errors since
+  boot, and no scrub ever run. Pending: a scrub after the parity check. If all errors are corrected, reset with
+  `btrfs device stats -z`. If they climb again, run memtest86+: checksum errors across several disks point to
+  something they share (non-ECC RAM, controller, cabling), not one disk.
 - **Update the BIOS before an Unraid major upgrade.** On 2026-10-18 the upgrade from 6.12.9 (kernel 6.1.82) to 7.3.3 hung
   right after the board's boot splash, before the OS loaded. The screen stayed black, the box was unreachable, and
   the power button cut it off instantly. The new kernel wouldn't boot with the board's 2024 BIOS, and a BIOS update
