@@ -272,3 +272,6 @@
 [submodule "infra/vmk8-cluster-config"]
 	path = infra/vmk8-cluster-config
 	url = git@github.com:dwilson2547/vmk8_cluster_config.git
+[submodule "infra/router-config"]
+	path = infra/router-config
+	url = git@github.com:dwilson2547/router_config.git
