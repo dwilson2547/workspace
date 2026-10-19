@@ -1,0 +1,41 @@
+# Redis Cluster via the OT-CONTAINER-KIT redis-operator (portable_cluster
+# slice 4, maintained-infra revision). Replaces the earlier bitnami chart
+# deploy: bitnami's free images were archived to the frozen `bitnamilegacy`
+# registry in Aug 2025 — wrong foundation for a blueprint. The operator runs
+# `quay.io/opstree/redis` (the project's companion image, actively rebuilt)
+# with the current Redis 8.10 line.
+redisCluster:
+  name: lab
+  clusterSize: 3        # 3 leaders (masters) + 3 followers (replicas)
+  clusterVersion: v8
+  image: quay.io/opstree/redis
+  tag: v8.10.1
+  imagePullPolicy: IfNotPresent
+  persistenceEnabled: true
+  # Same hand-applied Secret as the previous deploy (password never in git).
+  redisSecret:
+    secretName: redis-cluster-password
+    secretKey: redis-password
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+storageSpec:
+  volumeClaimTemplate:
+    spec:
+      storageClassName: local-path
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 2Gi
+  nodeConfVolume: true
+  nodeConfVolumeClaimTemplate:
+    spec:
+      storageClassName: local-path
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

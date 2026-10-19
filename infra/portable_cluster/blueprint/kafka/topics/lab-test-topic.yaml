@@ -1,0 +1,15 @@
+# Test topic for the portable_cluster Kafka slice: 6 partitions, RF 3 —
+# enough partitions to observe spread across the three brokers, and for the
+# ISR rebalance test. 1h retention: lab hygiene on the local-path tier.
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: lab-test-topic
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: lab
+spec:
+  partitions: 6
+  replicas: 3
+  config:
+    retention.ms: 3600000

@@ -1,0 +1,32 @@
+# Redis Cluster — portable_cluster slice 4 (maintained-infra revision).
+# Chart: OT-CONTAINER-KIT/redis-operator's charts/redis-cluster at v0.27.0,
+# which renders the RedisCluster CR the operator (argocd/redis-operator.yaml)
+# reconciles. Replaces the bitnami chart + bitnamilegacy image.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/OT-CONTAINER-KIT/redis-operator.git
+      targetRevision: v0.27.0
+      path: charts/redis-cluster
+      helm:
+        releaseName: redis
+        valueFiles:
+          - $values/redis/values.yaml
+    - repoURL: https://github.com/dwilson2547/vmk8_cluster_config.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: redis
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=true

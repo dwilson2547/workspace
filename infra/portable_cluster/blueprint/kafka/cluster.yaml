@@ -1,0 +1,57 @@
+# portable_cluster slice 2: Kafka via Strimzi 1.3.0 / Kafka 4.3.1 (KRaft).
+# Strimzi 1.x requires KafkaNodePool CRs for broker/controller topology; this
+# is COMBINED mode — one pool of 3 nodes acting as controller+broker each
+# (no ZooKeeper, no separate controller tier). Data on the local-path hot
+# tier. RF 3 / min.insync.replicas 2: kill one broker and produce continues —
+# the quorum floor from infra/portable_cluster/README.md.
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: mixed
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: lab
+spec:
+  replicas: 3
+  roles:
+    - controller
+    - broker
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: 10Gi
+        class: local-path
+        deleteClaim: true
+        kraftMetadata: shared
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+---
+apiVersion: kafka.strimzi.io/v1
+kind: Kafka
+metadata:
+  name: lab
+  namespace: kafka
+spec:
+  kafka:
+    version: 4.3.1
+    metadataVersion: 4.3-IV0
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}

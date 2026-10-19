@@ -1,0 +1,30 @@
+# CockroachDB (range-replicated, Postgres-wire SQL) — portable_cluster slice 3.
+# Chart 19.0.6 / CRDB 25.4.4 pinned to the upstream repo tag v25.4.4-preview+1.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cockroachdb
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/cockroachdb/helm-charts.git
+      targetRevision: v25.4.4-preview+1
+      path: cockroachdb
+      helm:
+        releaseName: cockroachdb
+        valueFiles:
+          - $values/cockroachdb/values.yaml
+    - repoURL: https://github.com/dwilson2547/vmk8_cluster_config.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cockroachdb
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=true

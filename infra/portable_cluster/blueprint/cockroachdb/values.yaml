@@ -1,0 +1,24 @@
+# CockroachDB values — portable_cluster slice 3. Insecure mode (tls.enabled:
+# false): acceptable on the disposable dev cluster; a real deployment keeps
+# the chart's default TLS with its built-in self-signer. 3 replicas = the
+# raft quorum floor; each replica holds a share of the ranges on local-path.
+statefulset:
+  replicas: 3
+  budget:
+    maxUnavailable: 1
+
+storage:
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+    storageClass: local-path
+
+tls:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+  limits:
+    memory: 2Gi

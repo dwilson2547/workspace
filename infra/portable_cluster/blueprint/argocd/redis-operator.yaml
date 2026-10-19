@@ -1,0 +1,24 @@
+# redis-operator (OT-CONTAINER-KIT) — reconciles RedisCluster CRs. Pinned to
+# v0.27.0. Watches all namespaces by default (cluster-scope RBAC, chart
+# default). Must sync before the `redis` app's RedisCluster CR can apply.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis-operator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/OT-CONTAINER-KIT/redis-operator.git
+    targetRevision: v0.27.0
+    path: charts/redis-operator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: redis-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=true
