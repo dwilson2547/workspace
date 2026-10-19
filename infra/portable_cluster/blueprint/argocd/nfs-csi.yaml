@@ -1,0 +1,25 @@
+# CSI NFS driver, pinned to v4.13.2 — the same version the prod cluster runs
+# (nfsplugin v4.13.2 there). Installs the controller Deployment and node
+# DaemonSet into kube-system. The StorageClass using it is in storage/.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nfs-csi
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kubernetes-csi/csi-driver-nfs.git
+    targetRevision: v4.13.2
+    # At tag v4.13.2 the chart lives under charts/latest/ (the repo's layout,
+    # not charts/csi-driver-nfs).
+    path: charts/latest/csi-driver-nfs
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

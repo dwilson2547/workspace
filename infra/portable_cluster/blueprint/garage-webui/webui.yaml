@@ -1,0 +1,83 @@
+# garage-webui — community admin UI for Garage.
+# ghcr.io/davidschoefberger/garage-webui: the fork rewritten for Garage v2's
+# admin API. (khairul169/garage-webui:1.1.0 speaks the removed v1 admin API —
+# every call 400s against Garage v2.4.1: "v1/ endpoint is no longer supported".)
+# Talks to the Garage admin API via the headless service (the chart exposes no
+# admin Service; the headless DNS resolves to every pod and 3903 is listening
+# on each — any node serves the full cluster view).
+#
+# Security posture (dev cluster, deliberate): the Garage admin API has no
+# admin_token set, so it is unauthenticated INSIDE the cluster; this UI is the
+# LAN-exposed window onto it, through Traefik's default LAN-only entrypoints.
+# If that stops being acceptable: set an admin token in the garage config,
+# pass it via API_ADMIN_KEY_FILE (secret mount), and enable the UI's own
+# AUTH_USER_PASS.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garage-webui
+  namespace: garage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: garage-webui
+  template:
+    metadata:
+      labels:
+        app: garage-webui
+    spec:
+      containers:
+        - name: garage-webui
+          image: ghcr.io/davidschoefberger/garage-webui:2.5.2
+          env:
+            - name: API_BASE_URL
+              value: http://garage-headless.garage:3903
+            - name: API_ADMIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: garage-admin-token
+                  key: adminToken
+            - name: PORT
+              value: "3909"
+          ports:
+            - containerPort: 3909
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 256Mi}
+          readinessProbe:
+            httpGet: {path: /, port: 3909}
+            initialDelaySeconds: 3
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-webui
+  namespace: garage
+spec:
+  type: ClusterIP
+  selector:
+    app: garage-webui
+  ports:
+    - port: 3909
+      targetPort: 3909
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: garage-webui
+  namespace: garage
+spec:
+  # traefik is the default IngressClass; default entrypoints = LAN-only.
+  rules:
+    - host: garage.vmk8.home.arpa
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: garage-webui
+                port:
+                  number: 3909

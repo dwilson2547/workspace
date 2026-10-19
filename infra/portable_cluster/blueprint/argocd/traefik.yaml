@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://traefik.github.io/charts
+      chart: traefik
+      # Pinned to the same chart version as prod (infra/cluster-config) for parity.
+      targetRevision: 37.4.0
+      helm:
+        releaseName: traefik
+        valueFiles:
+          - $values/traefik/values.yaml
+    - repoURL: https://github.com/dwilson2547/vmk8_cluster_config.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ingress
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=true

@@ -1,0 +1,17 @@
+# nfs-dataset StorageClass, mirroring prod (infra/cluster-config) exactly:
+# TrueNAS at 192.168.0.10, dataset /mnt/ssd_pool/nfs_dataset, hard NFSv4.1.
+# Both clusters provision PVs as distinct subdirectories of the same share,
+# so dev data is visible on the NAS alongside prod data.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-dataset
+provisioner: nfs.csi.k8s.io
+mountOptions:
+  - hard
+  - nfsvers=4.1
+parameters:
+  server: 192.168.0.10
+  share: /mnt/ssd_pool/nfs_dataset
+reclaimPolicy: Delete
+volumeBindingMode: Immediate

@@ -1,0 +1,33 @@
+# Traefik ingress for the vmk8 dev cluster (chart pinned in argocd/traefik.yaml).
+# Deliberately much simpler than prod (infra/cluster-config/traefik/values.yaml):
+# dev-grade single replica behind the MetalLB LoadBalancer, LAN-only entrypoints,
+# no public entrypoints, no edge middlewares, no Cloudflare trust config.
+#
+# The LoadBalancer is pinned to 192.168.0.95 (metallb/pool.yaml, .95-.99) so the
+# prod CoreDNS dev zones can point at it stably.
+deployment:
+  kind: Deployment
+  replicas: 1
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+  name: traefik
+ingressRoute:
+  dashboard:
+    enabled: true
+    entryPoints:
+      - web
+    matchRule: Host(`traefik.vmk8.home.arpa`)
+ports:
+  web:
+    exposedPort: 80
+    port: 8000
+    protocol: TCP
+  websecure:
+    exposedPort: 443
+    port: 8443
+    protocol: TCP
+service:
+  annotations:
+    # Pinned: dev DNS zones in infra/cluster-config/dns/dns.yaml point here.
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.95

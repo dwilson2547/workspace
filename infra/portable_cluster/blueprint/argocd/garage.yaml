@@ -1,0 +1,30 @@
+# Garage (S3-compatible object storage) — first portable_cluster experiment.
+# Chart lives in the upstream git repo at script/helm/garage, pinned to v2.4.1.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: garage
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/deuxfleurs-org/garage.git
+      targetRevision: v2.4.1
+      path: script/helm/garage
+      helm:
+        releaseName: garage
+        valueFiles:
+          - $values/garage/values.yaml
+    - repoURL: https://github.com/dwilson2547/vmk8_cluster_config.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: garage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=true

@@ -1,0 +1,39 @@
+# local-path-provisioner (rancher, v0.0.37) — the hot local storage tier.
+# Bind-mount PVs under /opt/local-path-provisioner on each node: zero daemons
+# per volume, zero idle cost, no network hop. NOT the default StorageClass —
+# it is an opt-in high-performance tier; apps choose `local-path` explicitly.
+# On this cluster today the backing store is the VM root disk (ZFS on SATA SSD
+# on the Epyc host); dedicated NVMe nodes will raise the ceiling considerably.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-path
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rancher/local-path-provisioner.git
+    targetRevision: v0.0.37
+    path: deploy/chart/local-path-provisioner
+    helm:
+      releaseName: local-path-provisioner
+      values: |
+        storageClass:
+          create: true
+          defaultClass: false
+          name: local-path
+          reclaimPolicy: Delete
+        nodePathMap:
+          - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+            paths:
+              - /opt/local-path-provisioner
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: local-path-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=true
