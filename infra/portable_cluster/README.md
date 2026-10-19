@@ -116,11 +116,18 @@ already answers "where is the thing" — no Consul needed there.
       produce/consume verified, broker-kill during production verified with
       120/120 messages intact — see
       `infra/vmk8-cluster-config/docs/kafka-experiment-notes.md`
-- [ ] Node-kill test on vmk8: ISR/under-replicated recovery timing
+- [x] Node-kill test on vmk8: covered per-service (Kafka ISR rebalance,
+      CRDB raft majority, Redis replica promotion) — see the three
+      experiment notes docs
 - [x] CockroachDB 3-node on vmk8 (deployed directly at 3 nodes): table range
       replicated on {1,2,3}, INSERTs continued during a node kill (raft
       majority), 120/120 rows intact — see
       `infra/vmk8-cluster-config/docs/cockroachdb-experiment-notes.md`
       (note: chart init Job is a helm hook that deadlocks under ArgoCD;
       manual `cockroach init` required on fresh deploys)
+- [x] Redis Cluster on vmk8 (3 masters + 3 replicas): 16384 slots covered,
+      keys sharded ~1/3 per master, master kill → replica promotion, zero
+      data loss — see `infra/vmk8-cluster-config/docs/redis-experiment-notes.md`
+      (bitnamilegacy image registry; pod-0 bootstraps the cluster; stale
+      nodes.conf needs a scale-0 + PVC wipe to reset)
 - [ ] Perf rerun on Path B/C hardware; compare against the NFS baseline
