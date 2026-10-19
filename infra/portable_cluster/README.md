@@ -125,9 +125,10 @@ already answers "where is the thing" — no Consul needed there.
       `infra/vmk8-cluster-config/docs/cockroachdb-experiment-notes.md`
       (note: chart init Job is a helm hook that deadlocks under ArgoCD;
       manual `cockroach init` required on fresh deploys)
-- [x] Redis Cluster on vmk8 (3 masters + 3 replicas): 16384 slots covered,
-      keys sharded ~1/3 per master, master kill → replica promotion, zero
-      data loss — see `infra/vmk8-cluster-config/docs/redis-experiment-notes.md`
-      (bitnamilegacy image registry; pod-0 bootstraps the cluster; stale
-      nodes.conf needs a scale-0 + PVC wipe to reset)
+- [x] Redis Cluster on vmk8 — **redis-operator** (OT-CONTAINER-KIT v0.27.0 +
+      quay.io/opstree/redis:v8.10.1, actively maintained; the bitnami-chart
+      first pass ran the frozen bitnamilegacy image and was replaced — see the
+      notes): 3 masters + 3 replicas, slots covered, master kill → follower
+      promotion with the old leader demoting to its replica, zero data loss —
+      see `infra/vmk8-cluster-config/docs/redis-experiment-notes.md`
 - [ ] Perf rerun on Path B/C hardware; compare against the NFS baseline
