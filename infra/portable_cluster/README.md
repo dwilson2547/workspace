@@ -117,5 +117,10 @@ already answers "where is the thing" — no Consul needed there.
       120/120 messages intact — see
       `infra/vmk8-cluster-config/docs/kafka-experiment-notes.md`
 - [ ] Node-kill test on vmk8: ISR/under-replicated recovery timing
-- [ ] CockroachDB single-node first, then 3-node on vmk8
+- [x] CockroachDB 3-node on vmk8 (deployed directly at 3 nodes): table range
+      replicated on {1,2,3}, INSERTs continued during a node kill (raft
+      majority), 120/120 rows intact — see
+      `infra/vmk8-cluster-config/docs/cockroachdb-experiment-notes.md`
+      (note: chart init Job is a helm hook that deadlocks under ArgoCD;
+      manual `cockroach init` required on fresh deploys)
 - [ ] Perf rerun on Path B/C hardware; compare against the NFS baseline
