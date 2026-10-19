@@ -111,7 +111,11 @@ already answers "where is the thing" — no Consul needed there.
 - [x] Garage on vmk8 local-path: deployed 3-node directly (not 1→3), 256
       partitions 3x replicated, S3 write/read verified, node-kill during read
       verified — see `infra/vmk8-cluster-config/docs/garage-experiment-notes.md`
-- [ ] Strimzi Kafka on vmk8 local-path: deploy, scale 1→3, partition rebalance
+- [x] Strimzi Kafka on vmk8 local-path: deployed (Strimzi 1.3.0, Kafka 4.3.1
+      KRaft combined pool), 6-partition topic spread across all 3 brokers,
+      produce/consume verified, broker-kill during production verified with
+      120/120 messages intact — see
+      `infra/vmk8-cluster-config/docs/kafka-experiment-notes.md`
 - [ ] Node-kill test on vmk8: ISR/under-replicated recovery timing
 - [ ] CockroachDB single-node first, then 3-node on vmk8
 - [ ] Perf rerun on Path B/C hardware; compare against the NFS baseline
