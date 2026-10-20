@@ -30,10 +30,14 @@ The cluster's backup target (`/mnt/user/cluster_backup`, NFS). The live data is 
 
 - **`/mnt/minio-pool`** (btrfs RAID1, 3 devices: sdi, sdk, sdl) is used only by the old MinIO container. Its
   buckets moved to AIStor on TrueNAS on 2026-10-16, and nothing is known to write to it. On 2026-10-18 the lifetime
-  counters showed `corruption_errs` 24 (sdk) and 43 (sdl), with 0 read/write/flush errors, no new csum errors since
-  boot, and no scrub ever run. Pending: a scrub after the parity check. If all errors are corrected, reset with
-  `btrfs device stats -z`. If they climb again, run memtest86+: checksum errors across several disks point to
-  something they share (non-ECC RAM, controller, cabling), not one disk.
+  counters showed `corruption_errs` 24 (sdk) and 43 (sdl), with 0 read/write/flush errors. A scrub on 2026-10-19
+  (459.40 GiB) found no errors, and the counters were reset with `btrfs device stats -z` (user, 2026-10-20). If they
+  climb again, run memtest86+: checksum errors across several disks point to something they share (non-ECC RAM,
+  controller, cabling), not one disk.
+
+| Record | Root cause | Status |
+|---|---|---|
+| [2026_10_20 — Plex codec injection: miner + residential proxy](2026_10_20_plex_owner_token_transcoder_codec_injection.md) | Stolen owner token used to set `TranscoderH264Options=dump-yuv=…/Codecs/…/zz*.so`, so a transcode loaded the attacker's code | Fixed (container rebuilt, tokens revoked, port closed) |
 - **Update the BIOS before an Unraid major upgrade.** On 2026-10-18 the upgrade from 6.12.9 (kernel 6.1.82) to 7.3.3 hung
   right after the board's boot splash, before the OS loaded. The screen stayed black, the box was unreachable, and
   the power button cut it off instantly. The new kernel wouldn't boot with the board's 2024 BIOS, and a BIOS update
