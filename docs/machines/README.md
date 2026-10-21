@@ -38,6 +38,9 @@ The cluster's backup target (`/mnt/user/cluster_backup`, NFS). The live data is 
 | Record | Root cause | Status |
 |---|---|---|
 | [2026_10_20 — Plex codec injection: miner + residential proxy](2026_10_20_plex_owner_token_transcoder_codec_injection.md) | Stolen owner token used to set `TranscoderH264Options=dump-yuv=…/Codecs/…/zz*.so`, so a transcode loaded the attacker's code | Fixed (container rebuilt, tokens revoked, port closed) |
+- **Plugins and Docker containers update automatically every week** (CA Auto Update Applications, user, 2026-10-20).
+  This was set up after the Plex compromise, which a timely update would have prevented. Monitoring:
+  `infra/cluster-config/docs/alerting.md` → "Tower (Unraid)".
 - **Update the BIOS before an Unraid major upgrade.** On 2026-10-18 the upgrade from 6.12.9 (kernel 6.1.82) to 7.3.3 hung
   right after the board's boot splash, before the OS loaded. The screen stayed black, the box was unreachable, and
   the power button cut it off instantly. The new kernel wouldn't boot with the board's 2024 BIOS, and a BIOS update
