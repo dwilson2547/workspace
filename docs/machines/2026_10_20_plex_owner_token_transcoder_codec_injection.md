@@ -2,14 +2,14 @@
 
 **Date:** 2026-10-20  
 **Component:** Tower (Unraid, 192.168.x.x). The Plex Media Server container, its appdata (`/config`), and the router's connection tracking  
-**Severity:** High. Attackers ran their own code in the Plex container for at least four days, the whole LAN's connectivity degraded, and the scrapers and backups that depend on Tower kept failing.
+**Severity:** High. Attackers ran their own code in the Plex container for at least four days, the whole LAN's connectivity degraded, and the scrapers and backups kept failing.
 
 ---
 
 ## Observed symptom
 
-- For several days the internet was unreliable across the LAN. The router's traffic graphs showed no more bandwidth than usual. Disabling the router's packet inspection helped a little but didn't fix it (user).
-- Scraper runs and backups that go through Tower kept failing.
+- For several days the internet was unreliable across the LAN. The router was restarting about every 5 minutes. The router's traffic graphs showed no more bandwidth than usual. Disabling the router's packet inspection helped a little but didn't fix it (user).
+- Scraper runs and backups kept failing. The scraper failures were through the cluster's VPN proxy, not Tower itself (see [Effect on the scraper fleet](#effect-on-the-scraper-fleet)).
 - `top` inside the Plex container showed `xmrig` (a crypto miner) and a process called `myawesomeproxy`. A dropped payload was in the container's `/tmp` (user).
 
 ---
@@ -41,9 +41,27 @@ The code they ran dropped the miner and the proxy into the container's `/tmp`.
 
 ### Why the whole network suffered with no bandwidth spike
 
-> **⚠ unverified.** This is the most likely explanation. Neither the router nor the attacker's processes were examined while the attack was running.
+> **Not fully confirmed, but strongly supported.** The router stopped restarting as soon as Plex was shut down, and there have been no network problems since (user). Neither the router nor the attacker's processes were examined while the attack was running, so the mechanism below is still `⚠ unverified`.
 
-`myawesomeproxy` appears to be residential-proxy software, which sells Tower's home IP as an exit point for other people's traffic. That kind of traffic is mostly many short connections to many different hosts, not large transfers. Each connection takes a slot in the router's connection table and, with packet inspection on, costs router CPU. So connectivity can fail for every device on the network while the bytes-per-second graph looks normal. Separately, the miner used Tower's CPU, which on its own explains the failing scraper and backup runs on that box.
+`myawesomeproxy` appears to be residential-proxy software, which sells Tower's home IP as an exit point for other people's traffic. That kind of traffic is mostly many short connections to many different hosts, not large transfers. Each connection takes a slot in the router's connection table and, with packet inspection on, costs router CPU. So connectivity can fail for every device on the network while the bytes-per-second graph looks normal. Separately, the miner used Tower's CPU, which on its own explains failing backup runs on that box.
+
+The proxy's traffic was added to a network that was already busy. The scraper fleet itself opens many short connections through the router. The user's assessment is that the proxy alone would probably have been fine on a normal home connection, but proxy traffic plus the scraper fleet was more than the router could handle, and it restarted every 5 minutes.
+
+### Effect on the scraper fleet
+
+Measured from the cluster on 2026-10-21. All times UTC.
+
+The scrapers reach the parts sites through the `nordvpn-proxy` pod (namespace `vpn`, on k8s-main). It is a single replica, so each restart cut off every scraper at once.
+
+| | Before Oct 17 | Oct 17–20 | After the Oct 20 cleanup |
+|---|---|---|---|
+| `nordvpn-proxy` restarts (`kube_pod_container_status_restarts_total`, per day) | 0–1 | 1, **7** (Oct 18–19), 1, 2 | none in the 21h measured |
+| parts-direct runs that failed because the proxy was unreachable (`ERR_TUNNEL_CONNECTION_FAILED`, `no exit IP`) | 0 | 12 (Oct 18–20) | 0 |
+
+- **The peak matches the attack.** The worst day for proxy restarts, Oct 18–19, was also the day all four attacker IPs were active.
+- **The last proxy restart came just before the recreate.** It was at 21:04 on Oct 20, after DNS inside the tunnel stopped resolving (`Can not resolve api.ipify.org`). The Plex recreate was at 17:29 server log time.
+- **Six jobs were suspended.** parts-direct acura, ford, gm, mazda, mopar and vw were suspended after 3 consecutive failed runs each, all `TempFail` (exit 75). The operator counts network failures toward suspension and doesn't lift it on its own. All six were resumed by hand on 2026-10-21 18:23; acura's test run got through the VPN check and started scraping.
+- **Remaining failures are normal site timeouts.** After the cleanup, the only failures were navigation timeouts at session start (volvo, audi). They succeeded on retry and happened before the attack too.
 
 ---
 
@@ -54,6 +72,7 @@ The code they ran dropped the miner and the proxy into the container's `/tmp`.
 3. **Plex appdata dump (10.6 GB, 145,459 entries)** — the attacker's `c75335c-…` codec folder and every `zz*.so` file are **gone**. Plex replaced them with a fresh codec set (`a336ba9-…`) when the container was recreated. A full scan of the tarball contents found exactly 20 programs, all of them official codec libraries and `EasyAudioEncoder` downloaded at the recreate. `Plug-ins/` holds only Plex's own `Services.bundle`, unchanged since 2020. There are no custom scanners, no symlinks pointing outside the appdata folder, and no setuid files. `Preferences.xml` still contains `TranscoderH264Options=""`, which is empty and harmless.
 4. **Plex logs** — no mentions of `xmrig`, the proxy, or `/tmp` downloads. The `dump-yuv` sequence above is the only suspicious use of server settings. The log written after the 17:29 recreate on Oct 20 shows no outside requests.
 5. **Router connection count after cleanup** — 233 open connections, in the normal range (user).
+6. **Router stability after shutting Plex down** — the router stopped restarting every 5 minutes as soon as Plex was shut down, and there have been no network problems since (user).
 
 ---
 
