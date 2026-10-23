@@ -1,0 +1,449 @@
+# Hand-curated catalog behind the project index in the workspace README.
+#
+# meta/bin/gen-readme-index walks the domain folders, matches each project against this file and
+# rewrites the block between the project-index markers in README.md. A project found on disk but
+# missing here is still listed (with its README's opening line) and reported, so new projects show
+# up without anyone remembering to add them.
+#
+# [domains.<folder>]      title, blurb             heading and one-line intro per domain
+# [projects."<path>"]     summary                  one line, what it is
+#                         private = true           remote repo is private: 🔒, no link
+#                         featured = true          also listed under Highlights
+#                         stack = "..."            shown for featured projects
+#                         live = "https://..."     public URL, featured only
+#                         hidden = true            keep it off the README entirely
+#
+# private/, archive/ and docs/ are never walked.
+
+# Domain order here is the order in the README.
+[domains.automotive]
+title = "Automotive"
+blurb = "Vehicle parts data: interchange, junkyard inventory, OEM catalogue scrapers."
+
+[domains.web-scrapers]
+title = "Web scraping"
+blurb = "The shared scraping platform (cache, permits, egress, scheduling) and non-automotive scrapers."
+
+[domains.robotics]
+title = "Robotics & 3D scanning"
+blurb = "LiDAR and structured-light scanners, robot data pipelines, mapping."
+
+[domains.drones]
+title = "Drones"
+blurb = "Multirotor and surface craft: build docs, flight logs, tuning tools and a build simulator."
+
+[domains.embedded]
+title = "Embedded"
+blurb = "Firmware, CAN/DBC tooling, GNSS and sensor hardware."
+
+[domains.apps]
+title = "Apps"
+blurb = "End-user web and desktop apps."
+
+[domains.media]
+title = "Media"
+blurb = "Photo and video library management."
+
+[domains.ai]
+title = "AI & ML"
+blurb = "Image analysis, face grouping, local models, simulation."
+
+[domains.messaging]
+title = "Messaging & streaming"
+blurb = "Pub/sub tooling, performance testing and stream-processing experiments."
+
+[domains.infra]
+title = "Infrastructure"
+blurb = "The home k3s cluster, GitOps, networking and observability."
+
+[domains.games]
+title = "Games"
+blurb = "Godot projects."
+
+[domains.tools]
+title = "Tools"
+blurb = "Standalone utilities, CLIs and editor/browser extensions."
+
+[domains.meta]
+title = "Meta"
+blurb = "Agent skills, workspace tooling and documentation tooling."
+
+[domains.experiments]
+title = "Experiments"
+blurb = "POCs and sandboxes kept for reference."
+
+# --- automotive -------------------------------------------------------------------------------
+
+[projects."automotive/gyopart"]
+summary = "Get Your Own Part: junkyard inventory search joined to a parts-interchange catalogue, so you can find which yards have a car carrying the part you need."
+featured = true
+stack = "Python/FastAPI · React/Vite/Tailwind · PostgreSQL · MCP · Helm/ArgoCD"
+live = "https://gyopart.danwils.com"
+
+[projects."automotive/rockauto"]
+summary = "RockAuto catalogue scrapers (API, requests and Selenium generations)."
+private = true
+
+[projects."automotive/autoevolution-scraper"]
+summary = "Scraper for autoevolution vehicle specifications."
+private = true
+
+[projects."automotive/partsgeek-scraper"]
+summary = "Scraper for the PartsGeek parts catalogue."
+private = true
+
+[projects."automotive/motorcycles"]
+summary = "Motorcycle OEM parts and owner's-manual scrapers (Aprilia, Ducati, Harley, Honda, Kawasaki, Suzuki) on a shared scrape contract."
+
+[projects."automotive/mopar"]
+summary = "Mopar parts-store and diagram scraper."
+
+# --- web-scrapers -----------------------------------------------------------------------------
+
+[projects."web-scrapers/scrape-stack"]
+summary = "The shared scraping service suite: HTTP response cache, request permits and rate limiting, egress routing and monitoring, as one compose stack or Helm chart."
+featured = true
+stack = "Python/FastAPI · Go · React · PostgreSQL · Prometheus/Grafana · Helm"
+
+[projects."web-scrapers/scrape-job-manager"]
+summary = "Kubernetes operator for scheduled scrapers: Scraper, ScrapeJob and ScrapePool resources, balanced across a period with per-scraper serialisation, plus a web UI."
+private = true
+featured = true
+stack = "Python/FastAPI · React · Kubernetes CRDs · Helm/ArgoCD"
+
+[projects."web-scrapers/web-workflows"]
+summary = "Browser workflow automation: an MV3 Chrome extension as sensor/actuator, with a self-hosted backend owning state, the job queue and downloads."
+private = true
+
+[projects."web-scrapers/imdb-web-scrape"]
+summary = "Early IMDB scraper into a relational database."
+
+[projects."web-scrapers/manga-scraper"]
+summary = "Scraper for publicly visible manga pages."
+
+# --- robotics ---------------------------------------------------------------------------------
+
+[projects."robotics/robo-services"]
+summary = "Multi-hop pub/sub telemetry pipeline fed by vehicle CAN data, with probe/tracer messages for end-to-end observability, plus capture-device firmware."
+featured = true
+stack = "Python/FastAPI · Java · Kotlin · Arduino · Apache Iggy · Helm"
+
+[projects."robotics/structured-light-scanner"]
+summary = "Handheld structured-light scanner PoC: two hardware-triggered OV9281 global-shutter cameras and crossed strobed line lasers, triangulated in stereo."
+
+[projects."robotics/livox_handheld_scanner"]
+summary = "Handheld 3D mapping rig on a Livox Horizon LiDAR: real-time odometry, TSDF meshing, colourisation and a browser control panel."
+
+[projects."robotics/terrestrial-scanner"]
+summary = "Gantry 3D scanner from a 2D lidar, phone camera and Raspberry Pi, with GPS/IMU and ToF sensors."
+
+[projects."robotics/gis-speed-limit"]
+summary = "Java tool returning the speed limit at a GPS coordinate from OpenStreetMap via Overpass."
+
+# --- drones -----------------------------------------------------------------------------------
+
+[projects."drones/build-sim"]
+summary = "Drone build design tool: pick frame, motors, pack and payload, get AUW, thrust-to-weight, hover throttle and flight time, calibrated against the real fleet's logs."
+featured = true
+stack = "Python/FastAPI · React"
+
+[projects."drones/x500"]
+summary = "Holybro X500 V2: PX4/ArduPilot autonomy development quad."
+
+[projects."drones/f121-reliant-v2"]
+summary = "Reliant V2 Y6: coaxial six-motor build on a CNC-cut frame."
+
+[projects."drones/freestyle-3in"]
+summary = "3\" 4S freestyle quad on the Angel30 frame."
+
+[projects."drones/pavo20-pro-2"]
+summary = "BetaFPV Pavo20 Pro II: sub-250 g ducted cinewhoop with DJI O4."
+
+[projects."drones/pavo-femto"]
+summary = "BetaFPV Pavo Femto: 75 mm micro cinewhoop carrying the DJI O4 Air Unit."
+
+[projects."drones/aether-4"]
+summary = "BM Aether 4: 3D-printed unibody 4\" FPV build."
+
+[projects."drones/carnage-45"]
+summary = "V2 Carnage 4.5\" FPV build."
+
+[projects."drones/cinelog35-tof"]
+summary = "CineLog 3.5 with a Time-of-Flight sensor suite and companion MCU, aimed at GPS-free indoor autonomy."
+
+[projects."drones/dh600"]
+summary = "DH600: 600 mm folding long-endurance platform with a 3-axis gimbal, for cinematic and survey missions."
+
+[projects."drones/jet-catamaran"]
+summary = "3D-printed, fibreglassed catamaran driven by twin 30 mm water jets."
+
+[projects."drones/aeroptera"]
+summary = "Aeroptera Lace II: 800 mm 3D-printed folding quad frame under evaluation."
+
+[projects."drones/inventory"]
+summary = "Parts inventory and shared gear across the fleet."
+
+[projects."drones/tools"]
+summary = "Log tools: Blackbox and MAVLink tlog parameter and servo analysis, parameter diffs."
+
+# --- embedded ---------------------------------------------------------------------------------
+
+[projects."embedded/dbc-forge"]
+summary = "CAN over BLE: ESP32-C6 listen-only CAN bridge firmware and an Android companion app for decoding live traffic against DBC files."
+featured = true
+stack = "ESP32 (Arduino) · Kotlin/Android · BLE"
+
+[projects."embedded/can-simulator"]
+summary = "Bench CAN simulator that replays SavvyCAN logs from SD at accurate timing."
+
+[projects."embedded/ESP32RET"]
+summary = "ESP32 reverse-engineering tool for CAN buses (SavvyCAN-compatible), fork."
+
+[projects."embedded/phone-dbc-repo"]
+summary = "DBC files collected per vehicle for the CAN tools."
+private = true
+
+[projects."embedded/rtk-base-station"]
+summary = "Rooftop RTK GNSS base station serving RTCM3 corrections over a self-hosted NTRIP caster."
+
+[projects."embedded/led-vu-meter"]
+summary = "Real-time LED spectrum/VU meter: on-chip FFT into a 64×32 HUB75 matrix with swappable effects."
+
+[projects."embedded/media-remote"]
+summary = "ESP32-S3 media remote (PlatformIO)."
+
+[projects."embedded/media-remote-claude"]
+summary = "ESP32 BLE consumer-control media remote."
+
+[projects."embedded/rpi-camera"]
+summary = "Raspberry Pi camera rig with IMU, ToF sensor and SPI/I2C displays."
+private = true
+
+[projects."embedded/sensor-transposition"]
+summary = "Python toolkit for multi-sensor calibration, log parsing and coordinate-frame management."
+
+[projects."embedded/toolchain"]
+summary = "Shared, version-pinned arduino-cli and KiCad toolchains for every embedded project."
+
+# --- apps -------------------------------------------------------------------------------------
+
+[projects."apps/nodewright"]
+summary = "Web diagram editor on the JSON Canvas format (opens in Obsidian), with an MCP server so agents can draw diagrams for you."
+featured = true
+stack = "Python/FastAPI · React/TypeScript · MCP · authentik OIDC · Helm/ArgoCD"
+
+[projects."apps/webdoc"]
+summary = "Multi-user markdown knowledge base shared between people in a browser and agents over an OAuth MCP server, with a closed per-owner taxonomy and revision history."
+featured = true
+stack = "Python/FastAPI · React/TypeScript · MCP · OAuth · Helm/ArgoCD"
+
+[projects."apps/video-trimmer"]
+summary = "Local web UI over ffmpeg: scrub, mark in/out, export."
+
+[projects."apps/web-tools"]
+summary = "Single-file browser utilities (JSON/CSV/YAML, JWT, hashes, regex, diff, GeoJSON…) served as one static site."
+
+[projects."apps/task-queue-manager"]
+summary = "Desktop task queue manager (Tauri, pnpm workspace)."
+
+# --- media ------------------------------------------------------------------------------------
+
+[projects."media/photo-dump"]
+summary = "Self-hosted photo dump: upload, browse and share, behind authentik."
+private = true
+
+[projects."media/media-app-3"]
+summary = "Cross-platform desktop media manager for 500k+ item photo/video libraries: import, browse, face correction."
+
+[projects."media/media-library-manager"]
+summary = "Desktop organiser for large photo/video collections with face detection, adaptive clustering and duplicate handling."
+private = true
+
+[projects."media/photo-library-manager"]
+summary = "PyQt6 face-identification tool with incremental learning and visual constraint editing."
+
+# --- ai ---------------------------------------------------------------------------------------
+
+[projects."ai/room-acoustics-sim"]
+summary = "Interactive room acoustics simulator: Pyroomacoustics backend, Three.js visualisation of speaker placement."
+
+[projects."ai/dan-wiki"]
+summary = "Full-stack wiki with hierarchical pages, attachments and embeddings search."
+
+[projects."ai/face-app"]
+summary = "Local face-grouping POC clustering the same person across a folder of images."
+
+[projects."ai/image-analyzer"]
+summary = "Image sharpness and quality metrics (Laplacian, Sobel, FFT)."
+private = true
+
+[projects."ai/image-tagger"]
+summary = "Image tagging script and API."
+
+[projects."ai/model-test-scripts"]
+summary = "Scratch scripts for local models (llama.cpp, Hugging Face)."
+private = true
+
+[projects."ai/ai-projects"]
+summary = "Earlier home of the image analyzer, tagger and model scripts."
+private = true
+
+# --- messaging --------------------------------------------------------------------------------
+
+[projects."messaging/stream-canary"]
+summary = "Safe-rollout orchestrator for Kafka stream processors: mirror prod traffic into a canary, verify, gate, promote or roll back."
+
+[projects."messaging/sub-pub"]
+summary = "High-throughput Python processor moving messages between pub/sub systems, with back-pressure and metrics."
+
+[projects."messaging/pub-sub-perf-tool"]
+summary = "Pub/sub performance and validation testing across messaging systems."
+
+[projects."messaging/pub-sub-kiss-icp"]
+summary = "Pub/sub wrapper around KISS-ICP: point clouds in, LiDAR odometry out."
+
+[projects."messaging/pub-sub-tools"]
+summary = "Assorted tools for pub/sub systems."
+
+[projects."messaging/iggy-flink-poc"]
+summary = "Apache Flink 2.0 job reading from and writing to Apache Iggy over TCP."
+
+[projects."messaging/iggy-poc"]
+summary = "Minimal Apache Iggy streaming example."
+
+# --- infra ------------------------------------------------------------------------------------
+
+[projects."infra/cluster-config"]
+summary = "GitOps for the home MicroK8s cluster: every ArgoCD Application, authentik SSO, cert-manager, external-dns, Traefik, monitoring, backups."
+featured = true
+stack = "Kubernetes (MicroK8s) · ArgoCD · Helm · authentik · Traefik · Prometheus"
+
+[projects."infra/vmk8-cluster-config"]
+summary = "Manifests and ArgoCD apps for the MicroK8s dev cluster (5 VMs on the Epyc box)."
+
+[projects."infra/router-config"]
+hidden = true
+
+[projects."infra/helm"]
+summary = "Baseline Helm charts and a Helm cheat sheet."
+private = true
+
+[projects."infra/portable_cluster"]
+summary = "Design for a repeatable data-node cluster where each datastore shards and replicates at the application layer."
+
+[projects."infra/otel-prom-stack"]
+summary = "Local OTel Collector → Prometheus → Grafana compose stack."
+
+[projects."infra/prometheus-stack"]
+summary = "Prometheus and Grafana compose stack."
+
+[projects."infra/searxng"]
+summary = "Local SearXNG for an MCP search server."
+
+[projects."infra/desktop-jenkins"]
+summary = "Jenkins on the desktop."
+
+[projects."infra/dwilson2547.github.io"]
+summary = "GitHub Pages site."
+
+# --- games ------------------------------------------------------------------------------------
+
+[projects."games/Cascade"]
+summary = "Movement-first 3D roguelite: chained bullet jumps, slides and mid-air redirects come first, everything else after."
+featured = true
+stack = "Godot 4 · C#"
+
+[projects."games/ecosystem_sim"]
+summary = "Dinosaur ecosystem simulation: species with needs, limited resources, factions and rivalries, with a Godot frontend."
+
+# --- tools ------------------------------------------------------------------------------------
+
+[projects."tools/point-cloud-visualizer"]
+summary = "Live point cloud streaming: publishers send batches and odometry over WebSocket, the server fuses a voxel world model and serves LOD views to a three.js viewer."
+featured = true
+stack = "TypeScript · three.js · WebSocket · Python sidecar"
+
+[projects."tools/inventory-tracker"]
+summary = "AI-assisted purchase and inventory tracker: vendor receipts in, structured parts inventory with cached datasheets out."
+
+[projects."tools/dxf-converter"]
+summary = "Turns a scanned pen tracing into a clean, to-scale DXF for Onshape."
+
+[projects."tools/cronjob-manager"]
+summary = "Kubernetes CronJob manager: React UI, FastAPI backend and a Kubebuilder operator."
+
+[projects."tools/auto-dbms-from-sql"]
+summary = "Code generator: SQL schema in, Flask REST API and Angular Formly CRUD forms out."
+
+[projects."tools/command-builder-interactive"]
+summary = "TUI for composing complex CLI commands from a searchable template library."
+
+[projects."tools/gitignore-cli"]
+summary = "Interactive .gitignore generator over the github/gitignore templates."
+
+[projects."tools/nordvpn-proxy"]
+summary = "NordVPN proxy container (fork)."
+
+[projects."tools/potree"]
+summary = "Potree WebGL point cloud renderer (fork)."
+
+[projects."tools/scripts"]
+summary = "Utility scripts, grouped by language."
+private = true
+
+[projects."tools/chrome-extensions"]
+summary = "Chrome extensions: media scanning and identification, video interception."
+private = true
+
+[projects."tools/obsidian-plugins/obsidian-monaco"]
+summary = "Obsidian plugin: open code files in the Monaco editor."
+
+[projects."tools/obsidian-plugins/obsidian-image-resizer"]
+summary = "Obsidian plugin: downsize images added to the vault."
+
+[projects."tools/obsidian-plugins/obsidian-doc-puller"]
+summary = "Obsidian plugin: pull external docs into the vault."
+
+[projects."tools/obsidian-plugins/obsidian-shell-runner"]
+summary = "Obsidian plugin: run shell commands from notes."
+
+[projects."tools/obsidian-plugins/obsidian-html-apps"]
+summary = "Small HTML apps for Obsidian's Surfing plugin."
+
+# --- meta -------------------------------------------------------------------------------------
+
+[projects."meta/SKILLS"]
+summary = "Canonical agent skills for this workspace (see Agent skills above)."
+
+[projects."meta/bin"]
+summary = "Workspace CLI: note writer, git sync status, git guard hooks, this README's index generator."
+
+[projects."meta/scope-creep"]
+summary = "A project's requirements, decisions and dead branches drawn as a zoomable timeline tree."
+
+[projects."meta/markdown-renderer"]
+summary = "Angular markdown renderer."
+
+[projects."meta/markdown-api"]
+summary = "Markdown document API."
+private = true
+
+[projects."meta/sidebar-generator"]
+summary = "Generates navigation sidebars for markdown doc trees."
+
+# --- experiments ------------------------------------------------------------------------------
+
+[projects."experiments/hom-tx-perf-test"]
+summary = "Polyglot homogeneous-transform library with a shared benchmark: Python (NumPy) vs Rust (PyO3/nalgebra)."
+
+[projects."experiments/pocs"]
+summary = "Small proofs of concept: Angular components, gRPC, OCR, embedded Postgres, Potree popouts."
+
+[projects."experiments/testing/iggy"]
+summary = "Local Apache Iggy server for integration tests."
+
+[projects."experiments/testing/k8s-sandbox"]
+summary = "kind-based local Kubernetes sandbox with Helm tool installers."
+
+[projects."experiments/testing/python-gherkin-testcontainers"]
+summary = "behave BDD tests with Testcontainers: plugin per service, client injection, managed lifecycle."

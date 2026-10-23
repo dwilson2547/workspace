@@ -1,6 +1,6 @@
 # Working in this submodule-heavy layout
 
-This workspace is a superrepo of ~50 git submodules (see [`CONVENTIONS.md`](./CONVENTIONS.md) for the
+This workspace is a superrepo of ~90 git submodules (see [`CONVENTIONS.md`](./CONVENTIONS.md) for the
 structure). The recurring hazard with that layout: **git commands act on whichever repo your `cwd`
 resolves to, and submodule boundaries are invisible** — so it's easy to think you're in `workspace`
 when you're actually inside `automotive/gyopart`, and a commit lands in the wrong repo.
@@ -8,6 +8,19 @@ when you're actually inside `automotive/gyopart`, and a commit lands in the wron
 The fixes below make the active repo *visible* and stamp the commit *target* into every commit
 message. They live in machine-local files (`~/.bashrc`, `~/.git-hooks`), **not** in the repo, so
 **apply them once per machine** — this doc is the reproducible source.
+
+---
+
+## 0. Clone
+
+```bash
+git clone --recurse-submodules git@github.com:dwilson2547/workspace.git
+# already cloned without submodules:
+git submodule update --init --recursive
+```
+
+Submodules marked 🔒 in the README index are private repos and only clone with access to them.
+`git submodule update --init <path>` pulls just the ones you want.
 
 ---
 
@@ -135,6 +148,22 @@ would block pushes on any uncommitted/unpushed submodule):
 git config --global status.submoduleSummary true   # `git status` shows what changed inside submodules
 git config --global diff.submodule log             # `git diff` shows submodule commit logs, not bare SHAs
 git config --global submodule.recurse true         # pull/checkout/switch recurse by default
+```
+
+## Submodule cheat sheet
+
+```bash
+# add a new submodule
+git submodule add git@github.com:dwilson2547/<repo>.git <domain>/<project>
+
+# move a submodule to the latest commit on its branch, then record it in the superrepo
+git -C <domain>/<project> pull origin main
+git add <domain>/<project> && git commit -m "<project> bump: <why>"
+
+# remove a submodule
+git submodule deinit <domain>/<project>
+git rm <domain>/<project>
+rm -rf .git/modules/<domain>/<project>
 ```
 
 ---

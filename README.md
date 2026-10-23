@@ -1,39 +1,294 @@
-# Workspace repo to pull all my code in one place
+# workspace
 
-> **Structure & conventions:** see [`CONVENTIONS.md`](./CONVENTIONS.md) for the closed domain
-> taxonomy, placement rules, and knowledge layout. Agents follow [`CLAUDE.md`](./CLAUDE.md) /
-> [`AGENTS.md`](./AGENTS.md) and the `workspace-conventions` skill.
->
-> **New machine? Start here:** [`SUBMODULES.md`](./SUBMODULES.md) — everything that must be
-> installed once per clone (prompt context, commit-target stamp, git guards, skill symlinks) and
-> what needs no setup at all.
->
-> **Skills location:** skills are managed under [`meta/SKILLS`](./meta/SKILLS). To (re)install
-> local symlinks for agent runtimes, run:
-> `./meta/SKILLS/install_skill_symlinks.sh`
+This is my project showcase and the one place all my code lives: a superrepo that pulls ~100
+projects together, most of them as git submodules, grouped by domain: automotive parts data, web scraping,
+robotics and 3D scanning, drones, embedded hardware, self-hosted apps, and the infrastructure they
+run on. Each project keeps its own repo and history, and this repo pins them side by side, so
+there's one clone and one tree to search.
 
-Add new submodule: 
+Most of the services run on a single-user homelab: a MicroK8s cluster managed through ArgoCD, with
+authentik for sign-in. It's a personal environment, not business production.
 
-`git submodule add https://github.com/username/repo-name.git path/to/submodule`
+## Languages & technologies
 
-# Initialize and update all submodules
-git submodule init
-git submodule update
+GitHub's language bar only counts files that live in this repo itself, not inside the submodules,
+so here is the real spread:
 
-# Or do both in one command
-git submodule update --init --recursive
+| | |
+|---|---|
+| **Languages** | Python · TypeScript · JavaScript · Go · Java · Kotlin · C# · C++ (Arduino/ESP32) · Rust · SQL · Bash |
+| **Backend** | FastAPI · Flask · SQLAlchemy · Alembic · Pydantic · MCP servers · OAuth/OIDC |
+| **Frontend & desktop** | React · Vite · Tailwind · three.js · Angular · Monaco · Electron · Tauri · PyQt6 |
+| **Data & messaging** | PostgreSQL · TimescaleDB · MongoDB · Redis · Kafka · Apache Iggy · Apache Flink |
+| **Infrastructure** | Kubernetes · ArgoCD · Helm · Docker/Compose · Traefik · cert-manager · external-dns · MetalLB · authentik · GitHub Actions |
+| **Observability** | Prometheus · Grafana · OpenTelemetry |
+| **Scraping** | Playwright · Selenium · httpx · BeautifulSoup · a shared cache/permit/egress platform |
+| **AI, vision & 3D** | Hugging Face · llama.cpp · sentence-transformers · InsightFace · OpenCV · PyTorch · Open3D · KISS-ICP · Potree · Pyroomacoustics |
+| **Hardware** | ESP32 · Raspberry Pi · CAN/DBC · BLE · RTK GNSS/NTRIP · LiDAR · PX4/ArduPilot · Betaflight · PlatformIO · KiCad |
+| **Games** | Godot 4 (C#) |
 
-# Clone a repository with all its submodules
-git clone --recurse-submodules https://github.com/username/main-repo.git
+## Quick setup
 
-# Update a specific submodule to latest commit
-cd path/to/submodule
-git pull origin main
-cd back/to/main/project
-git add path/to/submodule
-git commit -m "Update submodule"
+```bash
+git clone --recurse-submodules git@github.com:dwilson2547/workspace.git
+cd workspace
+./meta/bin/install-git-guards.sh          # pre-commit guard (core.hooksPath)
+./meta/SKILLS/install_skill_symlinks.sh   # agent skills into ~/.claude/skills
+```
 
-# Remove a submodule
-git submodule deinit path/to/submodule
-git rm path/to/submodule
-rm -rf .git/modules/path/to/submodule
+🔒 projects are private repos and need access to clone. Full per-machine setup (prompt context,
+commit-target stamp, what needs no setup) and a submodule cheat sheet are in
+[`SUBMODULES.md`](./SUBMODULES.md).
+
+## How the workspace is organised
+
+- **[`CONVENTIONS.md`](./CONVENTIONS.md)** covers the closed domain taxonomy, where a new project goes,
+  when something is a submodule, and how knowledge is kept.
+- **Knowledge is repo-local markdown** at three scopes: `docs/` for the workspace and its
+  machines, `<domain>/docs/` for a domain, `<project>/docs/` for a project. Agents write atomic
+  notes with `meta/bin/wsnote`.
+- **Agents** follow [`CLAUDE.md`](./CLAUDE.md) / [`AGENTS.md`](./AGENTS.md).
+- Retired projects live in [`archive/`](./archive) for history.
+
+## Agent skills
+
+The workspace is built to be worked on with coding agents. Skills live in
+[`meta/SKILLS`](https://github.com/dwilson2547/SKILLS), and these are the ones that shape most of the work:
+
+| Skill | What it does |
+|---|---|
+| `workspace-conventions` | Placement, naming and knowledge capture rules for this repo |
+| `doc-indexer` | Semantic and literal search across every markdown file in every submodule |
+| `feature-development` | Default build/fix workflow: scope from the code, then execute or escalate |
+| `k8s-argocd` | Deploying and changing services on the home cluster |
+| `scraper-development-skill` | Investigate a site with Playwright first, then build the scraper on the shared stack |
+| `ui-development` / `ui-repair-loop` | Building UIs, and repairing broken ones workflow by workflow in a live browser |
+| `subagent-review` | Plan execution with a fresh subagent per task plus spec and quality review |
+| `issue-documentation` | Structured write-ups of incidents and root causes |
+| `trunk-flow-ci` | GitHub Actions build/publish pipelines for services and Helm charts |
+
+## Projects
+
+<!-- project-index:start (generated by meta/bin/gen-readme-index; edit meta/project-index.toml) -->
+
+### Highlights
+
+| Project | What it is | Stack |
+|---|---|---|
+| [**gyopart**](https://github.com/dwilson2547/gyopart) | Get Your Own Part: junkyard inventory search joined to a parts-interchange catalogue, so you can find which yards have a car carrying the part you need. [Live ↗](https://gyopart.danwils.com) | Python/FastAPI · React/Vite/Tailwind · PostgreSQL · MCP · Helm/ArgoCD |
+| 🔒 **scrape-job-manager** | Kubernetes operator for scheduled scrapers: Scraper, ScrapeJob and ScrapePool resources, balanced across a period with per-scraper serialisation, plus a web UI. | Python/FastAPI · React · Kubernetes CRDs · Helm/ArgoCD |
+| [**scrape-stack**](https://github.com/dwilson2547/scrape_stack) | The shared scraping service suite: HTTP response cache, request permits and rate limiting, egress routing and monitoring, as one compose stack or Helm chart. | Python/FastAPI · Go · React · PostgreSQL · Prometheus/Grafana · Helm |
+| [**robo-services**](https://github.com/dwilson2547/robo-services) | Multi-hop pub/sub telemetry pipeline fed by vehicle CAN data, with probe/tracer messages for end-to-end observability, plus capture-device firmware. | Python/FastAPI · Java · Kotlin · Arduino · Apache Iggy · Helm |
+| [**build-sim**](https://github.com/dwilson2547/drone-build-sim) | Drone build design tool: pick frame, motors, pack and payload, get AUW, thrust-to-weight, hover throttle and flight time, calibrated against the real fleet's logs. | Python/FastAPI · React |
+| [**dbc-forge**](https://github.com/dwilson2547/dbc-forge) | CAN over BLE: ESP32-C6 listen-only CAN bridge firmware and an Android companion app for decoding live traffic against DBC files. | ESP32 (Arduino) · Kotlin/Android · BLE |
+| [**nodewright**](https://github.com/dwilson2547/nodewright) | Web diagram editor on the JSON Canvas format (opens in Obsidian), with an MCP server so agents can draw diagrams for you. | Python/FastAPI · React/TypeScript · MCP · authentik OIDC · Helm/ArgoCD |
+| [**webdoc**](https://github.com/dwilson2547/webdoc) | Multi-user markdown knowledge base shared between people in a browser and agents over an OAuth MCP server, with a closed per-owner taxonomy and revision history. | Python/FastAPI · React/TypeScript · MCP · OAuth · Helm/ArgoCD |
+| [**cluster-config**](https://github.com/dwilson2547/cluster_config) | GitOps for the home MicroK8s cluster: every ArgoCD Application, authentik SSO, cert-manager, external-dns, Traefik, monitoring, backups. | Kubernetes (MicroK8s) · ArgoCD · Helm · authentik · Traefik · Prometheus |
+| [**Cascade**](https://github.com/dwilson2547/Cascade) | Movement-first 3D roguelite: chained bullet jumps, slides and mid-air redirects come first, everything else after. | Godot 4 · C# |
+| [**point-cloud-visualizer**](https://github.com/dwilson2547/point-cloud-visualizer) | Live point cloud streaming: publishers send batches and odometry over WebSocket, the server fuses a voxel world model and serves LOD views to a three.js viewer. | TypeScript · three.js · WebSocket · Python sidecar |
+
+### All projects (102)
+
+[Automotive](#automotive) · [Web scraping](#web-scraping) · [Robotics & 3D scanning](#robotics--3d-scanning) · [Drones](#drones) · [Embedded](#embedded) · [Apps](#apps) · [Media](#media) · [AI & ML](#ai--ml) · [Messaging & streaming](#messaging--streaming) · [Infrastructure](#infrastructure) · [Games](#games) · [Tools](#tools) · [Meta](#meta) · [Experiments](#experiments)
+
+#### Automotive
+
+`automotive/` — Vehicle parts data: interchange, junkyard inventory, OEM catalogue scrapers.
+
+| Project | What it is |
+|---|---|
+| 🔒 **autoevolution-scraper** | Scraper for autoevolution vehicle specifications. |
+| [**gyopart**](https://github.com/dwilson2547/gyopart) | Get Your Own Part: junkyard inventory search joined to a parts-interchange catalogue, so you can find which yards have a car carrying the part you need. |
+| [**mopar**](automotive/mopar) | Mopar parts-store and diagram scraper. |
+| [**motorcycles**](automotive/motorcycles) | Motorcycle OEM parts and owner's-manual scrapers (Aprilia, Ducati, Harley, Honda, Kawasaki, Suzuki) on a shared scrape contract. |
+| 🔒 **partsgeek-scraper** | Scraper for the PartsGeek parts catalogue. |
+| 🔒 **rockauto** | RockAuto catalogue scrapers (API, requests and Selenium generations). |
+
+#### Web scraping
+
+`web-scrapers/` — The shared scraping platform (cache, permits, egress, scheduling) and non-automotive scrapers.
+
+| Project | What it is |
+|---|---|
+| [**imdb-web-scrape**](web-scrapers/imdb-web-scrape) | Early IMDB scraper into a relational database. |
+| [**manga-scraper**](web-scrapers/manga-scraper) | Scraper for publicly visible manga pages. |
+| 🔒 **scrape-job-manager** | Kubernetes operator for scheduled scrapers: Scraper, ScrapeJob and ScrapePool resources, balanced across a period with per-scraper serialisation, plus a web UI. |
+| [**scrape-stack**](https://github.com/dwilson2547/scrape_stack) | The shared scraping service suite: HTTP response cache, request permits and rate limiting, egress routing and monitoring, as one compose stack or Helm chart. |
+| 🔒 **web-workflows** | Browser workflow automation: an MV3 Chrome extension as sensor/actuator, with a self-hosted backend owning state, the job queue and downloads. |
+
+#### Robotics & 3D scanning
+
+`robotics/` — LiDAR and structured-light scanners, robot data pipelines, mapping.
+
+| Project | What it is |
+|---|---|
+| [**gis-speed-limit**](https://github.com/dwilson2547/gis-speed-limit) | Java tool returning the speed limit at a GPS coordinate from OpenStreetMap via Overpass. |
+| [**livox_handheld_scanner**](https://github.com/dwilson2547/livox_handheld_scanner) | Handheld 3D mapping rig on a Livox Horizon LiDAR: real-time odometry, TSDF meshing, colourisation and a browser control panel. |
+| [**robo-services**](https://github.com/dwilson2547/robo-services) | Multi-hop pub/sub telemetry pipeline fed by vehicle CAN data, with probe/tracer messages for end-to-end observability, plus capture-device firmware. |
+| [**structured-light-scanner**](https://github.com/dwilson2547/structured_light_scanner) | Handheld structured-light scanner PoC: two hardware-triggered OV9281 global-shutter cameras and crossed strobed line lasers, triangulated in stereo. |
+| [**terrestrial-scanner**](https://github.com/dwilson2547/terrestrial-scanner) | Gantry 3D scanner from a 2D lidar, phone camera and Raspberry Pi, with GPS/IMU and ToF sensors. |
+
+#### Drones
+
+`drones/` — Multirotor and surface craft: build docs, flight logs, tuning tools and a build simulator.
+
+| Project | What it is |
+|---|---|
+| [**aeroptera**](drones/aeroptera) | Aeroptera Lace II: 800 mm 3D-printed folding quad frame under evaluation. |
+| [**aether-4**](drones/aether-4) | BM Aether 4: 3D-printed unibody 4" FPV build. |
+| [**build-sim**](https://github.com/dwilson2547/drone-build-sim) | Drone build design tool: pick frame, motors, pack and payload, get AUW, thrust-to-weight, hover throttle and flight time, calibrated against the real fleet's logs. |
+| [**carnage-45**](drones/carnage-45) | V2 Carnage 4.5" FPV build. |
+| [**cinelog35-tof**](drones/cinelog35-tof) | CineLog 3.5 with a Time-of-Flight sensor suite and companion MCU, aimed at GPS-free indoor autonomy. |
+| [**dh600**](drones/dh600) | DH600: 600 mm folding long-endurance platform with a 3-axis gimbal, for cinematic and survey missions. |
+| [**f121-reliant-v2**](drones/f121-reliant-v2) | Reliant V2 Y6: coaxial six-motor build on a CNC-cut frame. |
+| [**freestyle-3in**](drones/freestyle-3in) | 3" 4S freestyle quad on the Angel30 frame. |
+| [**inventory**](drones/inventory) | Parts inventory and shared gear across the fleet. |
+| [**jet-catamaran**](drones/jet-catamaran) | 3D-printed, fibreglassed catamaran driven by twin 30 mm water jets. |
+| [**pavo-femto**](drones/pavo-femto) | BetaFPV Pavo Femto: 75 mm micro cinewhoop carrying the DJI O4 Air Unit. |
+| [**pavo20-pro-2**](drones/pavo20-pro-2) | BetaFPV Pavo20 Pro II: sub-250 g ducted cinewhoop with DJI O4. |
+| [**tools**](drones/tools) | Log tools: Blackbox and MAVLink tlog parameter and servo analysis, parameter diffs. |
+| [**x500**](drones/x500) | Holybro X500 V2: PX4/ArduPilot autonomy development quad. |
+
+#### Embedded
+
+`embedded/` — Firmware, CAN/DBC tooling, GNSS and sensor hardware.
+
+| Project | What it is |
+|---|---|
+| [**can-simulator**](https://github.com/dwilson2547/can-simulator) | Bench CAN simulator that replays SavvyCAN logs from SD at accurate timing. |
+| [**dbc-forge**](https://github.com/dwilson2547/dbc-forge) | CAN over BLE: ESP32-C6 listen-only CAN bridge firmware and an Android companion app for decoding live traffic against DBC files. |
+| [**ESP32RET**](https://github.com/dwilson2547/ESP32RET) | ESP32 reverse-engineering tool for CAN buses (SavvyCAN-compatible), fork. |
+| [**led-vu-meter**](embedded/led-vu-meter) | Real-time LED spectrum/VU meter: on-chip FFT into a 64×32 HUB75 matrix with swappable effects. |
+| [**media-remote**](https://github.com/dwilson2547/media-remote) | ESP32-S3 media remote (PlatformIO). |
+| [**media-remote-claude**](embedded/media-remote-claude) | ESP32 BLE consumer-control media remote. |
+| 🔒 **phone-dbc-repo** | DBC files collected per vehicle for the CAN tools. |
+| 🔒 **rpi-camera** | Raspberry Pi camera rig with IMU, ToF sensor and SPI/I2C displays. |
+| [**rtk-base-station**](https://github.com/dwilson2547/rtk-base-station) | Rooftop RTK GNSS base station serving RTCM3 corrections over a self-hosted NTRIP caster. |
+| [**sensor-transposition**](https://github.com/dwilson2547/sensor_transposition) | Python toolkit for multi-sensor calibration, log parsing and coordinate-frame management. |
+| [**toolchain**](embedded/toolchain) | Shared, version-pinned arduino-cli and KiCad toolchains for every embedded project. |
+
+#### Apps
+
+`apps/` — End-user web and desktop apps.
+
+| Project | What it is |
+|---|---|
+| [**nodewright**](https://github.com/dwilson2547/nodewright) | Web diagram editor on the JSON Canvas format (opens in Obsidian), with an MCP server so agents can draw diagrams for you. |
+| [**task-queue-manager**](apps/task-queue-manager) | Desktop task queue manager (Tauri, pnpm workspace). |
+| [**video-trimmer**](apps/video-trimmer) | Local web UI over ffmpeg: scrub, mark in/out, export. |
+| [**web-tools**](apps/web-tools) | Single-file browser utilities (JSON/CSV/YAML, JWT, hashes, regex, diff, GeoJSON…) served as one static site. |
+| [**webdoc**](https://github.com/dwilson2547/webdoc) | Multi-user markdown knowledge base shared between people in a browser and agents over an OAuth MCP server, with a closed per-owner taxonomy and revision history. |
+
+#### Media
+
+`media/` — Photo and video library management.
+
+| Project | What it is |
+|---|---|
+| [**media-app-3**](media/media-app-3) | Cross-platform desktop media manager for 500k+ item photo/video libraries: import, browse, face correction. |
+| 🔒 **media-library-manager** | Desktop organiser for large photo/video collections with face detection, adaptive clustering and duplicate handling. |
+| 🔒 **photo-dump** | Self-hosted photo dump: upload, browse and share, behind authentik. |
+| [**photo-library-manager**](media/photo-library-manager) | PyQt6 face-identification tool with incremental learning and visual constraint editing. |
+
+#### AI & ML
+
+`ai/` — Image analysis, face grouping, local models, simulation.
+
+| Project | What it is |
+|---|---|
+| 🔒 **ai-projects** | Earlier home of the image analyzer, tagger and model scripts. |
+| [**dan-wiki**](https://github.com/dwilson2547/DanWiki) | Full-stack wiki with hierarchical pages, attachments and embeddings search. |
+| [**face-app**](https://github.com/dwilson2547/face_app) | Local face-grouping POC clustering the same person across a folder of images. |
+| 🔒 **image-analyzer** | Image sharpness and quality metrics (Laplacian, Sobel, FFT). |
+| [**image-tagger**](https://github.com/dwilson2547/image_tagger) | Image tagging script and API. |
+| 🔒 **model-test-scripts** | Scratch scripts for local models (llama.cpp, Hugging Face). |
+| [**room-acoustics-sim**](https://github.com/dwilson2547/room-acoustic-sim) | Interactive room acoustics simulator: Pyroomacoustics backend, Three.js visualisation of speaker placement. |
+
+#### Messaging & streaming
+
+`messaging/` — Pub/sub tooling, performance testing and stream-processing experiments.
+
+| Project | What it is |
+|---|---|
+| [**iggy-flink-poc**](https://github.com/dwilson2547/Iggy-flink-poc) | Apache Flink 2.0 job reading from and writing to Apache Iggy over TCP. |
+| [**iggy-poc**](https://github.com/dwilson2547/iggy-poc) | Minimal Apache Iggy streaming example. |
+| [**pub-sub-kiss-icp**](https://github.com/dwilson2547/pub-sub-kiss-icp) | Pub/sub wrapper around KISS-ICP: point clouds in, LiDAR odometry out. |
+| [**pub-sub-perf-tool**](https://github.com/dwilson2547/pub-sub-perf-tool) | Pub/sub performance and validation testing across messaging systems. |
+| [**pub-sub-tools**](https://github.com/dwilson2547/pub-sub-tools) | Assorted tools for pub/sub systems. |
+| [**stream-canary**](https://github.com/dwilson2547/stream-canary) | Safe-rollout orchestrator for Kafka stream processors: mirror prod traffic into a canary, verify, gate, promote or roll back. |
+| [**sub-pub**](https://github.com/dwilson2547/sub-pub) | High-throughput Python processor moving messages between pub/sub systems, with back-pressure and metrics. |
+
+#### Infrastructure
+
+`infra/` — The home k3s cluster, GitOps, networking and observability.
+
+| Project | What it is |
+|---|---|
+| [**cluster-config**](https://github.com/dwilson2547/cluster_config) | GitOps for the home MicroK8s cluster: every ArgoCD Application, authentik SSO, cert-manager, external-dns, Traefik, monitoring, backups. |
+| [**desktop-jenkins**](infra/desktop-jenkins) | Jenkins on the desktop. |
+| [**dwilson2547.github.io**](https://github.com/dwilson2547/dwilson2547.github.io) | GitHub Pages site. |
+| 🔒 **helm** | Baseline Helm charts and a Helm cheat sheet. |
+| [**otel-prom-stack**](infra/otel-prom-stack) | Local OTel Collector → Prometheus → Grafana compose stack. |
+| [**portable_cluster**](infra/portable_cluster) | Design for a repeatable data-node cluster where each datastore shards and replicates at the application layer. |
+| [**prometheus-stack**](infra/prometheus-stack) | Prometheus and Grafana compose stack. |
+| [**searxng**](infra/searxng) | Local SearXNG for an MCP search server. |
+| [**vmk8-cluster-config**](https://github.com/dwilson2547/vmk8_cluster_config) | Manifests and ArgoCD apps for the MicroK8s dev cluster (5 VMs on the Epyc box). |
+
+#### Games
+
+`games/` — Godot projects.
+
+| Project | What it is |
+|---|---|
+| [**Cascade**](https://github.com/dwilson2547/Cascade) | Movement-first 3D roguelite: chained bullet jumps, slides and mid-air redirects come first, everything else after. |
+| [**ecosystem_sim**](https://github.com/dwilson2547/ecosystem_sim) | Dinosaur ecosystem simulation: species with needs, limited resources, factions and rivalries, with a Godot frontend. |
+
+#### Tools
+
+`tools/` — Standalone utilities, CLIs and editor/browser extensions.
+
+| Project | What it is |
+|---|---|
+| [**auto-dbms-from-sql**](https://github.com/dwilson2547/auto_dbms_from_sql) | Code generator: SQL schema in, Flask REST API and Angular Formly CRUD forms out. |
+| 🔒 **chrome-extensions** | Chrome extensions: media scanning and identification, video interception. |
+| [**command-builder-interactive**](https://github.com/dwilson2547/Command-builder-interactive) | TUI for composing complex CLI commands from a searchable template library. |
+| [**cronjob-manager**](tools/cronjob-manager) | Kubernetes CronJob manager: React UI, FastAPI backend and a Kubebuilder operator. |
+| [**dxf-converter**](https://github.com/dwilson2547/dxf-converter) | Turns a scanned pen tracing into a clean, to-scale DXF for Onshape. |
+| [**gitignore-cli**](https://github.com/dwilson2547/gitignore-cli) | Interactive .gitignore generator over the github/gitignore templates. |
+| [**inventory-tracker**](tools/inventory-tracker) | AI-assisted purchase and inventory tracker: vendor receipts in, structured parts inventory with cached datasheets out. |
+| [**nordvpn-proxy**](https://github.com/dwilson2547/nordvpn-proxy) | NordVPN proxy container (fork). |
+| [**obsidian-doc-puller**](https://github.com/dwilson2547/obsidian-doc-puller) | Obsidian plugin: pull external docs into the vault. |
+| [**obsidian-html-apps**](https://github.com/dwilson2547/obsidian_html_apps) | Small HTML apps for Obsidian's Surfing plugin. |
+| [**obsidian-image-resizer**](https://github.com/dwilson2547/obsidian-image-resizer) | Obsidian plugin: downsize images added to the vault. |
+| [**obsidian-monaco**](https://github.com/dwilson2547/obsidian-monaco) | Obsidian plugin: open code files in the Monaco editor. |
+| [**obsidian-shell-runner**](https://github.com/dwilson2547/obsidian-shell-runner) | Obsidian plugin: run shell commands from notes. |
+| [**point-cloud-visualizer**](https://github.com/dwilson2547/point-cloud-visualizer) | Live point cloud streaming: publishers send batches and odometry over WebSocket, the server fuses a voxel world model and serves LOD views to a three.js viewer. |
+| [**potree**](https://github.com/dwilson2547/potree) | Potree WebGL point cloud renderer (fork). |
+| 🔒 **scripts** | Utility scripts, grouped by language. |
+
+#### Meta
+
+`meta/` — Agent skills, workspace tooling and documentation tooling.
+
+| Project | What it is |
+|---|---|
+| [**bin**](meta/bin) | Workspace CLI: note writer, git sync status, git guard hooks, this README's index generator. |
+| 🔒 **markdown-api** | Markdown document API. |
+| [**markdown-renderer**](https://github.com/dwilson2547/markdown_renderer) | Angular markdown renderer. |
+| [**scope-creep**](meta/scope-creep) | A project's requirements, decisions and dead branches drawn as a zoomable timeline tree. |
+| [**sidebar-generator**](https://github.com/dwilson2547/sidebar_generator) | Generates navigation sidebars for markdown doc trees. |
+| [**SKILLS**](https://github.com/dwilson2547/SKILLS) | Canonical agent skills for this workspace (see Agent skills above). |
+
+#### Experiments
+
+`experiments/` — POCs and sandboxes kept for reference.
+
+| Project | What it is |
+|---|---|
+| [**hom-tx-perf-test**](https://github.com/dwilson2547/Hom-tx-perf-test) | Polyglot homogeneous-transform library with a shared benchmark: Python (NumPy) vs Rust (PyO3/nalgebra). |
+| [**pocs**](https://github.com/dwilson2547/pocs) | Small proofs of concept: Angular components, gRPC, OCR, embedded Postgres, Potree popouts. |
+| [**iggy**](experiments/testing/iggy) | Local Apache Iggy server for integration tests. |
+| [**k8s-sandbox**](https://github.com/dwilson2547/k8s_sandbox) | kind-based local Kubernetes sandbox with Helm tool installers. |
+| [**python-gherkin-testcontainers**](https://github.com/dwilson2547/python-gherkin-testcontainers) | behave BDD tests with Testcontainers: plugin per service, client injection, managed lifecycle. |
+
+<!-- project-index:end -->
