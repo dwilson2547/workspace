@@ -278,3 +278,6 @@
 [submodule "messaging/spool"]
 	path = messaging/spool
 	url = git@github.com:dwilson2547/spool.git
+[submodule "ai/gpu-scheduler"]
+	path = ai/gpu-scheduler
+	url = git@github.com:dwilson2547/gpu-scheduler.git
