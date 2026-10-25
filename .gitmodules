@@ -275,3 +275,6 @@
 [submodule "infra/router-config"]
 	path = infra/router-config
 	url = git@github.com:dwilson2547/router_config.git
+[submodule "messaging/spool"]
+	path = messaging/spool
+	url = git@github.com:dwilson2547/spool.git
