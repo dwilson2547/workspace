@@ -62,6 +62,7 @@ The cluster's only GPU. `ssh k8s-ainode` from WSL. The hostname is `daniel-ainod
 | Driver | `580.196.07` open, DKMS, from NVIDIA's CUDA repo only (verified). Mixing it with Ubuntu-archive drivers breaks apt: [record](2026_10_25_ainode_nvidia_575_580_file_conflict.md) |
 | Power limit | **280 W** (stock 350 W). Set at boot by `/etc/systemd/system/nvidia-power-limit.service`, which runs `nvidia-smi -pm 1` and then `-pl 280` (verified) |
 | Cluster | microk8s `1.35/stable`, v1.35.6. Joined 2026-10-25 as a **full control-plane node, and it's a dqlite voter**. `k8s-worker2` is now the standby (verified `microk8s status`). The `nvidia` addon is enabled with `--gpu-operator-driver host`, and the node advertises `nvidia.com/gpu: 1` |
+| Host exporters | **None. k8s owns ports 9100 and 9400.** Removed 2026-10-25: a pre-k8s systemd `node_exporter.service` (`/opt/node_exporter`) held 9100 and crash-looped the cluster's node-exporter pod, and a standalone Docker `dcgm-exporter` (restart `always`) held 9400 next to the GPU operator's (verified). They may have come from an Ansible playbook run elsewhere; no trace of one was found on the box or in the workspace. Re-running such a playbook would put them back |
 
 **Thermal baseline.** `nvidia-smi` readings during a 5-minute fp16 matmul burn,
 [`evidence/2026_10_25_ainode_gpu_burn_job.yaml`](evidence/2026_10_25_ainode_gpu_burn_job.yaml). Both runs were in the final shelf position with one front intake (verified 2026-10-25):
