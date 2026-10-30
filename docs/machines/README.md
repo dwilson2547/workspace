@@ -37,7 +37,8 @@ The cluster's backup target (`/mnt/user/cluster_backup`, NFS). The live data is 
 
 | Record | Root cause | Status |
 |---|---|---|
-| [2026_10_20 — Plex codec injection: miner + residential proxy](2026_10_20_plex_owner_token_transcoder_codec_injection.md) | Stolen owner token used to set `TranscoderH264Options=dump-yuv=…/Codecs/…/zz*.so`, so a transcode loaded the attacker's code | Fixed (container rebuilt, tokens revoked, port closed) |
+| [2026_10_20 — Plex codec injection: miner + residential proxy](2026_10_20_plex_owner_token_transcoder_codec_injection.md) | Stolen owner token used to set `TranscoderH264Options=dump-yuv=…/Codecs/…/zz*.so`, so a transcode loaded the attacker's code | Fixed (container rebuilt, tokens revoked, port closed; port forward restored 2026-10-29) |
+| [2026_10_29 — Plex Remote Access red with port open: cert chain ends at ISRG Root YR](2026_10_29_plex_remote_access_unknown_ca_root_yr.md) | Reissued `plex.direct` cert chained to Let's Encrypt Root YR without the X1 cross-sign, so plex.tv's probe failed with `unknown ca` | Fixed (cert renamed → reissued) |
 - **Plugins and Docker containers update automatically every week** (CA Auto Update Applications, user, 2026-10-20).
   This was set up after the Plex compromise, which a timely update would have prevented. Monitoring:
   `infra/cluster-config/docs/alerting.md` → "Tower (Unraid)".
