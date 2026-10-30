@@ -25,7 +25,7 @@ The cluster's backup target (`/mnt/user/cluster_backup`, NFS). The live data is 
 |---|---|
 | Motherboard | **MSI PRO B760M-A WIFI DDR4** (user's word, 2026-10-18) |
 | BIOS | 1J, updated 2026-10-18 (user) |
-| OS | Unraid 7.3.3 (user), kernel `6.18.54-Unraid` (verified `uname -r`), since 2026-10-18 |
+| OS | Unraid 7.3.4 (user, PHP security patch; upgraded from 7.3.3, which was installed 2026-10-18). Kernel `6.18.54-Unraid` verified with `uname -r` on 7.3.3; ⚠ unverified on 7.3.4 |
 | NFS | `fs.leases-enable=0` (no delegations) set in `/boot/config/go`; nfsd threads raised to 64 (user, 2026-10-18) |
 
 - **`/mnt/minio-pool`** (btrfs RAID1, 3 devices: sdi, sdk, sdl) is used only by the old MinIO container. Its
