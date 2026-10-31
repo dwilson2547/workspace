@@ -281,3 +281,6 @@
 [submodule "ai/gpu-scheduler"]
 	path = ai/gpu-scheduler
 	url = git@github.com:dwilson2547/gpu-scheduler.git
+[submodule "infra/incident-operator"]
+	path = infra/incident-operator
+	url = git@github.com:dwilson2547/incident-operator.git
