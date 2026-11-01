@@ -284,3 +284,6 @@
 [submodule "infra/incident-operator"]
 	path = infra/incident-operator
 	url = git@github.com:dwilson2547/incident-operator.git
+[submodule "ai/gen-ai-platform"]
+	path = ai/gen-ai-platform
+	url = https://github.com/dwilson2547/gen-ai-platform
