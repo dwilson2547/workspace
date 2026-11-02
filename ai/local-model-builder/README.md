@@ -9,6 +9,10 @@ list of task cards go in; each task is sent to a gpu-scheduler model on its own,
 failures go back with the test output. Started 2026-11-02 as a feasibility test, not yet a repo: if the pass rate is
 good, the next step is sandboxes in the cluster with their own ingress; if not, it's dropped.
 
+**Status: parked 2026-11-02.** Results: [`docs/results.md`](docs/results.md). Conclusion so far: not worth it for
+whole apps (the plan and tests are most of the work), worth trying for repetitive template-plus-tests work. Next
+direction: [`docs/scraper-scope.md`](docs/scraper-scope.md).
+
 ## Layout
 
 - `sample/` — the first sample project, **shelf** (a book/film/game tracker: FastAPI, SQLite, Jinja2).
