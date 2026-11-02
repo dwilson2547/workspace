@@ -30,3 +30,13 @@ def test_delete(conn, make):
     assert get_item(conn, it.id) is None
     assert conn.execute("SELECT COUNT(*) FROM item_tags").fetchone()[0] == 0
     assert delete_item(conn, it.id) is False
+
+
+def test_update_and_delete_commit(conn, make, db_path):
+    from shelf.db import connect
+    it = make("Dune", tags=["sf"])
+    update_item(conn, it.id, ItemUpdate(rating=3, tags=["new"]))
+    other = connect(db_path)                       # the web app opens a new connection per request
+    assert get_item(other, it.id).rating == 3 and get_item(other, it.id).tags == ["new"]
+    delete_item(conn, it.id)
+    assert get_item(connect(db_path), it.id) is None

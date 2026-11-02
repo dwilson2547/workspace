@@ -99,7 +99,7 @@ def first_messages(task: dict, repo: Path) -> list[dict]:
 def schema(task: dict) -> dict:
     return {"type": "object", "required": ["plan", "files"], "additionalProperties": False,
             "properties": {
-                "plan": {"type": "string"},
+                "plan": {"type": "string", "maxLength": 600},     # else retries reason in here until the cap
                 "files": {"type": "array", "minItems": 1, "items": {
                     "type": "object", "required": ["path", "content"], "additionalProperties": False,
                     "properties": {"path": {"type": "string", "enum": task["writes"]},
@@ -174,6 +174,9 @@ def apply_files(repo: Path, task: dict, reply: dict | None) -> str | None:
         path = f.get("path") if isinstance(f, dict) else None
         if path not in task["writes"] or not isinstance(f.get("content"), str):
             return f"You may only write {task['writes']}, each with a string \"content\"; got {path!r}."
+    missing = [p for p in task["writes"] if not (repo / p).exists() and p not in {f["path"] for f in reply["files"]}]
+    if missing:
+        return f"You must write {missing}: they don't exist yet and the task needs them. Send every file you change."
     for f in reply["files"]:
         dest = repo / f["path"]
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -255,7 +258,16 @@ def main(argv: list[str]) -> int:
             for p in task["writes"]:
                 shutil.copy(SAMPLE / "reference" / p, repo / p)
             ok, summary, _ = run_tests(repo, tests)
-            outcome = "failed (oracle filled in)" if ok else "failed (oracle filled in, earlier work still broken)"
+            outcome = "failed (oracle filled in)"
+            if not ok:
+                # Earlier model work that passed its own tests breaks this one. Reset everything so far to the
+                # reference, so later tasks are still measured on their own.
+                for t in tasks:
+                    if t["id"] <= task["id"]:
+                        for p in t["writes"]:
+                            shutil.copy(SAMPLE / "reference" / p, repo / p)
+                ok, summary, _ = run_tests(repo, tests)
+                outcome = "failed (earlier work broke it; all reset to reference)"
             print(f"{task['name']:<22} oracle: {summary}", flush=True)
         rows.append((task["name"], outcome, round(time.time() - t0)))
         done_tests.append(task["test"])

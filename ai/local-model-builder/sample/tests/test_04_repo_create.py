@@ -20,8 +20,9 @@ def test_get(conn):
     assert get_item(conn, 999) is None
 
 
-def test_create_commits(conn, db_path):
+def test_create_commits_item_and_tags(conn, db_path):
     from shelf.db import connect
-    create_item(conn, ItemCreate(title="a", kind="album"))
-    other = connect(db_path)
+    it = create_item(conn, ItemCreate(title="a", kind="album", tags=["x", "y"]))
+    other = connect(db_path)                       # the web app opens a new connection per request
     assert other.execute("SELECT COUNT(*) FROM items").fetchone()[0] == 1
+    assert get_item(other, it.id).tags == ["x", "y"]
