@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{% block title %}shelf{% endblock %}</title></head>
+<body>
+<header><a href="/">shelf</a></header>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<main>{% block content %}{% endblock %}</main>
+</body>
+</html>

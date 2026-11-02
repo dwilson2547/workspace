@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="get" action="/" class="filters">
+  <select name="status"><option value="">any status</option>
+    {% for s in statuses %}<option value="{{ s }}" {% if filters.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+  <select name="kind"><option value="">any kind</option>
+    {% for k in kinds %}<option value="{{ k }}" {% if filters.kind == k %}selected{% endif %}>{{ k }}</option>{% endfor %}
+  </select>
+  <input name="q" value="{{ filters.q or '' }}" placeholder="search">
+  <input name="tag" value="{{ filters.tag or '' }}" placeholder="tag">
+  <button>Filter</button>
+</form>
+<table>
+  <tr><th>Title</th><th>Kind</th><th>Status</th><th>Rating</th><th>Tags</th></tr>
+  {% for item in items %}
+  <tr><td><a href="/items/{{ item.id }}">{{ item.title }}</a></td><td>{{ item.kind.value }}</td>
+      <td>{{ item.status.value }}</td><td>{{ item.rating or '' }}</td><td>{{ item.tags | join(', ') }}</td></tr>
+  {% else %}
+  <tr><td colspan="5">Nothing here yet.</td></tr>
+  {% endfor %}
+</table>
+<h2>Add</h2>
+<form method="post" action="/items">
+  <input name="title" placeholder="title">
+  <select name="kind">{% for k in kinds %}<option value="{{ k }}">{{ k }}</option>{% endfor %}</select>
+  <select name="status">{% for s in statuses %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select>
+  <input name="rating" placeholder="rating 1-5">
+  <input name="tags" placeholder="tags, comma separated">
+  <textarea name="notes"></textarea>
+  <button>Add</button>
+</form>
+{% endblock %}

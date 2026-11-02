@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} - shelf{% endblock %}
+{% block content %}
+<h1>{{ item.title }}</h1>
+<dl>
+  <dt>Kind</dt><dd>{{ item.kind.value }}</dd>
+  <dt>Status</dt><dd>{{ item.status.value }}</dd>
+  <dt>Rating</dt><dd>{{ item.rating or '' }}</dd>
+  <dt>Tags</dt><dd>{{ item.tags | join(', ') }}</dd>
+  <dt>Notes</dt><dd>{{ item.notes }}</dd>
+</dl>
+<form method="post" action="/items/{{ item.id }}/edit">
+  <input name="title" value="{{ item.title }}">
+  <select name="kind">{% for k in kinds %}<option value="{{ k }}" {% if item.kind.value == k %}selected{% endif %}>{{ k }}</option>{% endfor %}</select>
+  <select name="status">{% for s in statuses %}<option value="{{ s }}" {% if item.status.value == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+  <input name="rating" value="{{ item.rating or '' }}">
+  <input name="tags" value="{{ item.tags | join(', ') }}">
+  <textarea name="notes">{{ item.notes }}</textarea>
+  <button>Save</button>
+</form>
+<form method="post" action="/items/{{ item.id }}/delete"><button>Delete</button></form>
+{% endblock %}
