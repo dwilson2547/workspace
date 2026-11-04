@@ -28,6 +28,12 @@ the two prod postgres instances only. In order:
   snapshot of the whole backup share to MEGA S4 (Montreal), Sunday 07:00 ET, 4 weekly + 6 monthly kept, monthly
   5% read-back check; runbook `cluster-config/docs/offsite_backup.md`. First run 6.3 GiB; restore of a secrets
   export and a dump tested. part-images (~135 GiB) joins on the first run after its nightly copy lands.
+- [ ] **If `offsite-objects` fails again: pack part-images offsite instead of mirroring objects** — only on another
+  failure (user, 2026-11-04). The rclone mirror sends ~6.9M ~21 KB objects one by one to S4, so memory, request
+  count and MEGA's blocking all scale with object count, not bytes. part-images keys are content hashes and never
+  overwritten, so: nightly, tar the day's new objects into one archive; weekly, a key list for deletions; restore =
+  extract + apply deletions. Cuts offsite objects to a few hundred; needs a ~2-day re-upload. Why the current job
+  works and what it costs: `cluster-config/docs/issues/2026_11_04_offsite_objects_full_sync_oom_and_max_delete.md`.
 - [ ] **Syncthing mirror of the backup share** — the user still plans to mirror the share to the friend's and
   parents' houses via Syncthing on Unraid (set up on the Unraid side).
 - [x] **Protect backups from the cluster** — decided 2026-10-17: no Unraid-side snapshots (the user won't have
