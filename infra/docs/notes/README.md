@@ -1,6 +1,5 @@
 # Notes index
 
-- [Alertmanager email + PromQL unless gotcha](alertmanager-email-promql-unless-gotcha.md) — Backup-failure alerting lives in monitoring/manifests/postgres-backup-alerts.yaml: PrometheusRule + Alertmana… `alerting,prometheus,promql,backup`
 - [argocd: new helm-based app repos need a repo-<name> repository secret](argocd-new-helm-based-app-repos-need-a-repo-name-repository-.md) — A new helm-based Application pointing at git@github.com:dwilson2547/<repo>.git fails with ComparisonError 'fa… `argocd,k8s,github`
 - [ArgoCD plain-HTTP ingress via Traefik nginx emulator](argocd-plain-http-ingress-via-traefik-nginx-emulator.md) — ArgoCD exposed at argocd.local via Traefik (ingressClassName: nginx). `argocd,k8s,ingress,traefik,coredns`
 - [ArgoCD repo registration without CLI via kubectl secret](argocd-repo-registration-without-cli-via-kubectl-secret.md) — Register a private git repo with ArgoCD by creating a Secret with label argocd.argoproj.io/secret-type=reposi… `argocd,git,ssh,infrastructure`
@@ -12,7 +11,6 @@
 - [Gyopart k8s DNS strategy: single CoreDNS for all zones](gyopart-k8s-dns-strategy-single-coredns-for-all-zones.md) — All private DNS is served from the single prod CoreDNS pod in the dns namespace at 192.168.0.61. `dns,coredns,cluster_config,infrastructure`
 - [Homepage dashboard — gethomepage.dev on home.cluster.local](homepage-dashboard-gethomepage-dev-on-home-cluster-local.md) — Deployed at home.cluster.local via homepage/ in cluster_config. `homepage,cluster_config,infrastructure,dashboard`
 - [k8s-main recurring microk8s containerd failure — CRITICAL recurring issue](k8s-main-recurring-microk8s-containerd-failure-critical-recu.md) — RECURRING ISSUE. `incident,microk8s,containerd,nfs,k8s-main,recurring,critical`
-- [Postgres backup version-matching gotcha](postgres-backup-version-matching-gotcha.md) — Nightly postgres backups to the Unraid NAS (192.168.0.15) ship in infra/cluster-config postgres/backup.yaml: … `postgres,backup,nfs,k8s`
 - [Reloader namespace scope gotcha](reloader-namespace-scope-gotcha.md) — Stakater Reloader was deployed in the reloader namespace with watchGlobally=false, so it did not react to Con… `argocd,reloader,dns,configmap`
-- [restic: probe a repository with cat config --no-lock and branch on exit 10](restic-probe-a-repository-with-cat-config-no-lock-and-branch.md) — restic cat config takes a lock, so a lock left by a killed run makes it fail; a script that treats any failur… `restic,backup,gotcha`
 - [Shared Postgres namespace — manifests and next steps](shared-postgres-namespace-manifests-and-next-steps.md) — Created cluster/postgres/ with namespace.yaml, postgres.yaml (Bitnami postgresql:17.6.0, 100Gi nfs-crucial PV… `postgres,k8s,cluster,infrastructure`
+- [restic: probe a repository with cat config --no-lock and branch on exit 10](restic-probe-a-repository-with-cat-config-no-lock-and-branch.md) — restic cat config takes a lock, so a lock left by a killed run makes it fail; a script that treats any failur… `restic,backup,gotcha`
