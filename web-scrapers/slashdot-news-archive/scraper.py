@@ -470,10 +470,15 @@ def run_scrape(conn, command: str, max_pages: int, do_embed: bool, embed_limit: 
                 logger.info("page=%d stories=%d new=%d%s", n, len(stories), added,
                             " (cache)" if from_cache else "")
                 if len(stories) == 0:
+                    if is_backfill and n > deepest_known:
+                        logger.info("page %d is empty — end of the listing archive, stopping", n)
+                        break
                     raise Broken(f"page {n} parsed zero stories — selector drift?")
                 if added == 0 and n > 0 and (not is_backfill or n > deepest_known):
                     logger.info("page %d had no new stories — gap filled, stopping", n)
                     break
+                if n % 100 == 0:
+                    logger.info("progress: page=%d new_stories=%d", n, new_stories)
     except Exception as e:
         status, error = "error", f"{type(e).__name__}: {e}"
         logger.error("run failed: %s", error)
