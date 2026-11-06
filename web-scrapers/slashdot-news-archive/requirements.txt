@@ -3,3 +3,6 @@ beautifulsoup4>=4.12
 lxml>=5.0
 dwilson-cache-client
 dwilson-request-auth-client
+psycopg2-binary>=2.9
+pgvector>=0.3
+sentence-transformers>=3.0

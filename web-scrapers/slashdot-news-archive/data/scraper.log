@@ -1,0 +1,164 @@
+2026-11-04 23:39:15,978 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:39:16,191 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:39:16,215 WARNING skipping article 186596954: unparseable story URL https://yro.slashdot.org/story/26/11/05/0322258/vietnam-jails-pirate-football-streamers-for-up-to-a-year
+2026-11-04 23:39:16,215 WARNING skipping article 186594942: unparseable story URL https://yro.slashdot.org/story/26/11/04/2319208/axon-sued-over-ai-powered-license-plate-reader-network
+2026-11-04 23:39:16,216 ERROR run failed: ValueError: minute must be in 0..59
+2026-11-04 23:43:04,563 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:43:04,791 INFO page=0 stories=15 new=15 (cache)
+2026-11-04 23:43:04,800 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D1&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:43:06,773 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:43:07,012 INFO page=1 stories=15 new=15
+2026-11-04 23:43:07,026 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D2&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:43:11,878 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:43:12,110 INFO page=2 stories=15 new=15
+2026-11-04 23:43:12,118 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D3&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:43:20,467 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:43:20,703 INFO page=3 stories=15 new=15
+2026-11-04 23:43:20,717 INFO run done: pages_fetched=4 (cached=1) new_stories=60
+2026-11-04 23:43:34,250 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:43:34,287 INFO page=0 stories=15 new=0 (cache)
+2026-11-04 23:43:34,297 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D1&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:43:34,331 INFO page=1 stories=15 new=0 (cache)
+2026-11-04 23:43:34,331 INFO page 1 had no new stories — gap filled, stopping
+2026-11-04 23:43:34,347 INFO run done: pages_fetched=2 (cached=2) new_stories=0
+2026-11-04 23:43:43,607 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:43:43,642 INFO page=0 stories=15 new=0 (cache)
+2026-11-04 23:43:43,646 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D1&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:43:43,678 INFO page=1 stories=15 new=0 (cache)
+2026-11-04 23:43:43,678 INFO page 1 had no new stories — gap filled, stopping
+2026-11-04 23:43:43,694 INFO run done: pages_fetched=2 (cached=2) new_stories=0
+2026-11-04 23:44:14,437 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:44:14,474 INFO page=0 stories=15 new=0 (cache)
+2026-11-04 23:44:14,481 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D1&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:44:14,512 INFO page=1 stories=15 new=0 (cache)
+2026-11-04 23:44:14,518 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D2&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:44:14,554 INFO page=2 stories=15 new=0 (cache)
+2026-11-04 23:44:14,560 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D3&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:44:14,600 INFO page=3 stories=15 new=0 (cache)
+2026-11-04 23:44:14,604 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D4&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:44:16,244 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:44:16,467 INFO page=4 stories=15 new=15
+2026-11-04 23:44:16,472 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D5&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:44:24,960 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:44:25,187 INFO page=5 stories=15 new=15
+2026-11-04 23:44:25,193 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D6&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:44:33,096 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:44:33,329 INFO page=6 stories=15 new=15
+2026-11-04 23:44:33,338 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D7&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:44:39,672 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:44:39,917 INFO page=7 stories=15 new=15
+2026-11-04 23:44:39,925 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D8&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:44:47,890 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:44:48,119 INFO page=8 stories=15 new=15
+2026-11-04 23:44:48,124 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D9&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:44:54,260 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:44:54,489 INFO page=9 stories=15 new=15
+2026-11-04 23:44:54,497 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D10&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:45:03,654 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:45:03,900 INFO page=10 stories=15 new=15
+2026-11-04 23:45:03,909 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D11&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:45:12,895 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:45:13,122 INFO page=11 stories=15 new=15
+2026-11-04 23:45:13,128 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D12&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:45:20,801 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:45:21,027 INFO page=12 stories=15 new=15
+2026-11-04 23:45:21,035 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D13&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:45:29,394 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:45:29,619 INFO page=13 stories=15 new=15
+2026-11-04 23:45:29,627 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D14&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:45:37,743 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:45:37,979 INFO page=14 stories=15 new=15
+2026-11-04 23:45:37,987 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D15&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:45:46,172 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:45:46,412 INFO page=15 stories=15 new=15
+2026-11-04 23:45:46,417 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D16&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:45:54,226 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:45:54,455 INFO page=16 stories=15 new=15
+2026-11-04 23:45:54,460 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D17&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:02,439 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:46:02,663 INFO page=17 stories=15 new=15
+2026-11-04 23:46:02,670 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D18&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:11,684 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:46:11,933 INFO page=18 stories=15 new=15
+2026-11-04 23:46:11,944 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D19&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:20,917 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:20,955 INFO page=0 stories=15 new=0 (cache)
+2026-11-04 23:46:20,964 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D1&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:20,998 INFO page=1 stories=15 new=0 (cache)
+2026-11-04 23:46:21,006 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D2&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,041 INFO page=2 stories=15 new=0 (cache)
+2026-11-04 23:46:21,050 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D3&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,092 INFO page=3 stories=15 new=0 (cache)
+2026-11-04 23:46:21,101 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D4&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,133 INFO page=4 stories=15 new=0 (cache)
+2026-11-04 23:46:21,143 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D5&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,174 INFO page=5 stories=15 new=0 (cache)
+2026-11-04 23:46:21,184 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D6&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,218 INFO page=6 stories=15 new=0 (cache)
+2026-11-04 23:46:21,227 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D7&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,258 INFO page=7 stories=15 new=0 (cache)
+2026-11-04 23:46:21,268 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D8&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,303 INFO page=8 stories=15 new=0 (cache)
+2026-11-04 23:46:21,314 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D9&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,351 INFO page=9 stories=15 new=0 (cache)
+2026-11-04 23:46:21,361 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D10&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,392 INFO page=10 stories=15 new=0 (cache)
+2026-11-04 23:46:21,402 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D11&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,434 INFO page=11 stories=15 new=0 (cache)
+2026-11-04 23:46:21,440 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D12&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,473 INFO page=12 stories=15 new=0 (cache)
+2026-11-04 23:46:21,479 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D13&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,512 INFO page=13 stories=15 new=0 (cache)
+2026-11-04 23:46:21,521 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D14&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,560 INFO page=14 stories=15 new=0 (cache)
+2026-11-04 23:46:21,569 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D15&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,603 INFO page=15 stories=15 new=0 (cache)
+2026-11-04 23:46:21,613 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D16&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,644 INFO page=16 stories=15 new=0 (cache)
+2026-11-04 23:46:21,654 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D17&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,685 INFO page=17 stories=15 new=0 (cache)
+2026-11-04 23:46:21,694 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D18&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:46:21,745 INFO page=18 stories=15 new=0 (cache)
+2026-11-04 23:46:21,753 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D19&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:25,076 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:46:25,299 INFO page=19 stories=15 new=15
+2026-11-04 23:46:25,306 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D20&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:33,256 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:46:33,489 INFO page=20 stories=15 new=15
+2026-11-04 23:46:33,494 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D21&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:41,271 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:46:41,502 INFO page=21 stories=15 new=15
+2026-11-04 23:46:41,508 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D22&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:49,499 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:46:49,733 INFO page=22 stories=15 new=15
+2026-11-04 23:46:49,741 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D23&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:46:57,547 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:46:57,784 INFO page=23 stories=15 new=15
+2026-11-04 23:46:57,795 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D24&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:47:05,541 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:47:05,769 INFO page=24 stories=15 new=15
+2026-11-04 23:47:05,775 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D25&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:47:13,801 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:47:14,071 INFO page=25 stories=15 new=15
+2026-11-04 23:47:14,082 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D26&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:47:21,881 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:47:22,110 INFO page=26 stories=15 new=15
+2026-11-04 23:47:22,116 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D27&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:47:30,010 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:47:30,232 INFO page=27 stories=15 new=15
+2026-11-04 23:47:30,240 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D28&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:47:38,104 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:47:38,337 INFO page=28 stories=15 new=15
+2026-11-04 23:47:38,343 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D29&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:47:46,228 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:47:46,482 INFO page=29 stories=15 new=15
+2026-11-04 23:47:46,488 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D30&bucket=default&max_age=3600 "HTTP/1.1 404 Not Found"
+2026-11-04 23:47:54,409 INFO HTTP Request: POST http://webcache.scrapestack.local/cache "HTTP/1.1 201 Created"
+2026-11-04 23:47:54,644 INFO page=30 stories=15 new=15
+2026-11-04 23:47:54,658 INFO run done: pages_fetched=31 (cached=19) new_stories=180
+2026-11-04 23:47:59,888 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:47:59,925 INFO page=0 stories=15 new=0 (cache)
+2026-11-04 23:47:59,934 INFO HTTP Request: GET http://webcache.scrapestack.local/cache?url=https%3A%2F%2Fslashdot.org%2F%3Fpage%3D1&bucket=default&max_age=3600 "HTTP/1.1 200 OK"
+2026-11-04 23:47:59,970 INFO page=1 stories=15 new=0 (cache)
+2026-11-04 23:47:59,970 INFO page 1 had no new stories — gap filled, stopping
+2026-11-04 23:47:59,984 INFO run done: pages_fetched=2 (cached=2) new_stories=0
