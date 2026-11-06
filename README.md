@@ -87,7 +87,7 @@ The workspace is built to be worked on with coding agents. Skills live in
 | [**Cascade**](https://github.com/dwilson2547/Cascade) | Movement-first 3D roguelite: chained bullet jumps, slides and mid-air redirects come first, everything else after. | Godot 4 · C# |
 | [**point-cloud-visualizer**](https://github.com/dwilson2547/point-cloud-visualizer) | Live point cloud streaming: publishers send batches and odometry over WebSocket, the server fuses a voxel world model and serves LOD views to a three.js viewer. | TypeScript · three.js · WebSocket · Python sidecar |
 
-### All projects (102)
+### All projects (110)
 
 [Automotive](#automotive) · [Web scraping](#web-scraping) · [Robotics & 3D scanning](#robotics--3d-scanning) · [Drones](#drones) · [Embedded](#embedded) · [Apps](#apps) · [Media](#media) · [AI & ML](#ai--ml) · [Messaging & streaming](#messaging--streaming) · [Infrastructure](#infrastructure) · [Games](#games) · [Tools](#tools) · [Meta](#meta) · [Experiments](#experiments)
 
@@ -114,6 +114,7 @@ The workspace is built to be worked on with coding agents. Skills live in
 | [**manga-scraper**](web-scrapers/manga-scraper) | Scraper for publicly visible manga pages. |
 | 🔒 **scrape-job-manager** | Kubernetes operator for scheduled scrapers: Scraper, ScrapeJob and ScrapePool resources, balanced across a period with per-scraper serialisation, plus a web UI. |
 | [**scrape-stack**](https://github.com/dwilson2547/scrape_stack) | The shared scraping service suite: HTTP response cache, request permits and rate limiting, egress routing and monitoring, as one compose stack or Helm chart. |
+| [**slashdot-news-archive**](web-scrapers/slashdot-news-archive) | Daily scraper for the [Slashdot](https://slashdot.org/) homepage firehose. Fetches `https://slashdot.org/` (and `?page=N` to fill gaps), parses every story —… |
 | 🔒 **web-workflows** | Browser workflow automation: an MV3 Chrome extension as sensor/actuator, with a self-hosted backend owning state, the job queue and downloads. |
 
 #### Robotics & 3D scanning
@@ -199,8 +200,12 @@ The workspace is built to be worked on with coding agents. Skills live in
 | 🔒 **ai-projects** | Earlier home of the image analyzer, tagger and model scripts. |
 | [**dan-wiki**](https://github.com/dwilson2547/DanWiki) | Full-stack wiki with hierarchical pages, attachments and embeddings search. |
 | [**face-app**](https://github.com/dwilson2547/face_app) | Local face-grouping POC clustering the same person across a folder of images. |
+| [**gen-ai-platform**](https://github.com/dwilson2547/gen-ai-platform) | Generate, store and tweak generative-AI artifacts — images for now — from a web page or from agents over an OAuth MCP server. Every artifact keeps the prompt… |
+| [**gpu-scheduler**](https://github.com/dwilson2547/gpu-scheduler) | Shares the cluster's one GPU (RTX 3080 12 GB on `k8s-ainode`) between services. Services submit work to a per-model queue. One scheduler process owns the GPU… |
 | 🔒 **image-analyzer** | Image sharpness and quality metrics (Laplacian, Sobel, FFT). |
 | [**image-tagger**](https://github.com/dwilson2547/image_tagger) | Image tagging script and API. |
+| [**local-model-builder**](ai/local-model-builder) | Can the local models build a small app if a planner breaks it into tiny, test-backed tasks? A spec and an ordered list of task cards go in; each task is sent… |
+| 🔒 **model-forge** | Model-making pipeline for the Ampere Altra node: structural surgery, quantization, MoE assembly, and a benchmark funnel that ranks candidate models. Design phase. |
 | 🔒 **model-test-scripts** | Scratch scripts for local models (llama.cpp, Hugging Face). |
 | [**room-acoustics-sim**](https://github.com/dwilson2547/room-acoustic-sim) | Interactive room acoustics simulator: Pyroomacoustics backend, Three.js visualisation of speaker placement. |
 
@@ -215,6 +220,7 @@ The workspace is built to be worked on with coding agents. Skills live in
 | [**pub-sub-kiss-icp**](https://github.com/dwilson2547/pub-sub-kiss-icp) | Pub/sub wrapper around KISS-ICP: point clouds in, LiDAR odometry out. |
 | [**pub-sub-perf-tool**](https://github.com/dwilson2547/pub-sub-perf-tool) | Pub/sub performance and validation testing across messaging systems. |
 | [**pub-sub-tools**](https://github.com/dwilson2547/pub-sub-tools) | Assorted tools for pub/sub systems. |
+| [**spool**](https://github.com/dwilson2547/spool) | A local, disk-persisted, partitioned pub/sub buffer in Rust. It decouples a producer from a publisher on the same host without an external broker. You get Ka… |
 | [**stream-canary**](https://github.com/dwilson2547/stream-canary) | Safe-rollout orchestrator for Kafka stream processors: mirror prod traffic into a canary, verify, gate, promote or roll back. |
 | [**sub-pub**](https://github.com/dwilson2547/sub-pub) | High-throughput Python processor moving messages between pub/sub systems, with back-pressure and metrics. |
 
@@ -228,6 +234,7 @@ The workspace is built to be worked on with coding agents. Skills live in
 | [**desktop-jenkins**](infra/desktop-jenkins) | Jenkins on the desktop. |
 | [**dwilson2547.github.io**](https://github.com/dwilson2547/dwilson2547.github.io) | GitHub Pages site. |
 | 🔒 **helm** | Baseline Helm charts and a Helm cheat sheet. |
+| [**incident-operator**](https://github.com/dwilson2547/incident-operator) | Turns Alertmanager alerts into tracked incidents and has a small local LLM (through gpu-scheduler) triage each one. The model picks and explains; code decide… |
 | [**otel-prom-stack**](infra/otel-prom-stack) | Local OTel Collector → Prometheus → Grafana compose stack. |
 | [**portable_cluster**](infra/portable_cluster) | Design for a repeatable data-node cluster where each datastore shards and replicates at the application layer. |
 | [**prometheus-stack**](infra/prometheus-stack) | Prometheus and Grafana compose stack. |
@@ -287,6 +294,7 @@ The workspace is built to be worked on with coding agents. Skills live in
 |---|---|
 | [**hom-tx-perf-test**](https://github.com/dwilson2547/Hom-tx-perf-test) | Polyglot homogeneous-transform library with a shared benchmark: Python (NumPy) vs Rust (PyO3/nalgebra). |
 | [**pocs**](https://github.com/dwilson2547/pocs) | Small proofs of concept: Angular components, gRPC, OCR, embedded Postgres, Potree popouts. |
+| [**rust-learning**](experiments/rust-learning) | Small, working Rust programs to learn from by poking at them. Each one is short. The comments cover only what is specific to Rust; general programming concep… |
 | [**iggy**](experiments/testing/iggy) | Local Apache Iggy server for integration tests. |
 | [**k8s-sandbox**](https://github.com/dwilson2547/k8s_sandbox) | kind-based local Kubernetes sandbox with Helm tool installers. |
 | [**python-gherkin-testcontainers**](https://github.com/dwilson2547/python-gherkin-testcontainers) | behave BDD tests with Testcontainers: plugin per service, client injection, managed lifecycle. |

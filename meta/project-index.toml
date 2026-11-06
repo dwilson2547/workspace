@@ -284,6 +284,10 @@ summary = "Image tagging script and API."
 summary = "Scratch scripts for local models (llama.cpp, Hugging Face)."
 private = true
 
+[projects."ai/model-forge"]
+summary = "Model-making pipeline for the Ampere Altra node: structural surgery, quantization, MoE assembly, and a benchmark funnel that ranks candidate models. Design phase."
+private = true
+
 [projects."ai/ai-projects"]
 summary = "Earlier home of the image analyzer, tagger and model scripts."
 private = true
