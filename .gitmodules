@@ -287,3 +287,6 @@
 [submodule "ai/gen-ai-platform"]
 	path = ai/gen-ai-platform
 	url = https://github.com/dwilson2547/gen-ai-platform
+[submodule "ai/model-forge"]
+	path = ai/model-forge
+	url = git@github.com:dwilson2547/model_forge.git
