@@ -290,3 +290,9 @@
 [submodule "ai/model-forge"]
 	path = ai/model-forge
 	url = git@github.com:dwilson2547/model_forge.git
+[submodule "embedded/race-logger"]
+	path = embedded/race-logger
+	url = git@github.com:dwilson2547/race-logger.git
+[submodule "embedded/digital-dash"]
+	path = embedded/digital-dash
+	url = git@github.com:dwilson2547/digital-dash.git
