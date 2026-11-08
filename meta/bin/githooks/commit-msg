@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Stops commit messages that advertise a security fix. A title like "remove the
+# hard-coded password" tells anyone reading a public log exactly which diff
+# still shows the old value. Scrubs get plain titles ("parts-loader: config from
+# environment"); what was removed goes to the user in chat, never into the repo.
+# CONVENTIONS.md §9.
+#
+# Agent sessions (CLAUDECODE=1) are blocked; by hand it only warns.
+# Genuine feature work that has to use these words (a password-reset page, token
+# refresh): WSGIT_MSG_OK=1 git commit ...
+
+[ -n "$WSGIT_MSG_OK" ] && exit 0
+
+# The message as git will store it: no comment lines, nothing below the
+# --verbose scissors line, no trailers such as Co-Authored-By.
+msg=$(sed -e '/^# -* >8 -*$/,$d' -e '/^#/d' "$1" | grep -viE '^[A-Za-z-]+-by: ')
+
+hits=$(printf '%s\n' "$msg" | grep -ioE \
+  -e '\b(passwords?|passwd|passphrases?|secrets?|credentials?|creds)\b' \
+  -e '\b(api[ _-]?keys?|private[ _-]keys?|access[ _-]keys?|tokens?)\b' \
+  -e '\b(leak(s|ed|ing)?|redact(s|ed|ing|ion)?|scrub(s|bed|bing)?)\b' \
+  -e '\b(vulnerab[a-z]*|exploit[a-z]*|expos(ed|ure)|hard-?coded|plain-?text|cve-[0-9]+)\b' \
+  | tr 'A-Z' 'a-z' | sort -u | tr '\n' ' ')
+[ -z "$hits" ] && exit 0
+
+RED=$'\033[31m'; YEL=$'\033[33m'; OFF=$'\033[0m'
+if [ "${CLAUDECODE:-}" = "1" ]; then
+  printf '%s\n' "${RED}BLOCKED:${OFF} commit message mentions: $hits" >&2
+  printf '  %s\n' \
+    "On a scrub, this points readers of the log at the diff that still shows the value." \
+    "Reword it as routine work (\"config from environment\", \"workman.db: refresh\")" \
+    "and tell the user what was removed in chat." \
+    "Feature work that genuinely needs the word: WSGIT_MSG_OK=1 git commit ..." >&2
+  exit 1
+fi
+printf '%s\n' "${YEL}warning:${OFF} commit message mentions: $hits— fine for feature work, not for a fix or scrub." >&2
+exit 0

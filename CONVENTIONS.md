@@ -392,9 +392,14 @@ outright:
    compares against the last fetched refs and tells you the sequence that works from where you are
    standing — including `git stash` first, since `git pull` refuses to run with staged changes.
 3. **Secrets.** The gate below, applied to staged content.
+4. **Messages that advertise a fix** (`commit-msg`). Words such as *password*, *secret*, *token*,
+   *redact*, *scrub*, *leak* or *vulnerability* in a commit message are blocked in agent sessions
+   and only warned about by hand. On a scrub, a message like that tells anyone reading a public log
+   which diff still shows the old value. Give scrubs plain titles and report the removal in chat.
 
-`WSGIT_SKIP=1 git commit …` overrides for a single commit; use it for a false positive, not to get
-past a real one.
+`WSGIT_SKIP=1 git commit …` overrides checks 1–3 for a single commit; use it for a false positive,
+not to get past a real one. Check 4 has its own override, `WSGIT_MSG_OK=1`, for feature work that
+genuinely needs the word (a password-reset page).
 
 ### The repo is current before work starts
 
