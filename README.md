@@ -206,6 +206,7 @@ The workspace is built to be worked on with coding agents. Skills live in
 | [**image-tagger**](https://github.com/dwilson2547/image_tagger) | Image tagging script and API. |
 | [**local-model-builder**](ai/local-model-builder) | Can the local models build a small app if a planner breaks it into tiny, test-backed tasks? A spec and an ordered list of task cards go in; each task is sent… |
 | 🔒 **model-forge** | Model-making pipeline for the Ampere Altra node: structural surgery, quantization, MoE assembly, and a benchmark funnel that ranks candidate models. Design phase. |
+| 🔒 **pluggable-experts** | Knowledge modules that plug into a local model: a persistent, updatable layer of the user's own information, made without a training run. Design phase. |
 | 🔒 **model-test-scripts** | Scratch scripts for local models (llama.cpp, Hugging Face). |
 | [**room-acoustics-sim**](https://github.com/dwilson2547/room-acoustic-sim) | Interactive room acoustics simulator: Pyroomacoustics backend, Three.js visualisation of speaker placement. |
 

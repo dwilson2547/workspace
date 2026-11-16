@@ -299,3 +299,6 @@
 [submodule "embedded/esp32-p4-camera"]
 	path = embedded/esp32-p4-camera
 	url = git@github.com:dwilson2547/esp32-p4-camera.git
+[submodule "ai/pluggable-experts"]
+	path = ai/pluggable-experts
+	url = git@github.com:dwilson2547/pluggable-experts.git
