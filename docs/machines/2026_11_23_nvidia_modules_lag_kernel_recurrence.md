@@ -103,8 +103,15 @@ Upgrade: linux-modules-nvidia-580-open-generic-hwe-24.04  7.0.0-31.31 → 7.0.0-
 Remove:  linux-modules-nvidia-580-open-7.0.0-28-generic
 ```
 
-**Status: package install verified in the apt log. ⚠ unverified: the post-reboot check (`nvidia-smi`, and whether YouTube on the
-dock screens improved).**
+**Status: fixed and verified.** Package install is in the apt log. After the reboot (user, 2026-11-24), `nvidia-smi` reports the
+GTX 1650 on driver `580.178.04` under kernel `7.0.0-43-generic`, `modinfo -F version nvidia` agrees, the session type is `x11`,
+and `xrandr --listproviders` lists the NVIDIA provider. ⚠ unverified: whether YouTube on the dock screens improved; the user
+has not said.
+
+**Expected side effect, not a new fault:** with the NVIDIA driver loaded, the GDM greeter and the first desktop start crash once
+and then come up on the second try. That is the long-standing, root-caused-but-unfixed
+[RRTellChanged use-after-free](2026_09_06_xorg_greeter_crash_rrtellchanged.md). It only shows while the driver works, so it
+returned as soon as this fix landed.
 
 ### Hazard from September was not followed
 

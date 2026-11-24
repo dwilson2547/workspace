@@ -15,7 +15,7 @@ load-bearing fact about this machine.
 | Record | Root cause | Status |
 |---|---|---|
 | [2026_09_06 — NVIDIA modules stop tracking the kernel](2026_09_06_nvidia_module_missing_hdmi_not_detected.md) | Prebuilt module packages pinned to one kernel ABI; dGPU left driverless, HDMI port absent from `/sys/class/drm` entirely | Fixed |
-| [2026_11_23 — NVIDIA modules missing again: the metapackage fell behind the kernel](2026_11_23_nvidia_modules_lag_kernel_recurrence.md) | Recurrence of the 09_06 failure. Running kernel `7.0.0-43` had no prebuilt module package because the flavour metapackage was still at `-31`; dGPU driverless, `nvidia-smi` failed | Fixed (package installed; post-reboot check not yet verified). DKMS switch pending |
+| [2026_11_23 — NVIDIA modules missing again: the metapackage fell behind the kernel](2026_11_23_nvidia_modules_lag_kernel_recurrence.md) | Recurrence of the 09_06 failure. Running kernel `7.0.0-43` had no prebuilt module package because the flavour metapackage was still at `-31`; dGPU driverless, `nvidia-smi` failed | Fixed (verified 2026-11-24: `nvidia-smi` OK). DKMS switch pending. The greeter crash returns with the driver, see the RRTellChanged record |
 | [2026_09_06 — RRTellChanged use-after-free kills the GDM greeter](2026_09_06_xorg_greeter_crash_rrtellchanged.md) | `xf86platformRemoveDevice` calls `RRTellChanged` after the GPU screen's `rrScrPriv` is freed, while still linked in `primary->secondary_list` | Root-caused, unfixed |
 
 ## Tower: Unraid backup box (192.168.0.15)
