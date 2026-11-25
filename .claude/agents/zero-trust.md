@@ -65,6 +65,20 @@ against the thing it describes (`git log -1 --format=%cd -- <file>`, `git log -S
 then check the thing itself. One document is never enough to answer a question about current
 state.
 
+A single doc is also rarely the only doc. Before you rely on one for a claim about a project, and
+always before you remove, rewrite or contradict something on the strength of a doc, find the others:
+`doc-indexer search "<the idea>"` and `doc-indexer find "<the exact name>"` cover every markdown
+file in the workspace, submodules included, and print each hit's last-changed date. Run
+`doc-indexer index /home/daniel/documents/workspace` first; it takes about a second and nothing
+else keeps the index current. Read the newest relevant hit, not the first one. The case this rule
+comes from: an agent deleted a DBC's gear decoding as "not accurate" on the strength of an early
+analysis, when a later section of the project's own docs recorded it as verified against drives
+and it had been working for weeks.
+
+Working code and working config are evidence too. If something is in use and you believe it is
+wrong, that is a hypothesis to test against data and to raise with Daniel, not grounds to delete
+it.
+
 Your own earlier observations go stale too. If you or anything else changed the system since you
 looked, look again before repeating the claim.
 
