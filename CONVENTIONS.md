@@ -84,7 +84,7 @@ a `projects/` bucket. There is deliberately no `projects/` domain.
 | `infra/` | k8s, ArgoCD, baseline Helm, Docker, CI tooling | `cluster-config`, `helm`, `dockers`, `desktop-jenkins` |
 | `tools/` | Standalone utilities, CLIs, browser/editor extensions, one-off scripts | `scripts`, `auto-dbms-from-sql`, `cronjob-manager`, `chrome-extensions`, `obsidian-plugins/*`, `potree` |
 | `apps/` | End-user GUI/desktop/web apps | `task-queue-manager` |
-| `meta/` | Agent skills, workspace conventions, knowledge tooling | `SKILLS`, `bin/wsnote`, `doc-indexer`, plus the documentation tooling relocated out of the old top-level `docs/` (`markdown-api`, `markdown-renderer`, `sidebar-generator`) |
+| `meta/` | Agent skills and agent definitions, workspace conventions, knowledge tooling | `SKILLS`, `AGENTS`, `bin/wsnote`, `doc-indexer`, plus the documentation tooling relocated out of the old top-level `docs/` (`markdown-api`, `markdown-renderer`, `sidebar-generator`) |
 | `private/` | Personal projects kept out of public view. Deliberate §2 exception: the domain folder holds a single **private container submodule** (one private remote) and projects live as plain folders inside it, so nothing about them appears in this public repo. Contents are documented only inside that private submodule | *(private)* |
 | `experiments/` | POCs and sandboxes kept for reference | `pocs/*`, `testing/*` |
 | `archive/` | Superseded / dead, kept for history only. **Mirrors the taxonomy one level down** — `archive/<domain>/<project>` (§4c) | `automotive/` (gyopart predecessors, standalone rockauto scrapers), `web-scrapers/` (the old monorepo + cache/permit services absorbed into scrape-stack), `meta/` (the retired knowledge stack, §5), `apps/`, `embedded/` |

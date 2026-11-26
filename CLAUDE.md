@@ -41,23 +41,44 @@ The essentials (full detail in `CONVENTIONS.md`):
   a commit inside a submodule is not finished until the superrepo records it. Straight after
   pushing the submodule, from the workspace root:
   `git add <path> && git commit -m "Submodule bump: <project> <what changed>" && git push`.
-  Bump only the submodules you committed in; another session's unbumped pointer is theirs. **The only gate is secrets
-  and credentials** — scan the diff, and if something is found, stop and unstage rather than
+  Bump only the submodules you committed in; another session's unbumped pointer is theirs.
+  **The only gate is secrets and credentials** — scan the diff, and if something is found, stop and unstage rather than
   planning to fix it in the next commit (§9).
 - **Helm/Argo** — self-deploying project → `<project>/helm/<project>/`; shared/cluster-wide →
   `infra/cluster-config/` (§6).
+- **Look it up first: `doc-indexer`** — one local index over every markdown file in the workspace,
+  submodules included; the single point of access to what has already been decided, solved or
+  recorded. Use it before non-trivial work, and **always before deleting, rewriting or
+  contradicting something on the strength of a doc**:
+  ```bash
+  doc-indexer index <workspace root>    # ~1s; nothing else keeps the index current
+  doc-indexer search "<the idea>"       # semantic: symptoms, concepts, "how do we…"
+  doc-indexer find "<exact name>"       # literal: signal names, error strings, config keys
+  ```
+  Every hit shows its last-changed date. When hits disagree, the newer one is usually the
+  correction; read it in full. Files are often duplicated across submodules, so before editing one,
+  find its other copies and work on the one the running system actually loads. (2026-11-25: an
+  agent removed the Impala's working gear signal after auditing a stale fork of its DBC.)
+- **Evidence in answers** — a claim about current state is backed by a tool call made this
+  session, stated by the user, or labelled. A *hypothesis* is called one and comes with the
+  evidence for it, the evidence against it, and the check that would settle it; run that check
+  yourself whenever you can. Never ask the user to run a check you are able to run. Docs, memory
+  and training are leads, not answers. For questions where a wrong answer is expensive, the
+  stricter mode is `claude --agent zero-trust` (`meta/AGENTS/`).
 - **Provenance** — every specific claim in a doc is *verified*, *planned*, or marked
   `⚠ unverified` (§10). Never fill an unknown with a plausible value from a "typical" setup, and
   never upgrade a claim's status without a measurement, a config dump, or the user's word. Do not
   configure against planned/⬜ rows without eyes on the hardware.
 
-- **First run on a machine** — two things live in `.git/config` and `~/`, so they cannot be
+- **First run on a machine** — three things live in `.git/config` and `~/`, so they cannot be
   committed and may be missing on a fresh clone. Check, and install if absent:
   ```bash
   git config --get core.hooksPath   # expect <workspace>/meta/bin/githooks
   ./meta/bin/install-git-guards.sh          # if it is not that
   ls ~/.claude/skills/doc-indexer           # expect a symlink into meta/SKILLS
   ./meta/SKILLS/install_skill_symlinks.sh   # if missing
+  ls ~/.claude/agents/zero-trust.md         # expect a symlink into meta/AGENTS
+  ./meta/AGENTS/install_agent_symlinks.sh   # if missing
   ```
   Full detail and the hooksPath interaction: [`SUBMODULES.md`](./SUBMODULES.md). The session-start
   git sync needs no setup — it is committed and path-independent.

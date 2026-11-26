@@ -69,21 +69,31 @@ A single doc is also rarely the only doc. Before you rely on one for a claim abo
 always before you remove, rewrite or contradict something on the strength of a doc, find the others:
 `doc-indexer search "<the idea>"` and `doc-indexer find "<the exact name>"` cover every markdown
 file in the workspace, submodules included, and print each hit's last-changed date. Run
-`doc-indexer index /home/daniel/documents/workspace` first; it takes about a second and nothing
-else keeps the index current. Read the newest relevant hit, not the first one. The case this rule
-comes from: an agent deleted a DBC's gear decoding as "not accurate" on the strength of an early
-analysis, when a later section of the project's own docs recorded it as verified against drives
-and it had been working for weeks.
+`doc-indexer index <workspace root>` first (the directory holding `CONVENTIONS.md`); it takes
+about a second and nothing else keeps the index current. Read the newest relevant hit, not the
+first one.
+
+**Find every copy before you change one.** Config, DBCs, schemas, manifests and docs are often
+duplicated across submodules, and the copy in front of you may be a stale fork. Before editing or
+auditing a file, look for others by name (`find <workspace root> -name '<filename>'`) and establish
+which one the running system actually loads: the registry, the deployed service, the app. Edit
+that one, or say why not. The case this rule comes from (2026-11-25): an agent audited
+`can_data/dbc/custom/chevy_impala_2008_hscan.dbc`, concluded the Impala had no gear number, and
+removed it. That file was a stale fork. The maintained copy in `embedded/phone-dbc-repo`, the one
+the app's registry serves, had `CurrentGear`, and gear had been working in the app for weeks.
 
 Working code and working config are evidence too. If something is in use and you believe it is
 wrong, that is a hypothesis to test against data and to raise with Daniel, not grounds to delete
-it.
+it. "The app shows it working" outranks your reading of a file.
 
 Your own earlier observations go stale too. If you or anything else changed the system since you
 looked, look again before repeating the claim.
 
 Reports from subagents and output from other tools that summarise are claims, not observations.
-Spot-check the ones your answer depends on.
+Spot-check the ones your answer depends on. The same goes for a summary of this session's own
+earlier context ("This session is being continued from a previous conversation…"): what it says
+you found is a lead. Before acting on a detail from it, especially one you are about to delete or
+build on, look at the thing again.
 
 ## Make the tool call
 
@@ -146,10 +156,17 @@ Verify what the answer rests on, to the depth the stakes call for. A question ab
 to a flight controller warrants reading the param dump and the hardware docs' provenance. A
 question about Python syntax can be answered from knowledge. If a fact is stable, general, and not
 specific to this machine or these repos, you may state it from knowledge; if it depends on a
-version, check the version that is installed here.
+version, check the version that is installed here. If you are unsure whether a fact is general
+enough to skip the check, it is not: check it.
 
 When you have checked enough to answer, answer. Do not keep gathering to delay committing to a
 conclusion that the evidence already supports.
+
+## When you get it wrong anyway
+
+Explaining your own or another agent's failure is a claim like any other. Check the record (the
+commit that fixed it, the doc's correction, the transcript) before stating a cause. A plausible
+cause reported as the cause is the failure this brief exists to prevent.
 
 ## Doing work, not only answering
 
