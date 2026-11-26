@@ -1,270 +1,359 @@
 [submodule "tools/scripts"]
 	path = tools/scripts
 	url = git@github.com:dwilson2547/scripts.git
+	branch = main
 [submodule "tools/chrome-extensions"]
 	path = tools/chrome-extensions
 	url = git@github.com:dwilson2547/chrome_extensions.git
+	branch = main
 [submodule "tools/potree"]
 	path = tools/potree
 	url = git@github.com:dwilson2547/potree.git
+	branch = develop
 [submodule "media/photo-dump"]
 	path = media/photo-dump
 	url = git@github.com:dwilson2547/photo_dump.git
+	branch = main
 [submodule "archive/automotive/parts-interchange"]
 	path = archive/automotive/parts-interchange
 	url = git@github.com:dwilson2547/parts_interchange.git
+	branch = main
 [submodule "archive/meta/wiki-demo"]
 	path = archive/meta/wiki-demo
 	url = git@github.com:dwilson2547/wiki_demo.git
+	branch = main
 [submodule "experiments/pocs"]
 	path = experiments/pocs
 	url = git@github.com:dwilson2547/pocs.git
+	branch = main
 [submodule "tools/auto-dbms-from-sql"]
 	path = tools/auto-dbms-from-sql
 	url = git@github.com:dwilson2547/auto_dbms_from_sql.git
+	branch = main
 [submodule "infra/helm"]
 	path = infra/helm
 	url = git@github.com:dwilson2547/helm.git
+	branch = main
 [submodule "ai/dan-wiki"]
 	path = ai/dan-wiki
 	url = git@github.com:dwilson2547/DanWiki.git
+	branch = main
 [submodule "archive/meta/tool-wikis"]
 	path = archive/meta/tool-wikis
 	url = git@github.com:dwilson2547/tool_wikis.git
+	branch = main
 [submodule "media/media-library-manager"]
 	path = media/media-library-manager
 	url = git@github.com:dwilson2547/media-library-manager.git
+	branch = main
 [submodule "tools/obsidian-plugins/obsidian-image-resizer"]
 	path = tools/obsidian-plugins/obsidian-image-resizer
 	url = git@github.com:dwilson2547/obsidian-image-resizer.git
+	branch = master
 [submodule "tools/obsidian-plugins/obsidian-shell-runner"]
 	path = tools/obsidian-plugins/obsidian-shell-runner
 	url = git@github.com:dwilson2547/obsidian-shell-runner.git
+	branch = main
 [submodule "tools/obsidian-plugins/obsidian-html-apps"]
 	path = tools/obsidian-plugins/obsidian-html-apps
 	url = git@github.com:dwilson2547/obsidian_html_apps.git
+	branch = main
 [submodule "experiments/testing/python-gherkin-testcontainers"]
 	path = experiments/testing/python-gherkin-testcontainers
 	url = git@github.com:dwilson2547/python-gherkin-testcontainers.git
+	branch = main
 [submodule "messaging/pub-sub-tools"]
 	path = messaging/pub-sub-tools
 	url = git@github.com:dwilson2547/pub-sub-tools.git
+	branch = main
 [submodule "messaging/sub-pub"]
 	path = messaging/sub-pub
 	url = git@github.com:dwilson2547/sub-pub.git
+	branch = main
 [submodule "messaging/pub-sub-perf-tool"]
 	path = messaging/pub-sub-perf-tool
 	url = git@github.com:dwilson2547/pub-sub-perf-tool.git
+	branch = main
 [submodule "messaging/iggy-poc"]
 	path = messaging/iggy-poc
 	url = git@github.com:dwilson2547/iggy-poc.git
+	branch = main
 [submodule "embedded/sensor-transposition"]
 	path = embedded/sensor-transposition
 	url = git@github.com:dwilson2547/sensor_transposition.git
+	branch = main
 [submodule "experiments/testing/k8s-sandbox"]
 	path = experiments/testing/k8s-sandbox
 	url = git@github.com:dwilson2547/k8s_sandbox.git
+	branch = main
 [submodule "tools/obsidian-plugins/obsidian-doc-puller"]
 	path = tools/obsidian-plugins/obsidian-doc-puller
 	url = git@github.com:dwilson2547/obsidian-doc-puller.git
+	branch = main
 [submodule "tools/obsidian-plugins/obsidian-monaco"]
 	path = tools/obsidian-plugins/obsidian-monaco
 	url = git@github.com:dwilson2547/obsidian-monaco.git
+	branch = main
 [submodule "automotive/gyopart"]
 	path = automotive/gyopart
 	url = git@github.com:dwilson2547/gyopart.git
+	branch = main
 [submodule "infra/cluster-config"]
 	path = infra/cluster-config
 	url = git@github.com:dwilson2547/cluster_config.git
+	branch = main
 [submodule "meta/SKILLS"]
 	path = meta/SKILLS
 	url = git@github.com:dwilson2547/SKILLS.git
+	branch = main
 [submodule "robotics/robo-services"]
 	path = robotics/robo-services
 	url = git@github.com:dwilson2547/robo-services.git
+	branch = main
 [submodule "embedded/ESP32RET"]
 	path = embedded/ESP32RET
 	url = git@github.com:dwilson2547/ESP32RET.git
+	branch = master
 [submodule "embedded/rtk-base-station"]
 	path = embedded/rtk-base-station
 	url = git@github.com:dwilson2547/rtk-base-station.git
+	branch = main
 [submodule "embedded/dbc-forge"]
 	path = embedded/dbc-forge
 	url = git@github.com:dwilson2547/dbc-forge.git
+	branch = main
 [submodule "embedded/can-simulator"]
 	path = embedded/can-simulator
 	url = git@github.com:dwilson2547/can-simulator.git
+	branch = main
 [submodule "embedded/media-remote"]
 	path = embedded/media-remote
 	url = git@github.com:dwilson2547/media-remote.git
+	branch = main
 [submodule "embedded/phone-dbc-repo"]
 	path = embedded/phone-dbc-repo
 	url = git@github.com:dwilson2547/dbc_companion.git
+	branch = main
 [submodule "embedded/rpi-camera"]
 	path = embedded/rpi-camera
 	url = git@github.com:dwilson2547/rpi_camera.git
+	branch = main
 [submodule "robotics/terrestrial-scanner"]
 	path = robotics/terrestrial-scanner
 	url = git@github.com:dwilson2547/terrestrial-scanner.git
+	branch = main
 [submodule "ai/face-app"]
 	path = ai/face-app
 	url = git@github.com:dwilson2547/face_app.git
+	branch = main
 [submodule "ai/image-tagger"]
 	path = ai/image-tagger
 	url = git@github.com:dwilson2547/image_tagger.git
+	branch = main
 [submodule "ai/model-test-scripts"]
 	path = ai/model-test-scripts
 	url = git@github.com:dwilson2547/model_test_scripts.git
+	branch = main
 [submodule "ai/image-analyzer"]
 	path = ai/image-analyzer
 	url = git@github.com:dwilson2547/image_analyzer.git
+	branch = main
 [submodule "archive/automotive/junkyard-inventory-scrapers"]
 	path = archive/automotive/junkyard-inventory-scrapers
 	url = git@github.com:dwilson2547/junkyard_inventory_scrapers.git
+	branch = main
 [submodule "archive/automotive/parts-direct"]
 	path = archive/automotive/parts-direct
 	url = git@github.com:dwilson2547/parts_direct.git
+	branch = main
 [submodule "web-scrapers/scrape-stack"]
 	path = web-scrapers/scrape-stack
 	url = git@github.com:dwilson2547/scrape_stack.git
+	branch = main
 [submodule "web-scrapers/scrape-job-manager"]
 	path = web-scrapers/scrape-job-manager
 	url = git@github.com:dwilson2547/scrape_job_manager.git
+	branch = main
 [submodule "automotive/autoevolution-scraper"]
 	path = automotive/autoevolution-scraper
 	url = git@github.com:dwilson2547/autoevolution_scraper.git
+	branch = main
 [submodule "automotive/rockauto"]
 	path = automotive/rockauto
 	url = git@github.com:dwilson2547/rockauto.git
+	branch = main
 [submodule "automotive/partsgeek-scraper"]
 	path = automotive/partsgeek-scraper
 	url = git@github.com:dwilson2547/partsgeek_scraper.git
+	branch = main
 [submodule "tools/nordvpn-proxy"]
 	path = tools/nordvpn-proxy
 	url = git@github.com:dwilson2547/nordvpn-proxy.git
+	branch = develop
 [submodule "archive/meta/context-store"]
 	path = archive/meta/context-store
 	url = git@github.com:dwilson2547/context-store.git
+	branch = main
 [submodule "archive/meta/ai-tool-docs"]
 	path = archive/meta/ai-tool-docs
 	url = git@github.com:dwilson2547/ai_tool_docs.git
+	branch = main
 [submodule "archive/meta/ai-notes-server"]
 	path = archive/meta/ai-notes-server
 	url = git@github.com:dwilson2547/ai_notes_server.git
+	branch = main
 [submodule "robotics/livox_handheld_scanner"]
 	path = robotics/livox_handheld_scanner
 	url = git@github.com:dwilson2547/livox_handheld_scanner.git
+	branch = main
 [submodule "messaging/iggy-flink-poc"]
 	path = messaging/iggy-flink-poc
 	url = git@github.com:dwilson2547/Iggy-flink-poc.git
+	branch = main
 [submodule "messaging/pub-sub-kiss-icp"]
 	path = messaging/pub-sub-kiss-icp
 	url = git@github.com:dwilson2547/pub-sub-kiss-icp.git
+	branch = main
 [submodule "robotics/gis-speed-limit"]
 	path = robotics/gis-speed-limit
 	url = git@github.com:dwilson2547/gis-speed-limit.git
+	branch = main
 [submodule "archive/web-scrapers/cache-browser"]
 	path = archive/web-scrapers/cache-browser
 	url = git@github.com:dwilson2547/cache_browser.git
+	branch = main
 [submodule "archive/web-scrapers/filecache"]
 	path = archive/web-scrapers/filecache
 	url = git@github.com:dwilson2547/filecache.git
+	branch = main
 [submodule "archive/web-scrapers/imgcache"]
 	path = archive/web-scrapers/imgcache
 	url = git@github.com:dwilson2547/imgcache.git
+	branch = main
 [submodule "archive/web-scrapers/vidcache"]
 	path = archive/web-scrapers/vidcache
 	url = git@github.com:dwilson2547/vidcache.git
+	branch = main
 [submodule "archive/web-scrapers/webcache"]
 	path = archive/web-scrapers/webcache
 	url = git@github.com:dwilson2547/webcache.git
+	branch = main
 [submodule "archive/web-scrapers/cache-client"]
 	path = archive/web-scrapers/cache-client
 	url = git@github.com:dwilson2547/cache_client.git
+	branch = main
 [submodule "archive/web-scrapers/request-authorization"]
 	path = archive/web-scrapers/request-authorization
 	url = git@github.com:dwilson2547/request_authorization.git
+	branch = main
 [submodule "archive/web-scrapers/http-test-service"]
 	path = archive/web-scrapers/http-test-service
 	url = git@github.com:dwilson2547/http-test-service.git
+	branch = main
 [submodule "archive/automotive/rockauto-selenium-scraper"]
 	path = archive/automotive/rockauto-selenium-scraper
 	url = git@github.com:dwilson2547/rockauto_selenium_scraper.git
+	branch = main
 [submodule "archive/automotive/rockauto-requests-scraper"]
 	path = archive/automotive/rockauto-requests-scraper
 	url = git@github.com:dwilson2547/rockauto_requests_scraper.git
+	branch = main
 [submodule "archive/automotive/rockauto-api-scraper"]
 	path = archive/automotive/rockauto-api-scraper
 	url = git@github.com:dwilson2547/rockauto_api_scraper.git
+	branch = main
 [submodule "tools/gitignore-cli"]
 	path = tools/gitignore-cli
 	url = git@github.com:dwilson2547/gitignore-cli.git
+	branch = main
 [submodule "tools/command-builder-interactive"]
 	path = tools/command-builder-interactive
 	url = git@github.com:dwilson2547/Command-builder-interactive.git
+	branch = main
 [submodule "experiments/hom-tx-perf-test"]
 	path = experiments/hom-tx-perf-test
 	url = git@github.com:dwilson2547/Hom-tx-perf-test.git
+	branch = main
 [submodule "archive/web-scrapers/web-scrapers"]
 	path = archive/web-scrapers/web-scrapers
 	url = git@github.com:dwilson2547/web_scrapers.git
+	branch = main
 [submodule "archive/embedded/arduino-pi-projects"]
 	path = archive/embedded/arduino-pi-projects
 	url = git@github.com:dwilson2547/arduino_pi_projects.git
+	branch = main
 [submodule "docs/wiki"]
 	path = docs/wiki
 	url = git@github.com:dwilson2547/wiki.git
+	branch = main
 [submodule "meta/markdown-api"]
 	path = meta/markdown-api
 	url = git@github.com:dwilson2547/markdown_api.git
+	branch = main
 [submodule "meta/markdown-renderer"]
 	path = meta/markdown-renderer
 	url = git@github.com:dwilson2547/markdown_renderer.git
+	branch = main
 [submodule "meta/sidebar-generator"]
 	path = meta/sidebar-generator
 	url = git@github.com:dwilson2547/sidebar_generator.git
+	branch = main
 [submodule "docs/auto-doc"]
 	path = docs/auto-doc
 	url = git@github.com:dwilson2547/auto-doc.git
+	branch = main
 [submodule "ai/ai-projects"]
 	path = ai/ai-projects
 	url = git@github.com:dwilson2547/ai_projects.git
+	branch = main
 [submodule "infra/dwilson2547.github.io"]
 	path = infra/dwilson2547.github.io
 	url = git@github.com:dwilson2547/dwilson2547.github.io.git
+	branch = master
 [submodule "games/ecosystem_sim"]
 	path = games/ecosystem_sim
 	url = git@github.com:dwilson2547/ecosystem_sim.git
+	branch = main
 [submodule "games/Cascade"]
 	path = games/Cascade
 	url = git@github.com:dwilson2547/Cascade.git
+	branch = main
 [submodule "robotics/structured-light-scanner"]
 	path = robotics/structured-light-scanner
 	url = git@github.com:dwilson2547/structured_light_scanner.git
+	branch = main
 [submodule "private/private"]
 	path = private/private
 	url = git@github.com:dwilson2547/private.git
+	branch = main
 [submodule "ai/room-acoustics-sim"]
 	path = ai/room-acoustics-sim
 	url = git@github.com:dwilson2547/room-acoustic-sim.git
+	branch = main
 [submodule "tools/point-cloud-visualizer"]
 	path = tools/point-cloud-visualizer
 	url = git@github.com:dwilson2547/point-cloud-visualizer.git
+	branch = main
 [submodule "drones/build-sim"]
 	path = drones/build-sim
 	url = git@github.com:dwilson2547/drone-build-sim.git
+	branch = main
 [submodule "tools/dxf-converter"]
 	path = tools/dxf-converter
 	url = git@github.com:dwilson2547/dxf-converter.git
+	branch = main
 [submodule "apps/nodewright"]
 	path = apps/nodewright
 	url = git@github.com:dwilson2547/nodewright.git
+	branch = main
 [submodule "apps/webdoc"]
 	path = apps/webdoc
 	url = git@github.com:dwilson2547/webdoc.git
+	branch = main
 [submodule "web-scrapers/web-workflows"]
 	path = web-scrapers/web-workflows
 	url = git@github.com:dwilson2547/web-workflows.git
+	branch = main
 [submodule "messaging/stream-canary"]
 	path = messaging/stream-canary
 	url = git@github.com:dwilson2547/stream-canary.git
@@ -272,33 +361,44 @@
 [submodule "infra/vmk8-cluster-config"]
 	path = infra/vmk8-cluster-config
 	url = git@github.com:dwilson2547/vmk8_cluster_config.git
+	branch = main
 [submodule "infra/router-config"]
 	path = infra/router-config
 	url = git@github.com:dwilson2547/router_config.git
+	branch = main
 [submodule "messaging/spool"]
 	path = messaging/spool
 	url = git@github.com:dwilson2547/spool.git
+	branch = main
 [submodule "ai/gpu-scheduler"]
 	path = ai/gpu-scheduler
 	url = git@github.com:dwilson2547/gpu-scheduler.git
+	branch = main
 [submodule "infra/incident-operator"]
 	path = infra/incident-operator
 	url = git@github.com:dwilson2547/incident-operator.git
+	branch = main
 [submodule "ai/gen-ai-platform"]
 	path = ai/gen-ai-platform
 	url = https://github.com/dwilson2547/gen-ai-platform
+	branch = main
 [submodule "ai/model-forge"]
 	path = ai/model-forge
 	url = git@github.com:dwilson2547/model_forge.git
+	branch = main
 [submodule "embedded/race-logger"]
 	path = embedded/race-logger
 	url = git@github.com:dwilson2547/race-logger.git
+	branch = main
 [submodule "embedded/digital-dash"]
 	path = embedded/digital-dash
 	url = git@github.com:dwilson2547/digital-dash.git
+	branch = main
 [submodule "embedded/esp32-p4-camera"]
 	path = embedded/esp32-p4-camera
 	url = git@github.com:dwilson2547/esp32-p4-camera.git
+	branch = main
 [submodule "ai/pluggable-experts"]
 	path = ai/pluggable-experts
 	url = git@github.com:dwilson2547/pluggable-experts.git
+	branch = main

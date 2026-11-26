@@ -5,7 +5,11 @@ each project's own TODO.md).
 
 ## Unprioritized
 
-- [ ] **Branch-tracking submodule sync** — Configure every submodule with its tracking branch in
+- [x] **Branch-tracking submodule sync** (done 2026-11-25) — `branch =` set for all 101 top-level
+  submodules in `.gitmodules`; `meta/bin/wsgit-status` now attaches detached submodules to that
+  branch and clones uninitialised ones at session start. Tested: `update = merge` and a
+  `foreach` alias were not enough on git 2.43 — a fresh `update --init` still detaches, and
+  `foreach` skips uninitialised submodules — so neither was added. Original plan: Configure every submodule with its tracking branch in
   `.gitmodules` (`branch = main` for most; a few use `dev`/`develop` — audit each) plus
   `update = merge`, so `git submodule update --remote` pulls latest into the local branch instead
   of detaching HEAD. Add a `git sync-subs` alias (`git submodule foreach 'git checkout <branch> &&

@@ -122,8 +122,10 @@ One of the two git safeguards (CONVENTIONS.md §9) is wired through `.claude/set
 which **is** committed, and neither its hook command nor the script hardcodes a path — so it
 works in any clone at any path with no setup at all:
 
-- **SessionStart** → `meta/bin/wsgit-status` fetches the superrepo and all submodules in parallel
-  and fast-forwards whatever is safe, before the first prompt is answered.
+- **SessionStart** → `meta/bin/wsgit-status` fetches the superrepo and all submodules in parallel,
+  fast-forwards whatever is safe, clones newly added submodules, and puts detached submodules on
+  their tracking branch, before the first prompt is answered. When adding a submodule, set its
+  `branch =` in `.gitmodules` (otherwise origin's default is used).
 
 Only the other — the pre-commit guard — needs §2a above, because `core.hooksPath` lives in
 `.git/config` and cannot be committed.

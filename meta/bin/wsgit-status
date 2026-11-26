@@ -11,7 +11,20 @@
 # else — dirty, diverged, detached with local commits, pinned to a tag — is left
 # untouched and reported.
 #
-# WSGIT_NO_PULL=1  fetch and report only, never move anything.
+# Submodules track their BRANCH, not the superrepo's pinned commit. Git checks a
+# submodule out detached, at the pin; this puts it back on its branch
+# (.gitmodules `branch =`, else origin's default) whenever that loses nothing:
+# clean tree, no commits of its own, and the pinned commit already on the branch.
+# Superrepo pins drifting behind is accepted background noise.
+#
+# A submodule added to .gitmodules after this clone was made is never checked
+# out by fetch, pull or `submodule foreach`. This initialises it, so a clone
+# does not silently lack whole projects (and doc-indexer does not lack their docs).
+#
+# Output stays short: routine work is a count, only problems are named. A
+# chattier version of this (a Stop hook) was removed for burying the real report.
+#
+# WSGIT_NO_PULL=1  fetch and report only, never move or clone anything.
 
 set -uo pipefail
 _self="$(readlink -f "${BASH_SOURCE[0]}")"
@@ -22,15 +35,78 @@ JOBS="${WSGIT_JOBS:-16}"
 cd "$WS" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 
-synced=(); attention=()
+INIT_TIMEOUT="${WSGIT_INIT_TIMEOUT:-60}"
+
+synced=(); attention=(); attached=0; detached_left=0
 
 # --- fetch everything in parallel ------------------------------------------
 timeout "$FETCH_TIMEOUT" git fetch --quiet origin >/dev/null 2>&1
 sm_list=$(git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null | awk '{print $2}')
+
+# --- initialise submodules this clone has never checked out ----------------
+# Only after the superrepo is current, so a just-pulled .gitmodules counts too.
+init_new() {
+    local sm
+    printf '%s\n' "$sm_list" | while read -r sm; do
+        [ -z "$sm" ] || [ -e "$WS/$sm/.git" ] && continue
+        if [ -n "${WSGIT_NO_PULL:-}" ]; then
+            echo "ATTN|$sm|not checked out on this machine (auto-init disabled). Needs: git submodule update --init $sm"
+        elif timeout "$INIT_TIMEOUT" git -C "$WS" submodule update --init --recursive --quiet -- "$sm" >/dev/null 2>&1; then
+            echo "SYNCED|$sm|newly added submodule, cloned"
+        else
+            echo "ATTN|$sm|not checked out on this machine and clone failed or timed out. Needs: git submodule update --init $sm"
+        fi
+    done
+}
+
+# The branch a submodule tracks: .gitmodules `branch =`, else origin's default.
+tracking_branch() {
+    local path="$1" name b
+    name=$(git config -f "$WS/.gitmodules" --get-regexp '^submodule\..*\.path$' 2>/dev/null \
+           | awk -v p="$path" '$2 == p { sub(/^submodule\./, "", $1); sub(/\.path$/, "", $1); print $1; exit }')
+    [ -n "$name" ] && b=$(git config -f "$WS/.gitmodules" "submodule.$name.branch" 2>/dev/null)
+    [ -z "${b:-}" ] && b=$(git -C "$WS/$path" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')
+    printf '%s' "${b:-}"
+}
 printf '%s\n' "$sm_list" | while read -r sm; do
     [ -n "$sm" ] && [ -e "$WS/$sm/.git" ] && printf '%s\0' "$sm"
 done | xargs -0 -P "$JOBS" -I{} sh -c \
     "timeout $FETCH_TIMEOUT git -C '$WS/{}' fetch --quiet origin >/dev/null 2>&1" 2>/dev/null
+
+# --- put a detached submodule back on its branch ---------------------------
+# echoes: "ATTACHED <label>" | "DETACHED <label>" (left, routine) | "ATTN ..."
+attach_branch() {
+    local dir="$1" label="$2" b
+    b=$(tracking_branch "$label")
+    if [ -z "$b" ] || ! git -C "$dir" rev-parse -q --verify "refs/remotes/origin/$b" >/dev/null; then
+        echo "ATTN|$label|detached, and no origin branch to track (set branch = in .gitmodules)"
+        return
+    fi
+    if ! git -C "$dir" diff --quiet 2>/dev/null || ! git -C "$dir" diff --cached --quiet 2>/dev/null; then
+        echo "ATTN|$label|detached with uncommitted changes — left as is. Needs: git checkout $b (carrying the changes)"
+        return
+    fi
+    if ! git -C "$dir" merge-base --is-ancestor HEAD "origin/$b" 2>/dev/null; then
+        echo "ATTN|$label|detached at a commit that is not on origin/$b — left as is"
+        return
+    fi
+    # A local branch with commits of its own would be reset by -B below: leave it.
+    if git -C "$dir" rev-parse -q --verify "refs/heads/$b" >/dev/null \
+       && ! git -C "$dir" merge-base --is-ancestor "refs/heads/$b" "origin/$b" 2>/dev/null; then
+        echo "ATTN|$label|detached, and local '$b' has commits not on origin/$b — left as is"
+        return
+    fi
+    if [ -n "${WSGIT_NO_PULL:-}" ]; then
+        echo "DETACHED|$label|"
+        return
+    fi
+    if git -C "$dir" checkout -q -B "$b" "origin/$b" 2>/dev/null \
+       && git -C "$dir" branch -q --set-upstream-to="origin/$b" "$b" 2>/dev/null; then
+        echo "ATTACHED|$label|"
+    else
+        echo "ATTN|$label|detached; checking out $b failed (an untracked file in the way?)"
+    fi
+}
 
 # --- sync one repo ---------------------------------------------------------
 # echoes: "SYNCED <label> <detail>" | "ATTN <label> <detail>" | nothing
@@ -42,8 +118,12 @@ sync_repo() {
     unpushed=$(git -C "$dir" rev-list --count HEAD --not --remotes 2>/dev/null || echo 0)
 
     if [ "$branch" = "HEAD" ]; then
-        # Detached. Normal for a pinned submodule; only a problem if it holds work.
-        [ "${unpushed:-0}" -gt 0 ] && echo "ATTN|$label|detached HEAD holding $unpushed commit(s) on no branch — git checkout main (they will be lost otherwise)"
+        if [ "${unpushed:-0}" -gt 0 ]; then
+            echo "ATTN|$label|detached HEAD holding $unpushed commit(s) on no branch — create a branch for them (they will be lost otherwise)"
+            return
+        fi
+        [ "$label" = workspace ] && { echo "ATTN|$label|superrepo HEAD is detached"; return; }
+        attach_branch "$dir" "$label"
         return
     fi
 
@@ -80,20 +160,28 @@ sync_repo() {
     echo "ATTN|$label|$ahead unpushed commit(s) — not on your other machine"
 }
 
+# The superrepo first: a pull can add submodules, which init_new then picks up.
 results=$( sync_repo "$WS" "workspace"
+           sm_list=$(git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null | awk '{print $2}')
+           init_new
            printf '%s\n' "$sm_list" | while read -r sm; do
                [ -n "$sm" ] && [ -e "$WS/$sm/.git" ] && sync_repo "$WS/$sm" "$sm"
            done )
 
 while IFS='|' read -r kind label detail; do
     [ -z "$kind" ] && continue
-    [ "$kind" = SYNCED ] && synced+=("  $label: $detail")
-    [ "$kind" = ATTN   ] && attention+=("  $label: $detail")
+    [ "$kind" = SYNCED   ] && synced+=("  $label: $detail")
+    [ "$kind" = ATTN     ] && attention+=("  $label: $detail")
+    [ "$kind" = ATTACHED ] && attached=$((attached + 1))
+    [ "$kind" = DETACHED ] && detached_left=$((detached_left + 1))
 done <<< "$results"
+[ "$attached" -gt 0 ] && synced+=("  $attached detached submodule(s) put back on their branch at origin's tip")
+[ "$detached_left" -gt 0 ] && synced+=("  $detached_left submodule(s) detached; would be put on their branch (auto-pull disabled)")
+sm_count=$(printf '%s\n' "$sm_list" | grep -c .)
 
 # --- emit ------------------------------------------------------------------
 if [ ${#synced[@]} -eq 0 ] && [ ${#attention[@]} -eq 0 ]; then
-    body="git: workspace and all 86 submodules are in sync with their remotes. Nothing to pull."
+    body="git: workspace and all $sm_count submodules are on their branches and in sync with their remotes."
 else
     body="git state at session start — everything fetched, and safe fast-forwards already applied."
     if [ ${#synced[@]} -gt 0 ]; then

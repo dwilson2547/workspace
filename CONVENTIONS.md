@@ -407,10 +407,19 @@ Blocking at commit time is the wrong end of the problem — the work is already 
 `meta/bin/wsgit-status` runs from a **SessionStart hook** (`.claude/settings.json`) and, before the
 first prompt is answered:
 
-1. fetches the superrepo and all 86 submodules in parallel (~9s),
+1. fetches the superrepo and all submodules in parallel (~10s),
 2. **fast-forwards** everything it can do so safely — clean tree, no unpushed commits, no
    divergence. A fast-forward under those conditions cannot lose work.
-3. reports only what it could not handle: dirty, diverged, detached-with-commits, or no upstream.
+3. **clones any submodule this machine has never checked out.** Fetch, pull and
+   `submodule foreach` all skip a submodule added after the clone was made, so without this a
+   clone silently lacks whole projects, and doc-indexer lacks their docs.
+4. **puts detached submodules back on their branch** (`branch =` in `.gitmodules`, else origin's
+   default) at origin's tip, when that loses nothing: clean tree, no commits of its own, the
+   checked-out commit already on the branch. Submodules track their branch, not the superrepo's
+   pinned commit; pins drifting behind is accepted background noise.
+5. reports only what it could not handle: dirty, diverged, detached-with-commits, or no upstream.
+   Routine work is a count, never a list — a chattier Stop-hook version was removed (2026-10-13)
+   for burying the real report under other sessions' state.
 
 So the normal case needs no decision from anyone. The pre-commit guard above is the backstop for
 drift during a long session, not the primary mechanism, and should now rarely fire.
