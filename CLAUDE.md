@@ -37,7 +37,11 @@ The essentials (full detail in `CONVENTIONS.md`):
   one note per task, gated on "would this change how a future similar task is approached?" (§5).
 - **Commits** — commit early, often, and broken; a commit is a checkpoint, not a certificate that
   something works. Messages record the *why*. Push freely. Committing and pushing here needs no
-  per-request approval; history rewriting and branch deletion still do. **The only gate is secrets
+  per-request approval; history rewriting and branch deletion still do. **This is a superrepo:**
+  a commit inside a submodule is not finished until the superrepo records it. Straight after
+  pushing the submodule, from the workspace root:
+  `git add <path> && git commit -m "Submodule bump: <project> <what changed>" && git push`.
+  Bump only the submodules you committed in; another session's unbumped pointer is theirs. **The only gate is secrets
   and credentials** — scan the diff, and if something is found, stop and unstage rather than
   planning to fix it in the next commit (§9).
 - **Helm/Argo** — self-deploying project → `<project>/helm/<project>/`; shared/cluster-wide →

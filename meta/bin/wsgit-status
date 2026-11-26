@@ -52,6 +52,11 @@ init_new() {
         if [ -n "${WSGIT_NO_PULL:-}" ]; then
             echo "ATTN|$sm|not checked out on this machine (auto-init disabled). Needs: git submodule update --init $sm"
         elif timeout "$INIT_TIMEOUT" git -C "$WS" submodule update --init --recursive --quiet -- "$sm" >/dev/null 2>&1; then
+            # Same guards as the rest of the workspace, if this clone uses them.
+            # (install-git-guards.sh would do it, but only when someone re-runs it.)
+            local hp
+            hp=$(git -C "$WS" config --local --get core.hooksPath 2>/dev/null)
+            [ -n "$hp" ] && git -C "$WS/$sm" config --local core.hooksPath "$hp"
             echo "SYNCED|$sm|newly added submodule, cloned"
         else
             echo "ATTN|$sm|not checked out on this machine and clone failed or timed out. Needs: git submodule update --init $sm"
