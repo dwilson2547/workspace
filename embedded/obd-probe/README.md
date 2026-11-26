@@ -26,7 +26,7 @@ Design context: `robo-services/docs/plans/2026-11-26-guided-learning-mode.md`.
 
 ```bash
 g++ -std=c++17 -Wall -Wextra -o /tmp/test_obd test/test_obd.cpp && /tmp/test_obd   # from this folder
-arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3 firmware/obd_probe              # ~/.local/bin/arduino-cli
+arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3 firmware/obd_probe
 ```
 
 The tests show the code follows the framing and formulas in the standard (including a 20-byte VIN reply split over
