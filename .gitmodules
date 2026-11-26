@@ -402,3 +402,7 @@
 	path = ai/pluggable-experts
 	url = git@github.com:dwilson2547/pluggable-experts.git
 	branch = main
+[submodule "embedded/can-dongle-firmware"]
+	path = embedded/can-dongle-firmware
+	url = git@github.com:dwilson2547/can-dongle-firmware.git
+	branch = main
