@@ -406,3 +406,7 @@
 	path = embedded/can-dongle-firmware
 	url = git@github.com:dwilson2547/can-dongle-firmware.git
 	branch = main
+[submodule "embedded/canstream"]
+	path = embedded/canstream
+	url = git@github.com:dwilson2547/canstream.git
+	branch = main
